@@ -9,6 +9,14 @@ __pycache__/
 # models and runs
 runs/
 
+# bloat
+ros_ws/build/
+ros_ws/install/
+ros_ws/log/
+*.pt
+# *.onnx
+# *.tflite
+
 # Distribution / packaging
 .Python
 build/
