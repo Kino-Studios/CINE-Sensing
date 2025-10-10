@@ -16,9 +16,9 @@ if __name__ == '__main__':
     )
 
     hyper_params = {
-       "learning_rate": 0.5,
+       "learning_rate": 0.0006,
        "steps": 100000,
-       "batch_size": 50,
+       "batch_size": 4,
     }
     experiment.log_parameters(hyper_params)
 
@@ -26,4 +26,17 @@ if __name__ == '__main__':
     experiment.log_other("model_type", "YOLO11n")
     experiment.log_other("model_path", "training/checkpoints/yolo11n.pt")
 
-    model.train(data="training/configs/HomeObjects-3K.yaml", epochs=3, imgsz=512, amp=True, batch=4)
+    model.train(
+      data="training/configs/HomeObjects-3K.yaml", 
+      epochs=30, 
+      imgsz=640,
+      amp=True, 
+      batch=4,
+      device="mps",
+      lr0=0.0006, 
+      optimizer="AdamW", 
+      patience=5, 
+      save=True,
+      cos_lr=True,
+      workers=8
+    )
