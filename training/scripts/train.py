@@ -5,7 +5,7 @@ from ultralytics import YOLO
 
 if __name__ == '__main__':
     # model = YOLO("training/checkpoints/yolo11n.pt")
-    model = YOLO("runs/detect/train7/weights/last.pt")
+    model = YOLO("training/checkpoints/yolo11n.pt")
 
     # Get API key from environment variable
     api_key = os.getenv("COMET_API_KEY", "")
@@ -16,31 +16,67 @@ if __name__ == '__main__':
       workspace="fishnos"
     )
 
+    learning_rate = 0.0001
+    batch_size = 8  # reduced to avoid memory issues
+    epochs = 20
+    imgsz = 640
+    lr0 = 0.0001
+    lrf = 0.1
+    cos_lr = False
+    optimizer = "AdamW"
+    patience = 5
+    pretrained = True
+    device = "mps" # change if windows
+    save_period = 3
+    project = "runs/detect"
+    search_space = {
+      "lr0": (1e-4, 1e-2),     
+      "lrf": (0.01, 0.1),       
+      "warmup_epochs": (1.0, 3.0), 
+      "momentum": (0.8, 0.95),
+      "weight_decay": (1e-4, 1e-3) 
+    }
+
     hyper_params = {
-       "learning_rate": 0.01,
        "steps": 100000,
-       "batch_size": 4,
+       "batch_size": batch_size,
+       "epochs": epochs,
+       "imgsz": imgsz,
+       "lr0": lr0,
+       "lrf": lrf,
+       "cos_lr": cos_lr,
+       "optimizer": optimizer,
+       "patience": patience,
+       "pretrained": pretrained,
+       "device": device,
+       "save_period": save_period,
+       "project": project,
     }
     experiment.log_parameters(hyper_params)
 
+    # try to make a small model and use that instead
     experiment.log_other("model_name", "Yolo11n")
     experiment.log_other("model_type", "YOLO11n")
     experiment.log_other("model_path", "training/checkpoints/yolo11n.pt")
 
-    model.train(
+    results=model.tune(
       data="training/configs/HomeObjects-3K.yaml",
-      epochs=60,
       resume=False,
-      batch=8,
-      lr0=0.008,
-      lrf=0.2,
-      cos_lr=False,
-      optimizer="AdamW",
-      patience=15,
+      epochs=epochs,
+      imgsz=imgsz,
+      batch=batch_size,
+      lr0=lr0,
+      lrf=lrf,
+      cos_lr=cos_lr,
+      optimizer=optimizer,
+      patience=patience,
+      pretrained=pretrained,
+      device=device,
+      save_period=save_period,
+      project=project,
       amp=True,
-      device="mps",
-      workers=0,
-      mosaic=0.10, mixup=0.0, translate=0.10, scale=0.5,
-      hsv_h=0.015, hsv_s=0.7, hsv_v=0.4, fliplr=0.5,
-      project="runs/detect", name="train7_continue"  # new folder
+      cache=False,
+      val=False,
+      plots=False,
+      save=False
     )
