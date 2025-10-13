@@ -4,7 +4,8 @@ import torch
 from ultralytics import YOLO
 
 if __name__ == '__main__':
-    model = YOLO("training/checkpoints/pretrained/yolo11n.pt")
+    # model = YOLO("training/checkpoints/pretrained/yolo11n.pt")
+    model = YOLO("runs/detect/train34/weights/last.pt")
 
     # Get API key from environment variable
     api_key = os.getenv("COMET_API_KEY", "")
@@ -17,20 +18,20 @@ if __name__ == '__main__':
 
     workers = 4
     batch_size = 4  # reduced to avoid memory issues
-    epochs = 5
+    epochs = 15
     fraction = 1.0
     imgsz = 640
-    lr0 = 0.001
+    lr0 = 0.00025
     lrf = 0.01
     hsv_v = 0.5
     hsv_s = 0.7
     cos_lr = True
     optimizer = "AdamW"
-    patience = 0
+    patience = 5
     pretrained = True
     device = "mps" # change if windows
     save_period = 1
-    freeze = 10
+    freeze = 0
     rect = True
     project = "runs/detect"
     search_space = {
