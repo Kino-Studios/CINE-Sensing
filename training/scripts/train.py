@@ -5,9 +5,8 @@ from ultralytics import YOLO
 
 if __name__ == '__main__':
     # model = YOLO("training/checkpoints/pretrained/yolo11n.pt")
-    model = YOLO("runs/detect/train34/weights/last.pt")
+    model = YOLO("runs/detect/train34/weights/best.pt")
 
-    # Get API key from environment variable
     api_key = os.getenv("COMET_API_KEY", "")
     
     experiment = start(
@@ -21,18 +20,21 @@ if __name__ == '__main__':
     epochs = 15
     fraction = 1.0
     imgsz = 640
-    lr0 = 0.00025
+    lr0 = 0.0001
     lrf = 0.01
     hsv_v = 0.5
     hsv_s = 0.7
     cos_lr = True
     optimizer = "AdamW"
+    close_mosaic = 5
     patience = 5
-    pretrained = True
+    warmup_epochs = 1.0
+    pretrained = False
+    resume = False
     device = "mps" # change if windows
-    save_period = 1
-    freeze = 0
-    rect = True
+    save_period = 3
+    freeze = 3
+    rect = False
     project = "runs/detect"
     search_space = {
       "lr0": (1e-4, 1e-2),     
@@ -51,10 +53,14 @@ if __name__ == '__main__':
        "hsv_s": hsv_s,
        "lr0": lr0,
        "lrf": lrf,
+       "seed": seed,
        "cos_lr": cos_lr,
+       "warmup_epochs": warmup_epochs,
+       "close_mosaic": close_mosaic,
        "optimizer": optimizer,
        "patience": patience,
        "pretrained": pretrained,
+       "resume": resume,
        "device": device,
        "save_period": save_period,
        "project": project,
@@ -69,7 +75,7 @@ if __name__ == '__main__':
 
     results=model.train(
       data="training/configs/HomeObjects-3K.yaml",
-      resume=False,
+      resume=resume,
       fraction=fraction,
       epochs=epochs,
       imgsz=imgsz,
@@ -77,8 +83,11 @@ if __name__ == '__main__':
       workers=workers,
       hsv_v=hsv_v,
       hsv_s=hsv_s,
+      seed=seed,
       lr0=lr0,
       lrf=lrf,
+      warmup_epochs=warmup_epochs,
+      close_mosaic=close_mosaic,
       cos_lr=cos_lr,
       optimizer=optimizer,
       patience=patience,
