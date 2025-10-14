@@ -6,13 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Allow all files in third_party folder (override above rules)
+!autocine_ws/src/third_party/**
+
 # models and runs
 runs/
 
 # bloat
-ros_ws/build/
-ros_ws/install/
-ros_ws/log/
 # *.onnx
 # *.tflite
 
@@ -35,6 +35,11 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Allow build directories in third_party
+!autocine_ws/src/third_party/**/build/
+!autocine_ws/src/third_party/**/lib/
+!autocine_ws/src/third_party/**/lib64/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -70,6 +75,9 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+
+# Allow log files in third_party
+!autocine_ws/src/third_party/**/*.log
 
 # Flask stuff:
 instance/
