@@ -1,0 +1,6 @@
+repositories:
+    ego_planner:
+    voxblox:
+    vins_fusion:
+        type: git
+        url: https://github.com/HKUST-Aerial-Robotics/VINS-Mono.git
