@@ -4,8 +4,8 @@ import torch
 from ultralytics import YOLO
 
 if __name__ == '__main__':
-    # model = YOLO("training/checkpoints/pretrained/yolo11n.pt")
-    model = YOLO("runs/detect/train34/weights/best.pt")
+    model = YOLO("training/checkpoints/pretrained/yolo11n.pt")
+    # model = YOLO("runs/detect/train34/weights/best.pt")
 
     api_key = os.getenv("COMET_API_KEY", "")
     
@@ -20,7 +20,7 @@ if __name__ == '__main__':
     epochs = 15
     fraction = 1.0
     imgsz = 640
-    lr0 = 0.0001
+    lr0 = 0.00025
     lrf = 0.01
     hsv_v = 0.5
     hsv_s = 0.7
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     device = "mps" # change if windows
     save_period = 3
     freeze = 3
-    rect = False
+    rect = True
     project = "runs/detect"
     search_space = {
       "lr0": (1e-4, 1e-2),     
@@ -53,7 +53,6 @@ if __name__ == '__main__':
        "hsv_s": hsv_s,
        "lr0": lr0,
        "lrf": lrf,
-       "seed": seed,
        "cos_lr": cos_lr,
        "warmup_epochs": warmup_epochs,
        "close_mosaic": close_mosaic,
@@ -71,7 +70,6 @@ if __name__ == '__main__':
     # try to make a small model and use that instead
     experiment.log_other("model_name", "Yolo11n")
     experiment.log_other("model_type", "YOLO11n")
-    experiment.log_other("model_path", "training/checkpoints/pretrained/yolo11n.pt")
 
     results=model.train(
       data="training/configs/HomeObjects-3K.yaml",
@@ -83,11 +81,10 @@ if __name__ == '__main__':
       workers=workers,
       hsv_v=hsv_v,
       hsv_s=hsv_s,
-      seed=seed,
       lr0=lr0,
       lrf=lrf,
-      warmup_epochs=warmup_epochs,
-      close_mosaic=close_mosaic,
+      # warmup_epochs=warmup_epochs,
+      # close_mosaic=close_mosaic,
       cos_lr=cos_lr,
       optimizer=optimizer,
       patience=patience,
@@ -98,8 +95,10 @@ if __name__ == '__main__':
       freeze=freeze,
       amp=True,
       cache=True,
-      rect=rect,
+      # rect=rect,
       val=True,
       plots=True,
       save=True
     )
+
+    experiment.end()
