@@ -83,6 +83,12 @@ db.sqlite3-journal
 autocine_ws/log/
 autocine_ws/log/latest*
 
+# Ignore embedded git repositories (submodules)
+autocine_ws/opencv/
+autocine_ws/opencv_contrib/
+autocine_ws/src/VINS-Fusion-ROS2-humble-arm/
+autocine_ws/src/vision_opencv/
+
 # Flask stuff:
 instance/
 .webassets-cache
