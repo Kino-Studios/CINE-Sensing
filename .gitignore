@@ -79,6 +79,10 @@ db.sqlite3-journal
 # Allow log files in third_party
 !autocine_ws/src/third_party/**/*.log
 
+# Ignore autocine_ws log directory and symlinks
+autocine_ws/log/
+autocine_ws/log/latest*
+
 # Flask stuff:
 instance/
 .webassets-cache
