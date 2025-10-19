@@ -10,7 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/camera_launch.py']),
+        ('share/' + package_name + '/launch', ['launch/camera_launch.py', 'launch/test_camera.launch.py', 'launch/vins_rpi_test.launch.py']),
         ('share/' + package_name + '/config', ['config/camera_params.yaml']),
     ],
     install_requires=['setuptools'],
