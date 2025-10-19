@@ -1,0 +1,49 @@
+# Main camera configuration for bspline cinematography project
+# This configuration supports both training data collection and real-time inference
+
+# Camera hardware settings
+camera:
+  # Raspberry Pi Camera Module 3 specifications
+  model: "RPi Camera Module 3"
+  resolution:
+    width: 1920
+    height: 1080
+  max_fps: 30
+  sensor_size: "1/2.43 inch"
+  
+  # Calibration parameters (these should be measured for your specific camera)
+  intrinsics:
+    fx: 1000.0  # Focal length x
+    fy: 1000.0  # Focal length y
+    cx: 960.0   # Principal point x
+    cy: 540.0   # Principal point y
+  
+  distortion:
+    k1: 0.1     # Radial distortion coefficient
+    k2: -0.2    # Radial distortion coefficient
+    p1: 0.0     # Tangential distortion coefficient
+    p2: 0.0     # Tangential distortion coefficient
+    k3: 0.0     # Radial distortion coefficient
+
+# ROS2 topic configuration
+ros2:
+  topics:
+    image_raw: "/camera/image_raw"
+    camera_info: "/camera/camera_info"
+    compressed: "/camera/image_raw/compressed"
+  
+  frame_ids:
+    camera_optical: "camera_optical_frame"
+    camera_link: "camera_link"
+
+# Network configuration
+network:
+  # ROS2 Domain configuration for multi-machine setup
+  ros_domain_id: 42  # Change this if you have multiple ROS2 systems
+  
+  # Quality of Service settings
+  qos:
+    reliability: "reliable"  # or "best_effort"
+    durability: "volatile"   # or "transient_local"
+    history: "keep_last"
+    depth: 10
