@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-"""
-Launch file for the Raspberry Pi Camera Publisher
-
-This launch file starts the camera publisher node with the appropriate
-configuration parameters.
-
-Author: Your Name
-License: MIT
-"""
-
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, LogInfo
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -20,7 +9,6 @@ import os
 def generate_launch_description():
     """Generate launch description for camera publisher."""
     
-    # Declare launch arguments
     camera_id_arg = DeclareLaunchArgument(
         'camera_id',
         default_value='0',
