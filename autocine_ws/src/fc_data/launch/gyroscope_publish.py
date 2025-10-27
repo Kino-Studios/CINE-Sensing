@@ -4,6 +4,7 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3Stamped
 from geometry_msgs.msg import TwistStamped
+from nav_msgs.msg import Odometry
 
 class GyroscopePublisher(Node):
     def __init__(self):
@@ -20,6 +21,12 @@ class GyroscopePublisher(Node):
             Imu,
             'mavros/imu/data',
             self.imu_callback,
+            sensor_qos
+        )
+        self.subscriber = self.create_subscription(
+            Odometry,
+            'vins_estimator/odometry',
+            self.vio_callback,
             sensor_qos
         )
         self.vector_publisher = self.create_publisher(Vector3Stamped, 'gyroscope/data', sensor_qos)
@@ -45,3 +52,17 @@ class GyroscopePublisher(Node):
 
         self.vector_publisher.publish(gyro_msg)
         self.twist_publisher.publish(twist_msg)
+
+    def vio_callback(self, msg: Odometry):
+        vio_pose_msg = Odometry()
+        vio_pose_msg.header = msg.header
+        vio_pose_msg.pose.pose.position.x = msg.pose.pose.position.x
+        vio_pose_msg.pose.pose.position.y = msg.pose.pose.position.y
+        vio_pose_msg.pose.pose.position.z = msg.pose.pose.position.z
+        vio_pose_msg.pose.pose.orientation.x = msg.pose.pose.orientation.x
+        vio_pose_msg.pose.pose.orientation.y = msg.pose.pose.orientation.y
+        vio_pose_msg.pose.pose.orientation.z = msg.pose.pose.orientation.z
+        vio_pose_msg.pose.pose.orientation.w = msg.pose.pose.orientation.w
+        vio_pose_msg.twist.twist.linear.x = msg.twist.twist.linear.x
+        vio_pose_msg.twist.twist.linear.y = msg.twist.twist.linear.y
+        vio_pose_msg.twist.twist.linear.z = msg.twist.twist.linear.z
