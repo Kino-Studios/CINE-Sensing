@@ -26,22 +26,22 @@ class GyroscopePublisher(Node):
         self.twist_publisher = self.create_publisher(TwistStamped, 'gyroscope/twist', sensor_qos)
 
 
-    # called by subscriber to publish gyroscope data
+    # called by subscriber to publish gyroscope data for VINS
     def imu_callback(self, msg: Imu):
-        position_msg = Vector3Stamped()
-        position_msg.header = msg.header
-        position_msg.vector.x = msg.vector.x
-        position_msg.vector.y = msg.vector.y
-        position_msg.vector.z = msg.vector.z
+        gyro_msg = Vector3Stamped()
+        gyro_msg.header = msg.header
+        gyro_msg.vector.x = msg.angular_velocity.x
+        gyro_msg.vector.y = msg.angular_velocity.y
+        gyro_msg.vector.z = msg.angular_velocity.z
 
         twist_msg = TwistStamped()
         twist_msg.header = msg.header
-        twist_msg.twist.angular.x = msg.twist.angular.x
-        twist_msg.twist.angular.y = msg.twist.angular.y
-        twist_msg.twist.angular.z = msg.twist.angular.z
-        twist_msg.twist.linear.x = msg.twist.linear.x
-        twist_msg.twist.linear.y = msg.twist.linear.y
-        twist_msg.twist.linear.z = msg.twist.linear.z
+        twist_msg.twist.angular.x = msg.angular_velocity.x
+        twist_msg.twist.angular.y = msg.angular_velocity.y
+        twist_msg.twist.angular.z = msg.angular_velocity.z
+        twist_msg.twist.linear.x = msg.linear_acceleration.x
+        twist_msg.twist.linear.y = msg.linear_acceleration.y
+        twist_msg.twist.linear.z = msg.linear_acceleration.z
 
-        self.vector_publisher.publish(position_msg)
+        self.vector_publisher.publish(gyro_msg)
         self.twist_publisher.publish(twist_msg)
