@@ -20,7 +20,6 @@ class VIOPublisher(Node):
             depth=10
         )
         
-        # Subscribers
         self.imu_subscription = self.create_subscription(
             Imu,
             'mavros/imu/data',
@@ -28,7 +27,6 @@ class VIOPublisher(Node):
             sensor_qos
         )
         
-        # Subscribe to VINS output for processing
         self.vins_odom_subscription = self.create_subscription(
             Odometry,
             '/vins_estimator/odometry',
@@ -36,7 +34,6 @@ class VIOPublisher(Node):
             sensor_qos
         )
         
-        # Publishers for VINS-Fusion (IMU bridge)
         self.vins_imu_publisher = self.create_publisher(
             Imu,
             '/imu_bridge/data_raw',
@@ -63,8 +60,6 @@ class VIOPublisher(Node):
         self.get_logger().info('VIO Publisher initialized for VINS-Fusion integration')
 
     def imu_callback(self, msg: Imu):
-        """Forward IMU data to VINS and process for VIO"""
-        # Forward to VINS with proper frame_id
         vins_imu_msg = Imu()
         vins_imu_msg.header = msg.header
         vins_imu_msg.header.frame_id = "imu"
@@ -79,8 +74,6 @@ class VIOPublisher(Node):
         self.last_imu_time = msg.header.stamp
 
     def vins_odom_callback(self, msg: Odometry):
-        """Process VINS odometry output and republish as VIO"""
-        # Republish VINS odometry as VIO odometry
         vio_odom_msg = Odometry()
         vio_odom_msg.header.stamp = msg.header.stamp
         vio_odom_msg.header.frame_id = "map"
@@ -90,13 +83,11 @@ class VIOPublisher(Node):
         
         self.odometry_publisher.publish(vio_odom_msg)
         
-        # Also publish as pose
         pose_msg = PoseStamped()
         pose_msg.header = vio_odom_msg.header
         pose_msg.pose = msg.pose.pose
         self.pose_publisher.publish(pose_msg)
         
-        # Publish transform
         t = TransformStamped()
         t.header.stamp = msg.header.stamp
         t.header.frame_id = "map"
@@ -108,7 +99,6 @@ class VIOPublisher(Node):
         
         self.tf_broadcaster.sendTransform(t)
         
-        # Log VIO data periodically
         if msg.header.stamp.sec % 5 == 0:
             pos = msg.pose.pose.position
             self.get_logger().info(f'VIO Position: x={pos.x:.3f}, y={pos.y:.3f}, z={pos.z:.3f}')
