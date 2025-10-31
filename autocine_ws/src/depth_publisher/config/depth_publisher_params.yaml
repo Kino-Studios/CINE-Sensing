@@ -1,0 +1,12 @@
+depth_publisher_node:
+  ros__parameters:
+    model_size: "vits"  # Options: vits, vitb, vitl
+    device: "cpu"       # Options: cpu, cuda
+    image_topic: "/camera/image_raw"
+    depth_topic: "/depth/image_raw"
+    depth_colored_topic: "/depth/image_colored"
+    
+depth_visualizer_node:
+  ros__parameters:
+    show_statistics: true
+    display_window: true
