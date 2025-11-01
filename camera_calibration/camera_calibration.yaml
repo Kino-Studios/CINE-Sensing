@@ -1,0 +1,25 @@
+calibration_info:
+  calibration_date: '2025-10-31T23:04:52.327803'
+  mean_reprojection_error: 0.45665814178603836
+camera_name: rpi_camera_v3_calibrated
+distortion_parameters:
+  k1: -0.0578246072
+  k2: -0.0328310705
+  p1: -0.00243136122
+  p2: 0.000290213152
+image_height: 648
+image_width: 1152
+model_type: PINHOLE
+original_projection_parameters:
+  cx: 2313.8093
+  cy: 1283.72549
+  fx: 1990.39423
+  fy: 1989.71042
+original_resolution:
+  height: 2592
+  width: 4608
+projection_parameters:
+  cx: 578.452325
+  cy: 320.9313725
+  fx: 497.5985575
+  fy: 497.427605
