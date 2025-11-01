@@ -38,12 +38,8 @@ class ImprovedCameraPublisher(Node):
             self._start_opencv_capture()
         elif self.camera_method == 'libcamera':
             self._start_libcamera_capture()
-        
-        self.get_logger().info("Improved Camera Publisher started!")
     
     def _detect_camera_method(self):
-        """Detect which camera method works."""
-        
         for cam_id in [0, 1, 2]:
             try:
                 cap = cv2.VideoCapture(cam_id)
@@ -68,19 +64,16 @@ class ImprovedCameraPublisher(Node):
         return 'none'
     
     def _start_opencv_capture(self):
-        """Start OpenCV capture thread."""
         self.camera = cv2.VideoCapture(self.camera_id)
         if self.camera.isOpened():
             self.capture_thread = Thread(target=self._opencv_capture_loop, daemon=True)
             self.capture_thread.start()
     
     def _start_libcamera_capture(self):
-        """Start libcamera capture thread."""
         self.capture_thread = Thread(target=self._libcamera_capture_loop, daemon=True)
         self.capture_thread.start()
     
     def _opencv_capture_loop(self):
-        """OpenCV capture loop."""
         while not self.shutdown_event.is_set() and rclpy.ok():
             ret, frame = self.camera.read()
             if ret:
@@ -88,7 +81,6 @@ class ImprovedCameraPublisher(Node):
             time.sleep(1/30.0)  # 30 FPS
     
     def _libcamera_capture_loop(self):
-        """libcamera capture loop."""
         while not self.shutdown_event.is_set() and rclpy.ok():
             try:
                 with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_file:
@@ -117,7 +109,6 @@ class ImprovedCameraPublisher(Node):
             time.sleep(1/10.0)
     
     def _publish_frame(self, frame):
-        """Publish a frame as ROS2 message."""
         try:
             msg = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
             msg.header.stamp = self.get_clock().now().to_msg()
@@ -130,7 +121,6 @@ class ImprovedCameraPublisher(Node):
             self.get_logger().error(f"Failed to publish frame: {e}")
     
     def destroy_node(self):
-        """Clean shutdown."""
         self.shutdown_event.set()
         
         if hasattr(self, 'capture_thread') and self.capture_thread.is_alive():

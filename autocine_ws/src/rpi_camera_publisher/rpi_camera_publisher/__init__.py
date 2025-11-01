@@ -1,1 +1,0 @@
-# RPI Camera Publisher Package
