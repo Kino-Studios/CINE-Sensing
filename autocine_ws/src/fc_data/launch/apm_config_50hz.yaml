@@ -1,0 +1,21 @@
+/**:
+  ros__parameters:
+    conn:
+      system_time_rate: 1.0
+    
+    setpoint_velocity:
+      mav_frame: "BODY_NED"
+    
+    plugin_allowlist: []
+    plugin_denylist: []
+    
+stream_rate:
+  all: 50
+  extra1: 50
+  extra2: 50
+  extra3: 50
+  position: 50
+  raw_sensors: 50
+  rc_channels: 50
+  raw_controller: 50
+  extended_status: 50

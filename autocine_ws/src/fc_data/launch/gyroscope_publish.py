@@ -56,13 +56,13 @@ class GyroscopePublisher(Node):
     def vio_callback(self, msg: Odometry):
         vio_pose_msg = Odometry()
         vio_pose_msg.header = msg.header
-        vio_pose_msg.pose.pose.position.x = msg.pose.pose.position.x
-        vio_pose_msg.pose.pose.position.y = msg.pose.pose.position.y
-        vio_pose_msg.pose.pose.position.z = msg.pose.pose.position.z
-        vio_pose_msg.pose.pose.orientation.x = msg.pose.pose.orientation.x
-        vio_pose_msg.pose.pose.orientation.y = msg.pose.pose.orientation.y
-        vio_pose_msg.pose.pose.orientation.z = msg.pose.pose.orientation.z
-        vio_pose_msg.pose.pose.orientation.w = msg.pose.pose.orientation.w
-        vio_pose_msg.twist.twist.linear.x = msg.twist.twist.linear.x
-        vio_pose_msg.twist.twist.linear.y = msg.twist.twist.linear.y
-        vio_pose_msg.twist.twist.linear.z = msg.twist.twist.linear.z
+        vio_pose_msg.pose.position.x = msg.pose.position.x
+        vio_pose_msg.pose.position.y = msg.pose.position.y
+        vio_pose_msg.pose.position.z = msg.pose.position.z
+        vio_pose_msg.pose.orientation.x = msg.pose.orientation.x
+        vio_pose_msg.pose.orientation.y = msg.pose.orientation.y
+        vio_pose_msg.pose.orientation.z = msg.pose.orientation.z
+        vio_pose_msg.pose.orientation.w = msg.pose.orientation.w
+        vio_pose_msg.twist.linear.x = msg.twist.linear.x
+        vio_pose_msg.twist.linear.y = msg.twist.linear.y
+        vio_pose_msg.twist.linear.z = msg.twist.linear.z
