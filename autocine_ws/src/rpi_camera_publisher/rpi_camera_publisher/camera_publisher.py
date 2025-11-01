@@ -66,6 +66,13 @@ class ImprovedCameraPublisher(Node):
     def _start_opencv_capture(self):
         self.camera = cv2.VideoCapture(self.camera_id)
         if self.camera.isOpened():
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, 1152)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 648)
+            self.camera.set(cv2.CAP_PROP_FPS, 30)
+
+            self.camera.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # manual exposure
+            self.camera.set(cv2.CAP_PROP_EXPOSURE, -7)  # fast exposure
+            
             self.capture_thread = Thread(target=self._opencv_capture_loop, daemon=True)
             self.capture_thread.start()
     
@@ -92,7 +99,10 @@ class ImprovedCameraPublisher(Node):
                     '-t', '100',
                     '--immediate',
                     '--width', '1152',
-                    '--height', '648'
+                    '--height', '648',
+                    '--shutter', '2000', 
+                    '--gain', '2.0',    
+                    '--awb', 'auto',      
                 ], capture_output=True, timeout=2)
                 
                 if result.returncode == 0 and os.path.exists(tmp_filename):
