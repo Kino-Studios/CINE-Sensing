@@ -95,64 +95,47 @@ class ImprovedCameraPublisher(Node):
                 next_frame_time = current_time + frame_period
     
     def _libcamera_capture_loop(self):
-        frame_period = 1.0 / 30.0
-        next_frame_time = time.time()
-        subprocess_timeout = max(1.0, frame_period + 0.5)
-        
-        temp_dir = tempfile.mkdtemp()
-        frame_pattern = os.path.join(temp_dir, 'frame%05d.jpg')
-        
+        """Fast continuous capture using rpicam-vid with stdout streaming"""
         try:
+            # Start rpicam-vid in continuous mode, output raw YUV to stdout
+            process = subprocess.Popen([
+                'rpicam-vid',
+                '--codec', 'yuv420',
+                '--width', '1152',
+                '--height', '648',
+                '--framerate', '30',
+                '--timeout', '0',
+                '--nopreview',
+                '--shutter', '2000', 
+                '--output', '-' 
+            ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
+            
+            frame_size = 1152 * 648 * 3 // 2
+            
+            self.get_logger().info("Started libcamera continuous capture at 20Hz")
+            
             while not self.shutdown_event.is_set() and rclpy.ok():
                 try:
-                    existing_frames = set(os.listdir(temp_dir)) if os.path.exists(temp_dir) else set()
+                    raw_frame = process.stdout.read(frame_size)
                     
-                    result = subprocess.run([
-                        'rpicam-vid',
-                        '-t', '1',
-                        '--codec', 'mjpeg',
-                        '--framerate', '30',
-                        '--width', '1152',
-                        '--height', '648',
-                        '--segment', '1',
-                        '--output', frame_pattern,
-                        '--nopreview'
-                    ], capture_output=True, timeout=subprocess_timeout)
+                    if len(raw_frame) != frame_size:
+                        self.get_logger().warn("Incomplete frame received")
+                        continue
                     
-                    if result.returncode == 0:
-                        current_frames = set(os.listdir(temp_dir)) if os.path.exists(temp_dir) else set()
-                        new_frames = current_frames - existing_frames
-                        
-                        if new_frames:
-                            latest_frame = os.path.join(temp_dir, sorted(new_frames)[0])
-                            frame = cv2.imread(latest_frame)
-                            if frame is not None:
-                                self._publish_frame(frame)
-                            
-                            try:
-                                os.unlink(latest_frame)
-                            except:
-                                pass
+                    yuv = np.frombuffer(raw_frame, dtype=np.uint8).reshape((648 * 3 // 2, 1152))
+                    frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
                     
-                except subprocess.TimeoutExpired:
-                    self.get_logger().error(f"libcamera subprocess timed out after {subprocess_timeout}s")
+                    self._publish_frame(frame)
+                    
                 except Exception as e:
-                    self.get_logger().error(f"libcamera error: {e}")
-                
-                next_frame_time += frame_period
-                current_time = time.time()
-                sleep_time = next_frame_time - current_time
-                
-                if sleep_time > 0:
-                    time.sleep(sleep_time)
-                else:
-                    next_frame_time = current_time + frame_period
-        
+                    self.get_logger().error(f"Frame processing error: {e}")
+                    break
+                    
         finally:
-            try:
-                shutil.rmtree(temp_dir)
-            except:
-                pass
+            if 'process' in locals():
+                process.terminate()
+                process.wait(timeout=2)
+            self.get_logger().info("Stopped libcamera capture")
     
     def _publish_frame(self, frame):
         try:

@@ -1,6 +1,5 @@
 export ROS_DOMAIN_ID=0
 source /opt/ros/jazzy/setup.bash
-source ~/bspline-cinematography-generator-research/autocine_ws/install/setup.bash
 
 ros2 launch mavros apm.launch \
   fcu_url:=serial:///dev/ttyAMA0:115200 \
