@@ -95,9 +95,7 @@ class ImprovedCameraPublisher(Node):
                 next_frame_time = current_time + frame_period
     
     def _libcamera_capture_loop(self):
-        """Fast continuous capture using rpicam-vid with stdout streaming"""
         try:
-            # Start rpicam-vid in continuous mode, output raw YUV to stdout
             process = subprocess.Popen([
                 'rpicam-vid',
                 '--codec', 'yuv420',
