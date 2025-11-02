@@ -144,7 +144,6 @@ class ImprovedCameraPublisher(Node):
             msg.header.frame_id = 'camera'
             
             self.image_publisher.publish(msg)
-            self.get_logger().info(f'Published image: {frame.shape[1]}x{frame.shape[0]}')
             
         except Exception as e:
             self.get_logger().error(f"Failed to publish frame: {e}")
