@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
@@ -14,9 +12,9 @@ import tempfile
 import os
 import shutil
 
-class ImprovedCameraPublisher(Node):
+class CameraCameraPublisher(Node):
     def __init__(self):
-        super().__init__('improved_camera_publisher')
+        super().__init__('camera_publisher')
         
         self.bridge = CvBridge()
         self.shutdown_event = Event()
@@ -159,7 +157,7 @@ class ImprovedCameraPublisher(Node):
 
 def main():
     rclpy.init()
-    node = ImprovedCameraPublisher()
+    node = CameraCameraPublisher()
     
     try:
         rclpy.spin(node)
