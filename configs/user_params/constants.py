@@ -1,5 +1,5 @@
 class ModelDetectionConstants:
-    MODEL_PATH = '~/training/checkpoints/pre-export/homeobjects_yolo11n_trained.pt'
+    MODEL_PATH = '/home/fishnos/bspline-cinematography-generator-research/training/checkpoints/pre-export/homeobjects_yolo11n_trained.pt'
     
     CAMERA_IMAGE_TOPIC = '/camera/image_raw'
     BOUNDING_BOX_TOPIC = '/object_detection/bounding_box'
