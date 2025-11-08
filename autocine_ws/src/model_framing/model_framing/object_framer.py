@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 from ultralytics import YOLO
 from threading import Event
+from ultralytics.utils.plotting import Annotator
 import sys
 import os
 
@@ -47,6 +48,12 @@ class BoundingBoxPublisher(Node):
             ModelDetectionConstants.BOUNDING_BOX_TOPIC,
             qos_profile
         )
+
+        self.dimensions_publisher = self.create_publisher(
+            PolygonStamped,
+            '/object_detection/dimensions',
+            qos_profile
+        )
     
     def _bounding_box_capture_callback(self, msg):
         try:
@@ -54,9 +61,7 @@ class BoundingBoxPublisher(Node):
             
             results = self.model(cv_image, classes=[UserRequestedParameters.USER_OBJECT_ID])
             
-            # Check if any detections were found
             if len(results) == 0 or results[0].boxes is None or len(results[0].boxes) == 0:
-                self.get_logger().debug('No objects detected')
                 return
             
             boxes = results[0].boxes
@@ -74,12 +79,19 @@ class BoundingBoxPublisher(Node):
                 [x2, y2],
                 [x1, y2]
             ])
+
+            width, height, area = Annotator.get_bbox_dimension([x1, y1, x2, y2])
             
             polygon_msg = PolygonStamped()
             polygon_msg.header = Header()
             polygon_msg.header.stamp = msg.header.stamp
             polygon_msg.header.frame_id = msg.header.frame_id
-            
+
+            dimensions_msg = PolygonStamped()
+            dimensions_msg.header = Header()
+            dimensions_msg.header.stamp = msg.header.stamp
+            dimensions_msg.header.frame_id = msg.header.frame_id
+
             for i in range(ModelDetectionConstants.NUM_BOUNDING_BOX_POINTS):
                 point = Point32()
                 point.x = float(corners[i, 0])
@@ -87,9 +99,14 @@ class BoundingBoxPublisher(Node):
                 point.z = 0.0
                 polygon_msg.polygon.points.append(point)
             
-            self.bounding_box_publisher.publish(polygon_msg)
-            self.get_logger().info(f'Published bounding box for object at ({x1:.1f}, {y1:.1f})')
+            dim_point = Point32()
+            dim_point.x = float(width)
+            dim_point.y = float(height)
+            dim_point.z = float(area)
+            dimensions_msg.polygon.points.append(dim_point)
             
+            self.bounding_box_publisher.publish(polygon_msg)
+            self.dimensions_publisher.publish(dimensions_msg)    
         except Exception as e:
             self.get_logger().error(f'Error processing image: {str(e)}')
     
