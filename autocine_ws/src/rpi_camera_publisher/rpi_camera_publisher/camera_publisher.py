@@ -8,11 +8,8 @@ import numpy as np
 from threading import Thread, Event
 import time
 import subprocess
-import tempfile
-import os
-import shutil
 
-class CameraCameraPublisher(Node):
+class CameraPublisher(Node):
     def __init__(self):
         super().__init__('camera_publisher')
         
@@ -108,7 +105,7 @@ class CameraCameraPublisher(Node):
             
             frame_size = 1152 * 648 * 3 // 2
             
-            self.get_logger().info("Started libcamera continuous capture at 20Hz")
+            self.get_logger().info("Started libcamera continuous capture at 30hz")
             
             while not self.shutdown_event.is_set() and rclpy.ok():
                 try:
@@ -157,7 +154,7 @@ class CameraCameraPublisher(Node):
 
 def main():
     rclpy.init()
-    node = CameraCameraPublisher()
+    node = CameraPublisher()
     
     try:
         rclpy.spin(node)
