@@ -39,6 +39,14 @@ class CameraCameraPublisher(Node):
             self._start_libcamera_capture()
     
     def _detect_camera_method(self):
+        try:
+            result = subprocess.run(['rpicam-hello', '--list-cameras'], 
+                                  capture_output=True, text=True, timeout=5)
+            if result.returncode == 0 and 'Available cameras' in result.stdout:
+                return 'libcamera'
+        except:
+            pass
+        
         for cam_id in [0, 1, 2]:
             try:
                 cap = cv2.VideoCapture(cam_id)
@@ -51,14 +59,6 @@ class CameraCameraPublisher(Node):
                 cap.release()
             except:
                 pass
-        
-        try:
-            result = subprocess.run(['rpicam-hello', '--list-cameras'], 
-                                  capture_output=True, text=True, timeout=5)
-            if result.returncode == 0 and 'Available cameras' in result.stdout:
-                return 'libcamera'
-        except:
-            pass
         
         return 'none'
     
