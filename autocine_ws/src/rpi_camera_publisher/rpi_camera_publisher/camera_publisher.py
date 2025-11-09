@@ -62,7 +62,7 @@ class CameraPublisher(Node):
     def _start_opencv_capture(self):
         self.camera = cv2.VideoCapture(self.camera_id)
         if self.camera.isOpened():
-            self.camera.set(cv2.CAP_PROP_FPS, 30)
+            self.camera.set(cv2.CAP_PROP_FPS, 25)
             self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             self.capture_thread = Thread(target=self._opencv_capture_loop, daemon=True)
             self.capture_thread.start()
@@ -72,7 +72,7 @@ class CameraPublisher(Node):
         self.capture_thread.start()
     
     def _opencv_capture_loop(self):
-        frame_period = 1.0 / 30.0
+        frame_period = 1.0 / 25.0
         next_frame_time = time.time()
         
         while not self.shutdown_event.is_set() and rclpy.ok():
@@ -96,7 +96,7 @@ class CameraPublisher(Node):
                 '--codec', 'yuv420',
                 '--width', '1152',
                 '--height', '648',
-                '--framerate', '30',
+                '--framerate', '25',
                 '--timeout', '0',
                 '--nopreview',
                 '--shutter', '2000', 
@@ -105,7 +105,7 @@ class CameraPublisher(Node):
             
             frame_size = 1152 * 648 * 3 // 2
             
-            self.get_logger().info("Started libcamera continuous capture at 30hz")
+            self.get_logger().info("Started libcamera continuous capture at 25hz")
             
             while not self.shutdown_event.is_set() and rclpy.ok():
                 try:
@@ -162,7 +162,10 @@ def main():
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        try:
+            rclpy.shutdown()
+        except:
+            pass
 
 if __name__ == '__main__':
     main()

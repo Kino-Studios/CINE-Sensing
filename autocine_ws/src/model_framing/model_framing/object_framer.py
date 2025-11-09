@@ -54,6 +54,12 @@ class BoundingBoxPublisher(Node):
             '/object_detection/dimensions',
             qos_profile
         )
+
+        self.center_point_publisher = self.create_publisher(
+            PolygonStamped,
+            '/object_detection/center_point',
+            qos_profile
+        )
     
     def _bounding_box_capture_callback(self, msg):
         try:
@@ -105,8 +111,23 @@ class BoundingBoxPublisher(Node):
             dim_point.z = float(area)
             dimensions_msg.polygon.points.append(dim_point)
             
+            center_x = (x1 + x2) / 2.0
+            center_y = (y1 + y2) / 2.0
+            
+            center_msg = PolygonStamped()
+            center_msg.header = Header()
+            center_msg.header.stamp = msg.header.stamp
+            center_msg.header.frame_id = msg.header.frame_id
+            
+            center_point = Point32()
+            center_point.x = float(center_x)
+            center_point.y = float(center_y)
+            center_point.z = 0.0
+            center_msg.polygon.points.append(center_point)
+            
             self.bounding_box_publisher.publish(polygon_msg)
-            self.dimensions_publisher.publish(dimensions_msg)    
+            self.dimensions_publisher.publish(dimensions_msg)
+            self.center_point_publisher.publish(center_msg)
         except Exception as e:
             self.get_logger().error(f'Error processing image: {str(e)}')
     

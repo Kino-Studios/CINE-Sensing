@@ -7,8 +7,6 @@ import os
 
 
 def generate_launch_description():
-    """Generate launch description for camera publisher."""
-    
     camera_id_arg = DeclareLaunchArgument(
         'camera_id',
         default_value='0',
