@@ -24,7 +24,7 @@ class IMUBridge(Node):
         
         self.mavros_imu_sub = self.create_subscription(
             Imu,
-            '/mavros/imu/data',
+            '/mavros/imu/data_raw',
             self.imu_callback,
             mavros_qos
         )
@@ -51,7 +51,10 @@ def main(args=None):
     finally:
         if 'imu_bridge' in locals():
             imu_bridge.destroy_node()
-        rclpy.shutdown()
+        try:
+            rclpy.shutdown()
+        except:
+            pass
 
 if __name__ == '__main__':
     main()
