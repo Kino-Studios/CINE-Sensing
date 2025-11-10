@@ -99,13 +99,13 @@ class CameraPublisher(Node):
                 '--framerate', '25',
                 '--timeout', '0',
                 '--nopreview',
-                '--shutter', '2000', 
+                '--shutter', '2500', 
                 '--output', '-' 
             ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
             
             frame_size = 1152 * 648 * 3 // 2
             
-            self.get_logger().info("Started libcamera continuous capture at 25hz")
+            self.get_logger().info("libcamera continuous capture at 25hz")
             
             while not self.shutdown_event.is_set() and rclpy.ok():
                 try:

@@ -11,13 +11,13 @@ class IMUBridge(Node):
         super().__init__('imu_bridge')
         
         mavros_qos = QoSProfile(
-            depth=100,
+            depth=200,
             reliability=ReliabilityPolicy.BEST_EFFORT,
             durability=DurabilityPolicy.VOLATILE
         )
         
         vins_qos = QoSProfile(
-            depth=100,
+            depth=200,
             reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.VOLATILE
         )
@@ -36,8 +36,6 @@ class IMUBridge(Node):
         )
         
     def imu_callback(self, msg):
-        now = self.get_clock().now()
-        msg.header.stamp = now.to_msg()
         self.vins_imu_pub.publish(msg)
 
 def main(args=None):
