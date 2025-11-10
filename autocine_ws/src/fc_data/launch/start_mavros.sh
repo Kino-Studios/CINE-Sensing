@@ -1,6 +1,6 @@
 export ROS_DOMAIN_ID=0
 PORT=/dev/ttyAMA0
-BAUD=115200
+BAUD=921600
 
 source /opt/ros/jazzy/setup.bash
 
