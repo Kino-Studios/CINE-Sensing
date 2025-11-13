@@ -1,5 +1,5 @@
 gyroscope_data_publisher:
   ros__parameters:
-    baud_rate: 115200
+    baud_rate: 921600
     serial_port: "/dev/ttyAMA0"
-    serial_port_baud_rate: 115200
+    serial_port_baud_rate: 921600
