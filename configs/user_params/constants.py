@@ -21,3 +21,31 @@ class ModelDetectionConstants:
 class UserRequestedParameters:
     # for the user object, its the ids of the objects that the model uses (ill make it a chair for now)
     USER_OBJECT_ID = 2
+
+class RuleOfThirdsConstants:
+    FRAME_WIDTH = 1152
+    FRAME_HEIGHT = 648
+    
+    GRID_LINE_1_X = FRAME_WIDTH / 3.0
+    GRID_LINE_2_X = 2 * FRAME_WIDTH / 3.0
+    GRID_LINE_1_Y = FRAME_HEIGHT / 3.0
+    GRID_LINE_2_Y = 2 * FRAME_HEIGHT / 3.0
+    
+    ANCHOR_POINTS = [
+        (GRID_LINE_1_X, GRID_LINE_1_Y),  
+        (GRID_LINE_2_X, GRID_LINE_1_Y),     
+        (FRAME_WIDTH, GRID_LINE_1_Y),    
+        (GRID_LINE_1_X, GRID_LINE_2_Y),     
+        (GRID_LINE_2_X, GRID_LINE_2_Y),   
+        (FRAME_WIDTH, GRID_LINE_2_Y),       
+        (GRID_LINE_1_X, FRAME_HEIGHT),  
+        (GRID_LINE_2_X, FRAME_HEIGHT),     
+        (FRAME_WIDTH, FRAME_HEIGHT),       
+    ]
+    
+    CORE_ANCHOR_POINTS = [
+        (GRID_LINE_1_X, GRID_LINE_1_Y),   
+        (GRID_LINE_2_X, GRID_LINE_1_Y),     
+        (GRID_LINE_1_X, GRID_LINE_2_Y),    
+        (GRID_LINE_2_X, GRID_LINE_2_Y), 
+    ]
