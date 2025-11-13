@@ -41,14 +41,14 @@ except ImportError:
     
     class RuleOfThirdsConstants:
         FRAME_WIDTH = 1152
-        FRAME_HEIGHT = 216
+        FRAME_HEIGHT = 648
         GRID_LINE_1_X = 384
         GRID_LINE_2_X = 768
-        GRID_LINE_1_Y = 72
-        GRID_LINE_2_Y = 144
+        GRID_LINE_1_Y = 216
+        GRID_LINE_2_Y = 432
         CORE_ANCHOR_POINTS = [
-            (384, 72), (768, 72),
-            (384, 144), (768, 144)
+            (384, 216), (768, 216),
+            (384, 432), (768, 432)
         ]
 
 
