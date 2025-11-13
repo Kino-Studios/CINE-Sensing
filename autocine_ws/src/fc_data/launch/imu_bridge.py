@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 from sensor_msgs.msg import Imu
-import sys
+import numpy as np
 
 class IMUBridge(Node):
     def __init__(self):
@@ -36,6 +36,14 @@ class IMUBridge(Node):
         )
         
     def imu_callback(self, msg):
+        msg.linear_acceleration.x = msg.linear_acceleration.y
+        msg.linear_acceleration.y = msg.linear_acceleration.x
+        msg.linear_acceleration.z = -msg.linear_acceleration.z
+        
+        msg.angular_velocity.x = msg.angular_velocity.y
+        msg.angular_velocity.y = msg.angular_velocity.x
+        msg.angular_velocity.z = -msg.angular_velocity.z
+        
         self.vins_imu_pub.publish(msg)
 
 def main(args=None):

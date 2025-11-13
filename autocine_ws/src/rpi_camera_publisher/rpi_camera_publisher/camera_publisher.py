@@ -99,7 +99,7 @@ class CameraPublisher(Node):
                 '--framerate', '25',
                 '--timeout', '0',
                 '--nopreview',
-                '--shutter', '2500', 
+                '--shutter', '5000', 
                 '--output', '-' 
             ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
             
