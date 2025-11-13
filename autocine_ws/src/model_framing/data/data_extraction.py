@@ -1,62 +1,37 @@
-import os
-os.environ['ROS_DOMAIN_ID'] = '0'
-
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 from sensor_msgs.msg import Image
-from geometry_msgs.msg import PolygonStamped
+from geometry_msgs.msg import PolygonStamped, Point32
 from cv_bridge import CvBridge
 import cv2
 import numpy as np
-import csv
+import pandas as pd
 import sys
-import threading
+import os
 from datetime import datetime
+import tkinter as tk
+from tkinter import ttk, messagebox
+from PIL import Image as PILImage, ImageTk
+import threading
+from queue import Queue
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-workspace_root = os.path.join(project_root, 'autocine_ws', 'install')
-if workspace_root not in sys.path:
-    sys.path.insert(0, workspace_root)
-
-try:
-    from configs.user_params.constants import (
-        ModelDetectionConstants, 
-        UserRequestedParameters,
-        RuleOfThirdsConstants
-    )
-except ImportError:
-    class ModelDetectionConstants:
-        CAMERA_IMAGE_TOPIC = '/camera/image_raw'
-        BOUNDING_BOX_TOPIC = '/object_detection/bounding_box'
-        IMAGE_ENCODING = 'bgr8'
-        NUM_BOUNDING_BOX_POINTS = 4
-        MODEL_PATH = os.path.expanduser('~/yolo_model.pt')
-    
-    class UserRequestedParameters:
-        USER_OBJECT_ID = 11
-    
-    class RuleOfThirdsConstants:
-        FRAME_WIDTH = 1152
-        FRAME_HEIGHT = 216
-        GRID_LINE_1_X = 384
-        GRID_LINE_2_X = 768
-        GRID_LINE_1_Y = 72
-        GRID_LINE_2_Y = 144
-        CORE_ANCHOR_POINTS = [
-            (384, 72), (768, 72),
-            (384, 144), (768, 144)
-        ]
+from configs.user_params.constants import (
+    ModelDetectionConstants, 
+    UserRequestedParameters,
+    RuleOfThirdsConstants
+)
 
 
 class DataExtractionNode(Node):
-    def __init__(self):
+    def __init__(self, data_queue):
         super().__init__('data_extraction_node')
+        self.data_queue = data_queue
         self.bridge = CvBridge()
-        self.data_records = []
         
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
@@ -108,135 +83,23 @@ class DataExtractionNode(Node):
         with self.image_lock:
             return self.current_image.copy() if self.current_image is not None else None, \
                    self.current_bbox.copy() if self.current_bbox is not None else None
-    
-    def capture_data_point(self, mode='rule_of_thirds'):
-        image, bbox = self.get_current_data()
-        
-        if image is None:
-            return False, "No image available"
-        
-        if bbox is None:
-            return False, "No bounding box detected"
-        
-        height, width = image.shape[:2]
-        scale_x = RuleOfThirdsConstants.FRAME_WIDTH / width
-        scale_y = RuleOfThirdsConstants.FRAME_HEIGHT / height
-        
-        scaled_bbox = bbox.copy()
-        scaled_bbox[:, 0] *= scale_x
-        scaled_bbox[:, 1] *= scale_y
-        
-        bbox_center = np.mean(scaled_bbox, axis=0)
-        
-        min_dist = float('inf')
-        nearest_anchor = None
-        cluster_id = -1
-        
-        for idx, anchor in enumerate(RuleOfThirdsConstants.CORE_ANCHOR_POINTS):
-            dist = np.sqrt((bbox_center[0] - anchor[0])**2 + (bbox_center[1] - anchor[1])**2)
-            if dist < min_dist:
-                min_dist = dist
-                nearest_anchor = anchor
-                cluster_id = idx
-        
-        alignment_tolerance = 50
-        if mode == 'rule_of_thirds' and min_dist > alignment_tolerance:
-            return False, f"Not aligned: {min_dist:.1f}px from grid (tolerance: {alignment_tolerance}px)"
-        
-        for i, corner in enumerate(scaled_bbox):
-            record = {
-                'data_type': mode,
-                'cluster_id': cluster_id,
-                'x_px': corner[0],
-                'y_px': corner[1],
-                'bbox_x1': scaled_bbox[0, 0],
-                'bbox_y1': scaled_bbox[0, 1],
-                'bbox_x2': scaled_bbox[1, 0],
-                'bbox_y2': scaled_bbox[1, 1],
-                'bbox_x3': scaled_bbox[2, 0],
-                'bbox_y3': scaled_bbox[2, 1],
-                'bbox_x4': scaled_bbox[3, 0],
-                'bbox_y4': scaled_bbox[3, 1],
-                'center_x': bbox_center[0],
-                'center_y': bbox_center[1],
-                'distance_to_anchor': min_dist,
-                'timestamp': datetime.now().isoformat(),
-            }
-            self.data_records.append(record)
-        
-        return True, f"Captured 4 points (cluster {cluster_id}, distance: {min_dist:.1f}px)"
-    
-    def save_to_csv(self, csv_path):
-        if not self.data_records:
-            return False, "No data to save"
-        
-        try:
-            with open(csv_path, 'w', newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=self.data_records[0].keys())
-                writer.writeheader()
-                writer.writerows(self.data_records)
-            return True, f"Saved {len(self.data_records)} records to {csv_path}"
-        except Exception as e:
-            return False, f"Error saving: {str(e)}"
 
 
-def main():
-    rclpy.init()
-    node = DataExtractionNode()
-    
-    def spin_ros():
-        rclpy.spin(node)
-    
-    ros_thread = threading.Thread(target=spin_ros, daemon=True)
-    ros_thread.start()
-    
-    print("\n" + "="*70)
-    print("DATA EXTRACTION TOOL")
-    print("="*70)
-    print("Commands:")
-    print("  c <mode>  - Capture data point (mode: 'rule' or 'control', default: rule)")
-    print("  s <path>  - Save to CSV (default: bounding_box_data.csv)")
-    print("  i         - Show info")
-    print("  q         - Quit")
-    print("="*70 + "\n")
-    
-    try:
-        while True:
-            cmd = input(">>> ").strip().split()
-            
-            if not cmd:
-                continue
-            
-            if cmd[0].lower() == 'c':
-                mode = cmd[1].lower() if len(cmd) > 1 else 'rule'
-                mode = 'rule_of_thirds' if mode == 'rule' else mode
-                success, msg = node.capture_data_point(mode)
-                print(f"{'✅' if success else '❌'} {msg}")
-                
-            elif cmd[0].lower() == 's':
-                csv_path = cmd[1] if len(cmd) > 1 else 'bounding_box_data.csv'
-                success, msg = node.save_to_csv(csv_path)
-                print(f"{'✅' if success else '❌'} {msg}")
-                
-            elif cmd[0].lower() == 'i':
-                rot = len([r for r in node.data_records if r.get('data_type') == 'rule_of_thirds'])
-                ctrl = len([r for r in node.data_records if r.get('data_type') == 'control'])
-                print(f"Total points: {len(node.data_records)} (Rule of Thirds: {rot}, Control: {ctrl})")
-                
-            elif cmd[0].lower() == 'q':
-                break
-            else:
-                print("Unknown command")
-    
-    except KeyboardInterrupt:
-        print("\nShutting down...")
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
-
-
-if __name__ == '__main__':
-    main()
+class DataExtractionGUI:
+    def __init__(self, root, ros_node):
+        self.root = root
+        self.ros_node = ros_node
+        self.root.title("Data Extraction Tool")
+        self.root.geometry("1152x648")
+        
+        self.data_records = []
+        self.csv_file = None
+        self.region_size = 100
+        self.alignment_tolerance = 50
+        self.capture_mode = "rule_of_thirds"
+        
+        self.setup_gui()
+        self.update_display()
         
     def setup_gui(self):
         main_frame = ttk.Frame(self.root, padding="10")
@@ -711,12 +574,10 @@ if __name__ == '__main__':
 
 
 def main():
-    import os
-    os.environ['ROS_DOMAIN_ID'] = '0'
-    
     rclpy.init()
     
-    ros_node = DataExtractionNode({})
+    data_queue = Queue()
+    ros_node = DataExtractionNode(data_queue)
     
     def spin_ros():
         rclpy.spin(ros_node)
@@ -724,59 +585,13 @@ def main():
     ros_thread = threading.Thread(target=spin_ros, daemon=True)
     ros_thread.start()
     
-    print("\n" + "="*60)
-    print("DATA EXTRACTION TOOL - CLI MODE")
-    print("="*60)
-    print("Commands:")
-    print("  c - Capture data point")
-    print("  s - Save to CSV")
-    print("  q - Quit")
-    print("="*60 + "\n")
+    root = tk.Tk()
+    app = DataExtractionGUI(root, ros_node)
     
     try:
-        while True:
-            cmd = input("> ").strip().lower()
-            
-            if cmd == 'c':
-                image, bbox = ros_node.get_current_data()
-                
-                if image is None:
-                    print("❌ No image available")
-                    continue
-                
-                if bbox is None:
-                    print("❌ No bounding box detected")
-                    continue
-                
-                print(f"✅ Captured {len(ros_node.data_queue)} data points so far")
-                
-            elif cmd == 's':
-                csv_path = input("CSV path (default: bounding_box_data.csv): ").strip() or "bounding_box_data.csv"
-                
-                try:
-                    # Get all records from queue
-                    records = []
-                    while not ros_node.data_queue.empty():
-                        records.append(ros_node.data_queue.get())
-                    
-                    if records:
-                        with open(csv_path, 'w', newline='') as f:
-                            writer = csv.DictWriter(f, fieldnames=records[0].keys())
-                            writer.writeheader()
-                            writer.writerows(records)
-                        print(f"✅ Saved {len(records)} records to {csv_path}")
-                    else:
-                        print("❌ No data to save")
-                except Exception as e:
-                    print(f"❌ Error: {str(e)}")
-                    
-            elif cmd == 'q':
-                break
-            else:
-                print("Unknown command")
-    
+        root.mainloop()
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        pass
     finally:
         ros_node.destroy_node()
         rclpy.shutdown()
