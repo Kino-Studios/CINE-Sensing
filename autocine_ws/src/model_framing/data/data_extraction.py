@@ -94,6 +94,7 @@ class DataExtractionGUI:
         
         self.data_records = []
         self.csv_file = None
+        self.region_size = 100
         
         self.setup_gui()
         self.update_display()
@@ -180,12 +181,39 @@ class DataExtractionGUI:
         anchor_scale_x = width / RuleOfThirdsConstants.FRAME_WIDTH
         anchor_scale_y = height / RuleOfThirdsConstants.FRAME_HEIGHT
         
-        for anchor_x, anchor_y in RuleOfThirdsConstants.CORE_ANCHOR_POINTS:
-            px = int(anchor_x * anchor_scale_x)
-            py = int(anchor_y * anchor_scale_y)
-            size = 10
-            cv2.line(img_copy, (px - size, py - size), (px + size, py + size), (0, 0, 255), 2, cv2.LINE_AA)
-            cv2.line(img_copy, (px - size, py + size), (px + size, py - size), (0, 0, 255), 2, cv2.LINE_AA)
+        calculated_anchor_rects = self.calculate_anchor_rectangles()
+        
+        for cluster_id, (base_anchor_x, base_anchor_y) in enumerate(RuleOfThirdsConstants.CORE_ANCHOR_POINTS):
+            anchor_rect = calculated_anchor_rects[cluster_id]
+            
+            region_x_min = int((base_anchor_x - self.region_size / 2) * anchor_scale_x)
+            region_x_max = int((base_anchor_x + self.region_size / 2) * anchor_scale_x)
+            region_y_min = int((base_anchor_y - self.region_size / 2) * anchor_scale_y)
+            region_y_max = int((base_anchor_y + self.region_size / 2) * anchor_scale_y)
+            
+            cv2.rectangle(img_copy, (region_x_min, region_y_min), (region_x_max, region_y_max), 
+                        (200, 200, 200), 1, cv2.LINE_AA)
+            
+            scaled_anchor_rect = anchor_rect.copy()
+            scaled_anchor_rect[:, 0] *= anchor_scale_x
+            scaled_anchor_rect[:, 1] *= anchor_scale_y
+            
+            for i in range(4):
+                pt1 = tuple(scaled_anchor_rect[i].astype(int))
+                pt2 = tuple(scaled_anchor_rect[(i + 1) % 4].astype(int))
+                cv2.line(img_copy, pt1, pt2, (0, 0, 255), 2, cv2.LINE_AA)
+            
+            for corner in scaled_anchor_rect:
+                px, py = corner.astype(int)
+                size = 8
+                cv2.line(img_copy, (px - size, py - size), (px + size, py + size), (0, 0, 255), 2, cv2.LINE_AA)
+                cv2.line(img_copy, (px - size, py + size), (px + size, py - size), (0, 0, 255), 2, cv2.LINE_AA)
+        
+        if self.data_records:
+            for record in self.data_records:
+                px = int(record['x_px'] * anchor_scale_x)
+                py = int(record['y_px'] * anchor_scale_y)
+                cv2.circle(img_copy, (px, py), 3, (0, 100, 255), -1, cv2.LINE_AA)
         
         return img_copy
     
@@ -204,9 +232,22 @@ class DataExtractionGUI:
         for corner in corners:
             cv2.circle(img_copy, tuple(corner), 5, color, -1)
         
+        center = np.mean(corners, axis=0).astype(int)
+        cv2.circle(img_copy, tuple(center), 8, (255, 0, 0), -1)
+        
         return img_copy
     
-    def find_nearest_anchor(self, point):
+    def get_region_for_point(self, point):
+        for idx, anchor in enumerate(RuleOfThirdsConstants.CORE_ANCHOR_POINTS):
+            region_x_min = anchor[0] - self.region_size / 2
+            region_x_max = anchor[0] + self.region_size / 2
+            region_y_min = anchor[1] - self.region_size / 2
+            region_y_max = anchor[1] + self.region_size / 2
+            
+            if (region_x_min <= point[0] <= region_x_max and 
+                region_y_min <= point[1] <= region_y_max):
+                return idx, anchor
+        
         min_dist = float('inf')
         nearest_anchor = None
         anchor_index = -1
@@ -218,7 +259,43 @@ class DataExtractionGUI:
                 nearest_anchor = anchor
                 anchor_index = idx
         
-        return nearest_anchor, anchor_index
+        return anchor_index, nearest_anchor
+    
+    def calculate_anchor_rectangles(self):
+        anchor_rects = {}
+        for cluster_id in range(len(RuleOfThirdsConstants.CORE_ANCHOR_POINTS)):
+            cluster_records = [r for r in self.data_records if r['cluster_id'] == cluster_id]
+            if cluster_records:
+                bbox_corners_list = []
+                for record in cluster_records:
+                    corners = np.array([
+                        [record['bbox_x1'], record['bbox_y1']],
+                        [record['bbox_x2'], record['bbox_y2']],
+                        [record['bbox_x3'], record['bbox_y3']],
+                        [record['bbox_x4'], record['bbox_y4']]
+                    ])
+                    bbox_corners_list.append(corners)
+                
+                if bbox_corners_list:
+                    avg_corners = np.mean(bbox_corners_list, axis=0)
+                    anchor_rects[cluster_id] = avg_corners
+                else:
+                    base_anchor = RuleOfThirdsConstants.CORE_ANCHOR_POINTS[cluster_id]
+                    anchor_rects[cluster_id] = np.array([
+                        [base_anchor[0] - 50, base_anchor[1] - 50],
+                        [base_anchor[0] + 50, base_anchor[1] - 50],
+                        [base_anchor[0] + 50, base_anchor[1] + 50],
+                        [base_anchor[0] - 50, base_anchor[1] + 50]
+                    ])
+            else:
+                base_anchor = RuleOfThirdsConstants.CORE_ANCHOR_POINTS[cluster_id]
+                anchor_rects[cluster_id] = np.array([
+                    [base_anchor[0] - 50, base_anchor[1] - 50],
+                    [base_anchor[0] + 50, base_anchor[1] - 50],
+                    [base_anchor[0] + 50, base_anchor[1] + 50],
+                    [base_anchor[0] - 50, base_anchor[1] + 50]
+                ])
+        return anchor_rects
     
     def update_display(self):
         image, bbox = self.ros_node.get_current_data()
@@ -281,15 +358,43 @@ class DataExtractionGUI:
         scaled_bbox[:, 0] *= scale_x
         scaled_bbox[:, 1] *= scale_y
         
+        bbox_center = np.mean(scaled_bbox, axis=0)
+        cluster_id, base_anchor = self.get_region_for_point(bbox_center)
+        
+        calculated_anchor_rects = self.calculate_anchor_rectangles()
+        anchor_rect = calculated_anchor_rects.get(cluster_id, None)
+        
+        if anchor_rect is None:
+            anchor_rect = np.array([
+                [base_anchor[0] - 50, base_anchor[1] - 50],
+                [base_anchor[0] + 50, base_anchor[1] - 50],
+                [base_anchor[0] + 50, base_anchor[1] + 50],
+                [base_anchor[0] - 50, base_anchor[1] + 50]
+            ])
+        
+        anchor_center = np.mean(anchor_rect, axis=0)
+        
         for i, corner in enumerate(scaled_bbox):
-            nearest_anchor, cluster_id = self.find_nearest_anchor(corner)
+            anchor_corner = anchor_rect[i]
+            relative_x = corner[0] - anchor_corner[0]
+            relative_y = corner[1] - anchor_corner[1]
             
             record = {
-                'anchor_x': nearest_anchor[0],
-                'anchor_y': nearest_anchor[1],
+                'anchor_x': anchor_center[0],
+                'anchor_y': anchor_center[1],
+                'anchor_x1': anchor_rect[0, 0],
+                'anchor_y1': anchor_rect[0, 1],
+                'anchor_x2': anchor_rect[1, 0],
+                'anchor_y2': anchor_rect[1, 1],
+                'anchor_x3': anchor_rect[2, 0],
+                'anchor_y3': anchor_rect[2, 1],
+                'anchor_x4': anchor_rect[3, 0],
+                'anchor_y4': anchor_rect[3, 1],
                 'cluster_id': cluster_id,
                 'x_px': corner[0],
                 'y_px': corner[1],
+                'relative_x': relative_x,
+                'relative_y': relative_y,
                 'bbox_x1': scaled_bbox[0, 0],
                 'bbox_y1': scaled_bbox[0, 1],
                 'bbox_x2': scaled_bbox[1, 0],
@@ -298,6 +403,8 @@ class DataExtractionGUI:
                 'bbox_y3': scaled_bbox[2, 1],
                 'bbox_x4': scaled_bbox[3, 0],
                 'bbox_y4': scaled_bbox[3, 1],
+                'center_x': bbox_center[0],
+                'center_y': bbox_center[1],
                 'timestamp': datetime.now().isoformat(),
             }
             self.data_records.append(record)
@@ -318,7 +425,8 @@ class DataExtractionGUI:
             self.info_text.insert(tk.END, "Last 5 records:\n")
             for record in self.data_records[-5:]:
                 self.info_text.insert(tk.END, 
-                    f"Point ({record['x_px']:.1f}, {record['y_px']:.1f}) "
+                    f"Corner ({record['x_px']:.1f}, {record['y_px']:.1f}) "
+                    f"rel ({record['relative_x']:.1f}, {record['relative_y']:.1f}) "
                     f"-> Anchor ({record['anchor_x']:.1f}, {record['anchor_y']:.1f}) "
                     f"[Cluster {record['cluster_id']}]\n"
                 )
