@@ -95,6 +95,8 @@ class DataExtractionGUI:
         self.data_records = []
         self.csv_file = None
         self.region_size = 100
+        self.alignment_tolerance = 50
+        self.capture_mode = "rule_of_thirds"
         
         self.setup_gui()
         self.update_display()
@@ -111,18 +113,37 @@ class DataExtractionGUI:
         ttk.Entry(control_frame, textvariable=self.csv_path_var, width=50).grid(row=0, column=1, padx=5, pady=5)
         ttk.Button(control_frame, text="Browse", command=self.browse_csv_file).grid(row=0, column=2, padx=5, pady=5)
         
+        mode_frame = ttk.Frame(control_frame)
+        mode_frame.grid(row=0, column=3, padx=10, pady=5)
+        
+        ttk.Label(mode_frame, text="Mode:").pack(side=tk.LEFT, padx=5)
+        self.mode_var = tk.StringVar(value="rule_of_thirds")
+        ttk.Radiobutton(mode_frame, text="Rule of Thirds", variable=self.mode_var, 
+                       value="rule_of_thirds", command=self.update_mode).pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(mode_frame, text="Control", variable=self.mode_var, 
+                       value="control", command=self.update_mode).pack(side=tk.LEFT, padx=5)
+        
         self.capture_button = ttk.Button(
             control_frame, 
             text="Capture Data Point", 
             command=self.capture_data,
             state=tk.NORMAL
         )
-        self.capture_button.grid(row=0, column=3, padx=10, pady=5)
+        self.capture_button.grid(row=0, column=4, padx=10, pady=5)
         
-        ttk.Button(control_frame, text="Save to CSV", command=self.save_to_csv).grid(row=0, column=4, padx=5, pady=5)
+        ttk.Button(control_frame, text="Save to CSV", command=self.save_to_csv).grid(row=0, column=5, padx=5, pady=5)
         
         self.status_label = ttk.Label(control_frame, text="Status: Ready", foreground="green")
-        self.status_label.grid(row=1, column=0, columnspan=5, pady=5)
+        self.status_label.grid(row=1, column=0, columnspan=6, pady=5)
+        
+        alignment_info_frame = ttk.LabelFrame(control_frame, text="Alignment Guide", padding="5")
+        alignment_info_frame.grid(row=2, column=0, columnspan=6, sticky=(tk.W, tk.E), pady=5)
+        
+        self.alignment_label = ttk.Label(alignment_info_frame, text="Move camera to align object center with grid intersection", foreground="blue")
+        self.alignment_label.pack()
+        
+        self.mode_label = ttk.Label(alignment_info_frame, text="Current Mode: Rule of Thirds", foreground="green")
+        self.mode_label.pack()
         
         display_frame = ttk.Frame(main_frame)
         display_frame.grid(row=1, column=0, columnspan=2, pady=10, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -155,6 +176,15 @@ class DataExtractionGUI:
         display_frame.columnconfigure(0, weight=1)
         display_frame.columnconfigure(1, weight=1)
         
+    def update_mode(self):
+        self.capture_mode = self.mode_var.get()
+        if self.capture_mode == "rule_of_thirds":
+            self.mode_label.config(text="Current Mode: Rule of Thirds (Aligned)", foreground="green")
+            self.alignment_label.config(text="Move camera to align object center with grid intersection", foreground="blue")
+        else:
+            self.mode_label.config(text="Current Mode: Control (Non-aligned)", foreground="orange")
+            self.alignment_label.config(text="Capture data at any position (not aligned with grid)", foreground="orange")
+    
     def browse_csv_file(self):
         from tkinter import filedialog
         filename = filedialog.asksaveasfilename(
@@ -217,7 +247,7 @@ class DataExtractionGUI:
         
         return img_copy
     
-    def draw_bounding_box(self, image, bbox_corners, color=(0, 255, 0), thickness=2):
+    def draw_bounding_box(self, image, bbox_corners, color=(0, 255, 0), thickness=2, show_alignment=True):
         if bbox_corners is None or len(bbox_corners) < 4:
             return image
         
@@ -233,7 +263,32 @@ class DataExtractionGUI:
             cv2.circle(img_copy, tuple(corner), 5, color, -1)
         
         center = np.mean(corners, axis=0).astype(int)
-        cv2.circle(img_copy, tuple(center), 8, (255, 0, 0), -1)
+        
+        if show_alignment:
+            cluster_id, nearest_anchor = self.get_region_for_point(center)
+            dist_to_anchor = np.sqrt((center[0] - nearest_anchor[0])**2 + (center[1] - nearest_anchor[1])**2)
+            
+            if dist_to_anchor <= self.alignment_tolerance:
+                center_color = (0, 255, 0)
+                alignment_text = "ALIGNED"
+            elif dist_to_anchor <= self.region_size / 2:
+                center_color = (0, 255, 255)
+                alignment_text = "CLOSE"
+            else:
+                center_color = (0, 0, 255)
+                alignment_text = "MOVE CLOSER"
+            
+            cv2.circle(img_copy, tuple(center), 12, center_color, 3, cv2.LINE_AA)
+            cv2.circle(img_copy, tuple(center), 8, (255, 0, 0), -1)
+            
+            cv2.putText(img_copy, alignment_text, (center[0] + 15, center[1]), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, center_color, 2, cv2.LINE_AA)
+            
+            anchor_point = tuple(np.array(nearest_anchor).astype(int))
+            cv2.line(img_copy, tuple(center), anchor_point, center_color, 1, cv2.LINE_AA)
+            cv2.circle(img_copy, anchor_point, 5, center_color, 2, cv2.LINE_AA)
+        else:
+            cv2.circle(img_copy, tuple(center), 8, (255, 0, 0), -1)
         
         return img_copy
     
@@ -300,6 +355,33 @@ class DataExtractionGUI:
     def update_display(self):
         image, bbox = self.ros_node.get_current_data()
         
+        if bbox is not None and image is not None:
+            height, width = image.shape[:2]
+            scale_x = RuleOfThirdsConstants.FRAME_WIDTH / width
+            scale_y = RuleOfThirdsConstants.FRAME_HEIGHT / height
+            
+            scaled_bbox = bbox.copy()
+            scaled_bbox[:, 0] *= scale_x
+            scaled_bbox[:, 1] *= scale_y
+            
+            bbox_center = np.mean(scaled_bbox, axis=0)
+            cluster_id, nearest_anchor = self.get_region_for_point(bbox_center)
+            dist_to_anchor = np.sqrt((bbox_center[0] - nearest_anchor[0])**2 + (bbox_center[1] - nearest_anchor[1])**2)
+            
+            if dist_to_anchor <= self.alignment_tolerance:
+                status_text = f"✓ ALIGNED with Region {cluster_id} (Distance: {dist_to_anchor:.1f}px)"
+                status_color = "green"
+            elif dist_to_anchor <= self.region_size / 2:
+                status_text = f"→ Close to Region {cluster_id} (Distance: {dist_to_anchor:.1f}px) - Keep moving"
+                status_color = "orange"
+            else:
+                status_text = f"✗ Far from alignment (Distance: {dist_to_anchor:.1f}px) - Move camera closer to grid"
+                status_color = "red"
+            
+            self.alignment_label.config(text=status_text, foreground=status_color)
+        elif bbox is None and image is not None:
+            self.alignment_label.config(text="Waiting for object detection...", foreground="blue")
+        
         if image is not None:
             canvas_width = 640
             canvas_height = 360
@@ -313,12 +395,12 @@ class DataExtractionGUI:
             img_with_grid = self.draw_rule_of_thirds_grid(resized_image)
             if bbox is not None:
                 scaled_bbox = bbox * scale
-                img_with_grid = self.draw_bounding_box(img_with_grid, scaled_bbox, color=(0, 255, 0))
+                img_with_grid = self.draw_bounding_box(img_with_grid, scaled_bbox, color=(0, 255, 0), show_alignment=True)
             
             img_without_grid = resized_image.copy()
             if bbox is not None:
                 scaled_bbox = bbox * scale
-                img_without_grid = self.draw_bounding_box(img_without_grid, scaled_bbox, color=(0, 255, 0))
+                img_without_grid = self.draw_bounding_box(img_without_grid, scaled_bbox, color=(0, 255, 0), show_alignment=False)
             
             img_with_grid_rgb = cv2.cvtColor(img_with_grid, cv2.COLOR_BGR2RGB)
             img_without_grid_rgb = cv2.cvtColor(img_without_grid, cv2.COLOR_BGR2RGB)
@@ -359,18 +441,44 @@ class DataExtractionGUI:
         scaled_bbox[:, 1] *= scale_y
         
         bbox_center = np.mean(scaled_bbox, axis=0)
-        cluster_id, base_anchor = self.get_region_for_point(bbox_center)
         
-        calculated_anchor_rects = self.calculate_anchor_rectangles()
-        anchor_rect = calculated_anchor_rects.get(cluster_id, None)
-        
-        if anchor_rect is None:
+        if self.capture_mode == "rule_of_thirds":
+            cluster_id, base_anchor = self.get_region_for_point(bbox_center)
+            dist_to_anchor = np.sqrt((bbox_center[0] - base_anchor[0])**2 + (bbox_center[1] - base_anchor[1])**2)
+            
+            if dist_to_anchor > self.alignment_tolerance:
+                response = messagebox.askyesno(
+                    "Not Aligned", 
+                    f"Object center is {dist_to_anchor:.1f}px from nearest grid intersection.\n"
+                    f"Capture anyway?"
+                )
+                if not response:
+                    return
+            
+            calculated_anchor_rects = self.calculate_anchor_rectangles()
+            anchor_rect = calculated_anchor_rects.get(cluster_id, None)
+            
+            if anchor_rect is None:
+                anchor_rect = np.array([
+                    [base_anchor[0] - 50, base_anchor[1] - 50],
+                    [base_anchor[0] + 50, base_anchor[1] - 50],
+                    [base_anchor[0] + 50, base_anchor[1] + 50],
+                    [base_anchor[0] - 50, base_anchor[1] + 50]
+                ])
+            
+            data_type = "rule_of_thirds"
+        else:
+            cluster_id = -1
+            base_anchor = bbox_center
+            
             anchor_rect = np.array([
-                [base_anchor[0] - 50, base_anchor[1] - 50],
-                [base_anchor[0] + 50, base_anchor[1] - 50],
-                [base_anchor[0] + 50, base_anchor[1] + 50],
-                [base_anchor[0] - 50, base_anchor[1] + 50]
+                [bbox_center[0] - 50, bbox_center[1] - 50],
+                [bbox_center[0] + 50, bbox_center[1] - 50],
+                [bbox_center[0] + 50, bbox_center[1] + 50],
+                [bbox_center[0] - 50, bbox_center[1] + 50]
             ])
+            
+            data_type = "control"
         
         anchor_center = np.mean(anchor_rect, axis=0)
         
@@ -380,6 +488,7 @@ class DataExtractionGUI:
             relative_y = corner[1] - anchor_corner[1]
             
             record = {
+                'data_type': data_type,
                 'anchor_x': anchor_center[0],
                 'anchor_y': anchor_center[1],
                 'anchor_x1': anchor_rect[0, 0],
@@ -409,8 +518,11 @@ class DataExtractionGUI:
             }
             self.data_records.append(record)
         
+        rule_of_thirds_count = len([r for r in self.data_records if r.get('data_type') == 'rule_of_thirds'])
+        control_count = len([r for r in self.data_records if r.get('data_type') == 'control'])
+        
         self.status_label.config(
-            text=f"Status: Captured {len(self.data_records)} data points", 
+            text=f"Status: Captured {len(self.data_records)} data points (Rule of Thirds: {rule_of_thirds_count}, Control: {control_count})", 
             foreground="green"
         )
         
@@ -419,16 +531,21 @@ class DataExtractionGUI:
     def update_info_text(self):
         self.info_text.delete(1.0, tk.END)
         if self.data_records:
+            rule_of_thirds_count = len([r for r in self.data_records if r.get('data_type') == 'rule_of_thirds'])
+            control_count = len([r for r in self.data_records if r.get('data_type') == 'control'])
+            
             self.info_text.insert(tk.END, f"Total data points: {len(self.data_records)}\n")
+            self.info_text.insert(tk.END, f"Rule of Thirds: {rule_of_thirds_count} | Control: {control_count}\n")
             self.info_text.insert(tk.END, f"Last capture: {self.data_records[-1]['timestamp']}\n\n")
             
             self.info_text.insert(tk.END, "Last 5 records:\n")
             for record in self.data_records[-5:]:
+                data_type = record.get('data_type', 'unknown')
+                cluster_info = f"Cluster {record['cluster_id']}" if record['cluster_id'] >= 0 else "Control"
                 self.info_text.insert(tk.END, 
-                    f"Corner ({record['x_px']:.1f}, {record['y_px']:.1f}) "
-                    f"rel ({record['relative_x']:.1f}, {record['relative_y']:.1f}) "
+                    f"[{data_type.upper()}] Corner ({record['x_px']:.1f}, {record['y_px']:.1f}) "
                     f"-> Anchor ({record['anchor_x']:.1f}, {record['anchor_y']:.1f}) "
-                    f"[Cluster {record['cluster_id']}]\n"
+                    f"[{cluster_info}]\n"
                 )
         else:
             self.info_text.insert(tk.END, "No data captured yet\n")
@@ -447,7 +564,7 @@ class DataExtractionGUI:
             df = pd.DataFrame(self.data_records)
             df.to_csv(csv_path, index=False)
             self.status_label.config(
-                text=f"Status: Saved {len(self.data_records)} records to {csv_path}", 
+                text=f"Saved {len(self.data_records)} records to {csv_path}", 
                 foreground="green"
             )
             messagebox.showinfo("Success", f"Data saved to {csv_path}")
