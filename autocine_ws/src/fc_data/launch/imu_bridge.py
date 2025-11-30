@@ -36,13 +36,21 @@ class IMUBridge(Node):
         )
         
     def imu_callback(self, msg):
-        msg.linear_acceleration.x = msg.linear_acceleration.y
-        msg.linear_acceleration.y = msg.linear_acceleration.x
+        accel_x = msg.linear_acceleration.x
+        accel_y = msg.linear_acceleration.y
+        gyro_x = msg.angular_velocity.x
+        gyro_y = msg.angular_velocity.y
+        
+        msg.linear_acceleration.x = accel_y
+        msg.linear_acceleration.y = accel_x
         msg.linear_acceleration.z = -msg.linear_acceleration.z
         
-        msg.angular_velocity.x = msg.angular_velocity.y
-        msg.angular_velocity.y = msg.angular_velocity.x
+        msg.angular_velocity.x = gyro_y
+        msg.angular_velocity.y = gyro_x
         msg.angular_velocity.z = -msg.angular_velocity.z
+        
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'imu'
         
         self.vins_imu_pub.publish(msg)
 

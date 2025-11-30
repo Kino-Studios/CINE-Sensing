@@ -67,6 +67,7 @@ class VIOPublisher(Node):
         vins_imu_msg = Imu()
         vins_imu_msg.header = msg.header
         vins_imu_msg.header.frame_id = "imu"
+        vins_imu_msg.header.stamp = self.get_clock().now().to_msg()
         vins_imu_msg.linear_acceleration = msg.linear_acceleration
         vins_imu_msg.angular_velocity = msg.angular_velocity
         vins_imu_msg.orientation = msg.orientation
