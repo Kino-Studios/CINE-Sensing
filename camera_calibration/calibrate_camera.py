@@ -5,9 +5,16 @@ import matplotlib.pyplot as plt
 import os
 
 def calibrate(showsPics=True):
-    root = os.getcwd()
-    calibration_path = os.path.join(root, 'images')
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    calibration_path = os.path.join(script_dir, 'images')
     images = glob.glob(os.path.join(calibration_path, '*.jpg'))
+
+    print(f"Calibration path: {calibration_path}")
+    print(f"Found {len(images)} images")
+    
+    if not images:
+        print("ERROR: No images found in calibration/images directory")
+        return None, None
 
     n_rows = 9 # 10 boxes
     n_cols = 6 # 7 boxes
@@ -17,32 +24,50 @@ def calibrate(showsPics=True):
 
     world_points_list = []
     image_points_list = []
+    image_shape = None
+    successful_images = 0
 
     for fname in images:
         img = cv.imread(fname)
+        if img is None:
+            print(f"WARNING: Could not read image {fname}")
+            continue
+            
         img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         corners_found, corners_org = cv.findChessboardCorners(img_gray, (n_rows, n_cols), None)
 
         if corners_found:
-            world_points_list.append(world_points)
+            successful_images += 1
+            world_points_list.append(world_points.copy())
             corners_refined = cv.cornerSubPix(img_gray, corners_org, (11, 11), (-1, -1), term_criteria)
             image_points_list.append(corners_refined)
+            if image_shape is None:
+                image_shape = img_gray.shape[::-1]
 
             if showsPics:
                 cv.drawChessboardCorners(img, (n_rows, n_cols), corners_refined, corners_found)
                 cv.imshow('Chessboard', img)
                 cv.waitKey(500)
+        else:
+            print(f"No chessboard found in {os.path.basename(fname)}")
     
     cv.destroyAllWindows()
 
+    print(f"Successfully detected chessboard in {successful_images}/{len(images)} images")
+    
+    if successful_images == 0:
+        print("ERROR: No chessboards detected. Check image quality and chessboard dimensions.")
+        return None, None
+
     # calibrate
     rep_error, camera_matrix, distort_coeff, rot_vecs, translation_vecs, = cv.calibrateCamera(
-        world_points_list, image_points_list, img_gray.shape[::-1], None, None
+        world_points_list, image_points_list, image_shape, None, None
     )
 
     # save params
-    curr_folder = os.path.dirname(os.path.abspath(__file__))
-    param_path = os.path.join(curr_folder, 'calib_data', 'calibration.npz')
+    calib_data_dir = os.path.join(script_dir, 'calib_data')
+    os.makedirs(calib_data_dir, exist_ok=True)
+    param_path = os.path.join(calib_data_dir, 'calibration.npz')
     np.savez(param_path,
             rep_error=rep_error,
             camera_matrix=camera_matrix,
@@ -56,9 +81,14 @@ def run_calibration():
     calibrate(showsPics=False)
 
 def remove_distortion(camera_matrix, distort_coeff):
-    root = os.getcwd()
-    image_path = os.path.join(root, 'images/*.jpg')
-    image = cv.imread(image_path)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    image_path = os.path.join(script_dir, 'images', '*.jpg')
+    images = glob.glob(image_path)
+    
+    if not images:
+        return
+    
+    image = cv.imread(images[0])
 
     height, width = image.shape[:2]
     new_camera_matrix = cv.getOptimalNewCameraMatrix(
