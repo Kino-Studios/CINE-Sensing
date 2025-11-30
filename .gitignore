@@ -11,6 +11,7 @@ __pycache__/
 
 # models and runs
 runs/
+*.mcap
 
 # bloat
 # *.onnx
