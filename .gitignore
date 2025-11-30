@@ -11,6 +11,7 @@ __pycache__/
 
 # models and runs
 runs/
+*.mcap
 
 # bloat
 # *.onnx
@@ -232,3 +233,4 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+kalibr_bags/kalibr_cam/kalibr_cam_0.mcap

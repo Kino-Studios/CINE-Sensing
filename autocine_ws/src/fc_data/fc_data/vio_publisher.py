@@ -56,13 +56,12 @@ class VIOPublisher(Node):
     
         self.last_imu_time = None
         self.last_image_time = None
-        
-        self.get_logger().info('VIO Publisher initialized for VINS-Fusion integration')
 
     def imu_callback(self, msg: Imu):
         vins_imu_msg = Imu()
         vins_imu_msg.header = msg.header
         vins_imu_msg.header.frame_id = "imu"
+        vins_imu_msg.header.stamp = self.get_clock().now().to_msg()
         vins_imu_msg.linear_acceleration = msg.linear_acceleration
         vins_imu_msg.angular_velocity = msg.angular_velocity
         vins_imu_msg.orientation = msg.orientation
@@ -101,7 +100,6 @@ class VIOPublisher(Node):
         
         if msg.header.stamp.sec % 5 == 0:
             pos = msg.pose.pose.position
-            self.get_logger().info(f'VIO Position: x={pos.x:.3f}, y={pos.y:.3f}, z={pos.z:.3f}')
 
 def main(args=None):
     rclpy.init(args=args)

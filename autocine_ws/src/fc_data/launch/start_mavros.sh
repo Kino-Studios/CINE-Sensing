@@ -8,5 +8,6 @@ ros2 launch mavros apm.launch \
   fcu_url:=serial://$PORT:$BAUD \
   gcs_url:=udp://@ \
   system_id:=255 tgt_system:=1 tgt_component:=1 \
-  use_sim_time:=false 
-  # params_file:=/home/fishnos/bspline-cinematography-generator-research/autocine_ws/src/fc_data/config/mavros_params.yaml
+  use_sim_time:=false \
+  plugin_allowlist:=[] \
+  plugin_denylist:=[time_sync]
