@@ -104,6 +104,8 @@ class CameraPublisher(Node):
             ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
             
             frame_size = 1152 * 648 * 3 // 2
+            frame_count = 0
+            last_log_time = time.time()
             
             self.get_logger().info("libcamera continuous capture at 25hz")
             
@@ -127,14 +129,18 @@ class CameraPublisher(Node):
         finally:
             if 'process' in locals():
                 process.terminate()
-                process.wait(timeout=2)
+                try:
+                    process.wait(timeout=2)
+                except:
+                    process.kill()
             self.get_logger().info("Stopped libcamera capture")
     
     def _publish_frame(self, frame):
         try:
             msg = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
-            msg.header.stamp = self.get_clock().now().to_msg()
-            msg.header.frame_id = 'camera'
+            current_time = self.get_clock().now()
+            msg.header.stamp = current_time.to_msg()
+            msg.header.frame_id = 'cam0'
             
             self.image_publisher.publish(msg)
             
