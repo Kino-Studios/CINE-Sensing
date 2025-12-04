@@ -93,38 +93,40 @@ class CameraPublisher(Node):
         try:
             process = subprocess.Popen([
                 'rpicam-vid',
-                '--codec', 'yuv420',
+                '--codec', 'mjpeg',
                 '--width', '1152',
                 '--height', '648',
                 '--framerate', '25',
                 '--timeout', '0',
                 '--nopreview',
-                '--shutter', '5000', 
-                '--output', '-' 
+                '--shutter', '3200',
+                '--gain', '14.0',
+                '--awb', 'auto',
+                '--output', '-',
             ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
-            
-            frame_size = 1152 * 648 * 3 // 2
-            frame_count = 0
-            last_log_time = time.time()
-            
-            self.get_logger().info("libcamera continuous capture at 25hz")
-            
+
+            self.get_logger().info("libcamera capture at 25 Hz")
+
+            buffer = b""
             while not self.shutdown_event.is_set() and rclpy.ok():
-                try:
-                    raw_frame = process.stdout.read(frame_size)
-                    
-                    if len(raw_frame) != frame_size:
-                        self.get_logger().warn("Incomplete frame received")
-                        continue
-                    
-                    yuv = np.frombuffer(raw_frame, dtype=np.uint8).reshape((648 * 3 // 2, 1152))
-                    frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
-                    
-                    self._publish_frame(frame)
-                    
-                except Exception as e:
-                    self.get_logger().error(f"Frame processing error: {e}")
+                chunk = process.stdout.read(4096)
+                if not chunk:
                     break
+                buffer += chunk
+
+                while True:
+                    soi = buffer.find(b'\xff\xd8')
+                    eoi = buffer.find(b'\xff\xd9', soi + 2)
+                    if soi != -1 and eoi != -1:
+                        jpg = buffer[soi:eoi + 2]
+                        buffer = buffer[eoi + 2:]
+
+                        np_arr = np.frombuffer(jpg, dtype=np.uint8)
+                        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                        if frame is not None:
+                            self._publish_frame(frame)
+                    else:
+                        break
                     
         finally:
             if 'process' in locals():
@@ -133,7 +135,6 @@ class CameraPublisher(Node):
                     process.wait(timeout=2)
                 except:
                     process.kill()
-            self.get_logger().info("Stopped libcamera capture")
     
     def _publish_frame(self, frame):
         try:
@@ -143,6 +144,9 @@ class CameraPublisher(Node):
             msg.header.frame_id = 'cam0'
             
             self.image_publisher.publish(msg)
+            
+            # cv2.imwrite('latest_frame.png', frame)
+            # self.get_logger().info("Latest frame saved")
             
         except Exception as e:
             self.get_logger().error(f"Failed to publish frame: {e}")
