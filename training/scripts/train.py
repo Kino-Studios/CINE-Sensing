@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     workers = 4
     batch_size = 4  # reduced to avoid memory issues
-    epochs = 15
+    epochs = 400
     fraction = 1.0
     imgsz = 640
     lr0 = 0.00025
