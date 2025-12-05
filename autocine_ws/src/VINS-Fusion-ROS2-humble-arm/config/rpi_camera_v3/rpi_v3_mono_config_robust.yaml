@@ -1,0 +1,68 @@
+%YAML:1.0
+
+#support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
+imu: 1   
+num_of_cam: 1  
+
+imu_topic: "/imu_bridge/data_raw"
+image0_topic: "/camera/image_raw"
+image1_topic: "/cam1/image_raw"
+output_path: "~/vins_output/"
+
+cam0_intrinsics: [497.5985575, 497.427605, 578.452325, 320.9313725]
+cam0_distortion_coeffs: [-0.057825, -0.032831, -0.002431, 0.000290]
+
+cam0_calib: "cam0_wide.yaml"
+cam1_calib: "cam1_wide.yaml"
+image_width: 1152
+image_height: 648
+
+estimate_extrinsic: 1
+                        # 1  have an initial guess about extrinsic parameters
+                        # 2  don't know anything about extrinsic parameters (also forced recalibration)
+
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1]
+
+multiple_thread: 1
+
+#feature tracker parameters
+max_cnt: 150            # reduced from 400 for stability
+min_dist: 20            # increased from 15 for better feature distribution
+freq: 20                # frequency (Hz) of publish tracking result
+F_threshold: 1.0
+show_track: 1           # publish tracking image as topic
+flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
+
+#optimization parameters
+max_solver_time: 0.08   # increased from 0.04 for more robust solving
+max_num_iterations: 12  # increased from 8 for better convergence
+keyframe_parallax: 5.0 # reduced from 10.0 to require more motion for keyframes
+
+#imu parameters
+acc_n: 0.2          # increased noise assumption for more robust filtering
+gyr_n: 0.02         # increased noise assumption
+acc_w: 0.002        # increased bias random walk
+gyr_w: 0.0002       # increased bias random walk
+g_norm: 9.81007     # gravity magnitude
+
+#unsynchronization parameters
+estimate_td: 1                      # enable time offset estimation
+td: 0.0                             # initial value of time offset
+tr: 0.0
+
+#loop closure parameters
+load_previous_pose_graph: 0        # load and reuse previous pose graph
+pose_graph_save_path: "~/vins_output/pose_graph/" # save and load path
+save_image: 1                   # save image in pose graph for visualization purpose
+
+#additional robustness parameters
+init_depth: 5.0                    # initial depth for feature initialization
+min_parallax: 1.0                  # minimum parallax for triangulation
+outlier_threshold: 3.0             # outlier rejection threshold (pixels)
