@@ -23,8 +23,8 @@ class CameraPublisher(Node):
                 ('camera_topic', '/camera/image_raw'),
                 ('frame_id', 'cam0'),
                 ('save_latest_frame', False),
-                ('libcamera_shutter', 2000),
-                ('libcamera_gain', 10.0),
+                ('libcamera_shutter', 2500),
+                ('libcamera_gain', 18.0),
             ],
         )
 
