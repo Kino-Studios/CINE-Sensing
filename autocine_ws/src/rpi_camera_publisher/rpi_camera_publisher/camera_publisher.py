@@ -13,12 +13,35 @@ class CameraPublisher(Node):
     def __init__(self):
         super().__init__('camera_publisher')
         
+        self.declare_parameters(
+            '',
+            [
+                ('camera_id', 0),
+                ('image_width', 1152),
+                ('image_height', 648),
+                ('fps', 30.0),
+                ('camera_topic', '/camera/image_raw'),
+                ('frame_id', 'cam0'),
+                ('save_latest_frame', False),
+                ('libcamera_shutter', 2000),
+                ('libcamera_gain', 10.0),
+            ],
+        )
+
+        self.camera_id = self.get_parameter('camera_id').get_parameter_value().integer_value
+        self.image_width = self.get_parameter('image_width').get_parameter_value().integer_value
+        self.image_height = self.get_parameter('image_height').get_parameter_value().integer_value
+        self.fps = float(self.get_parameter('fps').get_parameter_value().double_value)
+        self.camera_topic = self.get_parameter('camera_topic').get_parameter_value().string_value
+        self.frame_id = self.get_parameter('frame_id').get_parameter_value().string_value
+        self.save_latest_frame = self.get_parameter('save_latest_frame').get_parameter_value().bool_value
+        self.libcamera_shutter = self.get_parameter('libcamera_shutter').get_parameter_value().integer_value
+        self.libcamera_gain = float(self.get_parameter('libcamera_gain').get_parameter_value().double_value)
+        
         self.bridge = CvBridge()
         self.shutdown_event = Event()
         
         self.camera_method = self._detect_camera_method()
-            
-        self.get_logger().info(f"Using camera method: {self.camera_method}")
         
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
@@ -27,7 +50,11 @@ class CameraPublisher(Node):
             depth=10
         )
         
-        self.image_publisher = self.create_publisher(Image, '/camera/image_raw', qos_profile)
+        self.image_publisher = self.create_publisher(
+            Image, 
+            self.camera_topic, 
+            qos_profile
+        )
         
         # start publishing
         if self.camera_method == 'opencv':
@@ -44,7 +71,8 @@ class CameraPublisher(Node):
         except:
             pass
         
-        for cam_id in [0, 1, 2]:
+        candidate_ids = [self.camera_id] + [cid for cid in [0, 1, 2] if cid != self.camera_id]
+        for cam_id in candidate_ids:
             try:
                 cap = cv2.VideoCapture(cam_id)
                 if cap.isOpened():
@@ -62,7 +90,9 @@ class CameraPublisher(Node):
     def _start_opencv_capture(self):
         self.camera = cv2.VideoCapture(self.camera_id)
         if self.camera.isOpened():
-            self.camera.set(cv2.CAP_PROP_FPS, 25)
+            self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.image_width)
+            self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.image_height)
+            self.camera.set(cv2.CAP_PROP_FPS, self.fps)
             self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             self.capture_thread = Thread(target=self._opencv_capture_loop, daemon=True)
             self.capture_thread.start()
@@ -72,7 +102,7 @@ class CameraPublisher(Node):
         self.capture_thread.start()
     
     def _opencv_capture_loop(self):
-        frame_period = 1.0 / 25.0
+        frame_period = 1.0 / self.fps
         next_frame_time = time.time()
         
         while not self.shutdown_event.is_set() and rclpy.ok():
@@ -94,18 +124,19 @@ class CameraPublisher(Node):
             process = subprocess.Popen([
                 'rpicam-vid',
                 '--codec', 'mjpeg',
-                '--width', '1152',
-                '--height', '648',
-                '--framerate', '25',
+                '--width', str(self.image_width),
+                '--height', str(self.image_height),
+                '--framerate', str(int(self.fps)),
                 '--timeout', '0',
                 '--nopreview',
-                '--shutter', '3200',
-                '--gain', '14.0',
+                '--shutter', str(self.libcamera_shutter),
+                '--gain', str(self.libcamera_gain),
                 '--awb', 'auto',
+                '--quality', '90',
                 '--output', '-',
             ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
 
-            self.get_logger().info("libcamera capture at 25 Hz")
+            self.get_logger().info("libcamera capture at " + str(self.fps) + " Hz")
 
             buffer = b""
             while not self.shutdown_event.is_set() and rclpy.ok():
@@ -138,15 +169,17 @@ class CameraPublisher(Node):
     
     def _publish_frame(self, frame):
         try:
-            msg = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
+            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            msg = self.bridge.cv2_to_imgmsg(gray_frame, encoding='mono8')
+
             current_time = self.get_clock().now()
             msg.header.stamp = current_time.to_msg()
-            msg.header.frame_id = 'cam0'
+            msg.header.frame_id = self.frame_id
             
             self.image_publisher.publish(msg)
-            
-            # cv2.imwrite('latest_frame.png', frame)
-            # self.get_logger().info("Latest frame saved")
+
+            if self.save_latest_frame:
+                cv2.imwrite('latest_frame.png', frame)
             
         except Exception as e:
             self.get_logger().error(f"Failed to publish frame: {e}")

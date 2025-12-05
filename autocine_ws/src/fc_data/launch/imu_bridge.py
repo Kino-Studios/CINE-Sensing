@@ -49,7 +49,6 @@ class IMUBridge(Node):
         msg.angular_velocity.y = gyro_x
         msg.angular_velocity.z = -msg.angular_velocity.z
         
-        msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = 'imu'
         
         self.vins_imu_pub.publish(msg)

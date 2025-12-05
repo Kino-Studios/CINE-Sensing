@@ -1,23 +1,18 @@
 # Camera configuration for Raspberry Pi Camera Module 3
 camera_publisher:
   ros__parameters:
-    # Camera device settings
-    camera_id: 0  # Default camera device ID
+    camera_id: 0
     
-    # Image capture settings
-    image_width: 1920
-    image_height: 1080
+    image_width: 1152
+    image_height: 648
     fps: 30.0
     
-    # Image format and quality
-    image_format: "BGR8"  # Options: BGR8, RGB8, MONO8
+    image_format: "MONO8"
     jpeg_quality: 95
     
-    # Publishing settings
     camera_topic: "/camera/image_raw"
     camera_info_topic: "/camera/camera_info"
     
-    # Camera calibration (example values - you'll need to calibrate your specific camera)
     camera_matrix:
       rows: 3
       cols: 3
@@ -28,22 +23,18 @@ camera_publisher:
     distortion_coefficients:
       rows: 1
       cols: 5
-      data: [0.1, -0.2, 0.0, 0.0, 0.0]  # k1, k2, p1, p2, k3
+      data: [0.1, -0.2, 0.0, 0.0, 0.0]
     
-    # Camera frame settings
     camera_frame_id: "camera_optical_frame"
     
-    # Additional RPi Camera Module 3 specific settings
     auto_exposure: true
-    exposure_time_us: 10000  # Microseconds (only used if auto_exposure is false)
+    exposure_time_us: 10000
     analog_gain: 1.0
     digital_gain: 1.0
     white_balance_auto: true
     white_balance_red_gain: 1.0
     white_balance_blue_gain: 1.0
     
-    # Buffer settings
-    buffer_size: 1  # Number of images to buffer
+    buffer_size: 1
     
-    # Publishing frequency control
-    publish_rate: 30.0  # Hz
+    publish_rate: 30.0
