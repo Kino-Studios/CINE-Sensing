@@ -13,7 +13,13 @@ class VIOPublisher(Node):
     def __init__(self):
         super().__init__('vio_publisher')
         
-        sensor_qos = QoSProfile(
+        sensor_sub_qos = QoSProfile(
+            reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            durability=QoSDurabilityPolicy.VOLATILE,
+            history=QoSHistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+        vins_pub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
@@ -24,32 +30,32 @@ class VIOPublisher(Node):
             Imu,
             'mavros/imu/data',
             self.imu_callback,
-            sensor_qos
+            sensor_sub_qos
         )
         
         self.vins_odom_subscription = self.create_subscription(
             Odometry,
             '/vins_estimator/odometry',
             self.vins_odom_callback,
-            sensor_qos
+            vins_pub_qos
         )
         
         self.vins_imu_publisher = self.create_publisher(
             Imu,
             '/imu_bridge/data_raw',
-            sensor_qos
+            vins_pub_qos
         )
         
         self.pose_publisher = self.create_publisher(
             PoseStamped,
             '/vio/pose',
-            sensor_qos
+            vins_pub_qos
         )
         
         self.odometry_publisher = self.create_publisher(
             Odometry,
             '/vio/odometry',
-            sensor_qos
+            vins_pub_qos
         )
         
         self.tf_broadcaster = TransformBroadcaster(self)
