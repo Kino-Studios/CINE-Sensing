@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import rclpy
 from rclpy.node import Node
 import subprocess
@@ -12,6 +10,7 @@ class VINSRunner(Node):
         super().__init__('vins_runner')
         self.vins_process = None
         self.loop_process = None
+        self.imu_bridge_process = None
         self.start_vins()
 
     def start_vins(self):
@@ -28,6 +27,10 @@ class VINSRunner(Node):
             'ros2', 'launch', 'mavros', 'px4.launch.py'
         ]
         
+        imu_bridge_cmd = [
+            'imu_bridge'
+        ]
+        
         loop_cmd = [
             'ros2', 'run', 'loop_fusion', 'loop_fusion_node',
             vins_ws + '/config/rpi_camera_v3/rpi_v3_mono_config.yaml'
@@ -38,7 +41,9 @@ class VINSRunner(Node):
             env['ROS_DOMAIN_ID'] = '0'
             
             self.vins_process = subprocess.Popen(vins_cmd, env=env)
-            self.loop_process = subprocess.Popen(loop_cmd, env=env)
+            self.imu_bridge_process = subprocess.Popen(imu_bridge_cmd, env=env)
+            # Loop closure disabled in config to save memory on RPi
+            # self.loop_process = subprocess.Popen(loop_cmd, env=env)
             
             self.get_logger().info('VINS-Fusion started')
             
@@ -48,6 +53,8 @@ class VINSRunner(Node):
     def shutdown(self):
         if self.vins_process:
             self.vins_process.terminate()
+        if self.imu_bridge_process:
+            self.imu_bridge_process.terminate()
         if self.loop_process:
             self.loop_process.terminate()
 

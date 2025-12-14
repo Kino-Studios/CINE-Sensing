@@ -26,20 +26,19 @@ body_T_cam0:
          0, 0, 0, 1]
 
 multiple_thread: 1
-
-# tracker
-min_parallax: 10
-max_cnt: 200
-min_dist: 25
-freq: 25
-F_threshold: 2.0
-detect_threshold: 8
-show_track: 1
+feature_tracker: 1
+min_parallax: 12
+max_cnt: 150
+min_dist: 30
+freq: 30
+F_threshold: 1.0
+detect_threshold: 10
+show_track: 0
 flow_back: 1
 equalize: 1
 clahe_clip: 4.0
-pyramid_levels: 4
-win_size: 21
+pyramid_levels: 3
+win_size: 15
 
 # optimizer
 keyframe_parallax: 10.0
@@ -57,8 +56,7 @@ estimate_td: 0
 td: -0.031551662509982356
 tr: 0.0
 
-# loop closure
-loop_closure: 0
+loop_closure: 1
 load_previous_pose_graph: 0
 pose_graph_save_path: "/home/fishnos/bspline-cinematography-generator-research/vins_output/pose_graph/"
 save_image: 0
