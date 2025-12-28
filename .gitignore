@@ -17,6 +17,10 @@ runs/
 # *.onnx
 # *.tflite
 
+# Local large artifacts (do not commit)
+training_env_venv.zip
+ziGzAjL1
+
 # Distribution / packaging
 .Python
 build/
