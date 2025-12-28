@@ -1,6 +1,7 @@
 import os
 from comet_ml import start
 import torch
+import numpy as np
 from ultralytics import YOLO
 
 if __name__ == '__main__':
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     resume = False
     device = "mps" # change if windows
     save_period = 3
-    freeze = 3
+    freeze = 0
     rect = True
     project = "runs/detect"
     search_space = {
@@ -100,5 +101,23 @@ if __name__ == '__main__':
       plots=True,
       save=True
     )
+
+    cm_obj = getattr(results, "confusion_matrix", None)
+
+    if cm_obj is None:
+        metrics = model.val(
+          data="training/configs/HomeObjects-3K.yaml", 
+          imgsz=imgsz, 
+          device=device, 
+          plots=True
+        )
+        cm = metrics.confusion_matrix.matrix.astype(float)
+    else:
+        cm = cm_obj.matrix.astype(float)
+
+    row_sums = cm.sum(axis=1, keepdims=True)
+    cm_norm = np.divide(cm, row_sums, out=np.zeros_like(cm), where=row_sums != 0)
+
+    np.save("confusion_matrix_row_normalized.npy", cm_norm)
 
     experiment.end()
