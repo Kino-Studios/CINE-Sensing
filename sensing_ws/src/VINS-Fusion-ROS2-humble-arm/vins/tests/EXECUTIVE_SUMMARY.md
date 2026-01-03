@@ -73,7 +73,7 @@ High IMU noise params → Solver distrusts IMU
 
 ```bash
 # Run IMU noise analyzer
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
 ```
 
 This will output **measured** values like:
@@ -100,7 +100,7 @@ cp config/rpi_camera_v3/rpi_v3_mono_config_CORRECTED.yaml \
 
 ```bash
 # Run static drift test
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
 ```
 
 **Expected improvement:**
