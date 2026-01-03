@@ -26,7 +26,7 @@ This guide walks through systematic testing and validation of your VINS-Fusion c
 ### Setup:
 ```bash
 cd /home/fishnos/bspline-cinematography-generator-research
-chmod +x autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/*.py
+chmod +x sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/*.py
 ```
 
 ---
@@ -58,7 +58,7 @@ ros2 run fc_data imu_bridge
 # Terminal 3
 cd ~/bspline-cinematography-generator-research
 source source_scripts.sh
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
 ```
 
 **What to expect:**
@@ -79,15 +79,15 @@ python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyze
 
 ```bash
 # Backup current config
-cp autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml \
-   autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config_BACKUP.yaml
+cp sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml \
+   sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config_BACKUP.yaml
 
 # Option A: Use pre-corrected config
-cp autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config_CORRECTED.yaml \
-   autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml
+cp sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config_CORRECTED.yaml \
+   sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml
 
 # Option B: Manually edit config file with measured values
-nano autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml
+nano sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml
 # Update acc_n, acc_w, gyr_n, gyr_w with values from analyzer
 ```
 
@@ -111,7 +111,7 @@ nano autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mon
 # Terminal 1: Run complete VINS stack
 cd ~/bspline-cinematography-generator-research
 source source_scripts.sh
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/run_vins.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/run_vins.py
 ```
 
 **Wait for initialization:**
@@ -125,7 +125,7 @@ python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/run_vins.py
 # Terminal 2
 cd ~/bspline-cinematography-generator-research
 source source_scripts.sh
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
 ```
 
 **Keep sensor COMPLETELY STILL for 30 seconds!**
@@ -162,7 +162,7 @@ python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test
 # Terminal 2
 cd ~/bspline-cinematography-generator-research
 source source_scripts.sh
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/feature_quality_test.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/feature_quality_test.py
 ```
 
 **During test:**
@@ -210,7 +210,7 @@ python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/feature_quality_t
 # Terminal 2
 cd ~/bspline-cinematography-generator-research
 source source_scripts.sh
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/solver_convergence_monitor.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/solver_convergence_monitor.py
 ```
 
 **During test:**
