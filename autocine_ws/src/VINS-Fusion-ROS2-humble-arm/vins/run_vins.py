@@ -14,10 +14,10 @@ class VINSRunner(Node):
         self.start_vins()
 
     def start_vins(self):
-        vins_ws = '/home/fishnos/bspline-cinematography-generator-research/autocine_ws/src/VINS-Fusion-ROS2-humble-arm'
-        
+        vins_ws = '/home/fishnos/CINE-Sensing/autocine_ws/src/VINS-Fusion-ROS2-humble-arm'
+
         os.chdir(vins_ws)
-        
+
         vins_cmd = [
             'ros2', 'run', 'vins', 'vins_node',
             vins_ws + '/config/rpi_camera_v3/rpi_v3_mono_config.yaml'
@@ -26,27 +26,25 @@ class VINSRunner(Node):
         mavros_cmd = [
             'ros2', 'launch', 'mavros', 'px4.launch.py'
         ]
-        
+
         imu_bridge_cmd = [
-            'imu_bridge'
+            'imu_bridge', '--ros-args', '-p', 'use_transform:=true'
         ]
-        
+
         loop_cmd = [
             'ros2', 'run', 'loop_fusion', 'loop_fusion_node',
             vins_ws + '/config/rpi_camera_v3/rpi_v3_mono_config.yaml'
         ]
-        
+
         try:
             env = os.environ.copy()
             env['ROS_DOMAIN_ID'] = '0'
-            
+
             self.vins_process = subprocess.Popen(vins_cmd, env=env)
             self.imu_bridge_process = subprocess.Popen(imu_bridge_cmd, env=env)
-            # Loop closure disabled in config to save memory on RPi
-            # self.loop_process = subprocess.Popen(loop_cmd, env=env)
-            
+
             self.get_logger().info('VINS-Fusion started')
-            
+
         except Exception as e:
             self.get_logger().error(f'Failed to start VINS: {str(e)}')
 
@@ -61,13 +59,13 @@ class VINSRunner(Node):
 def main(args=None):
     rclpy.init(args=args)
     runner = VINSRunner()
-    
+
     def signal_handler(sig, frame):
         runner.shutdown()
         sys.exit(0)
-    
+
     signal.signal(signal.SIGINT, signal_handler)
-    
+
     try:
         rclpy.spin(runner)
     except KeyboardInterrupt:

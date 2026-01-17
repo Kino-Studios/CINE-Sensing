@@ -5,7 +5,7 @@
 **Your VINS configuration has critical errors. Start here:**
 
 ```bash
-cd /home/fishnos/bspline-cinematography-generator-research
+cd /home/fishnos/CINE-Sensing
 
 # 1. Read this first (5 min)
 cat autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/EXECUTIVE_SUMMARY.md
@@ -86,7 +86,7 @@ python3 static_drift_test.py
 # Success: < 0.2m drift in 30s
 
 # Feature tracking test
-python3 feature_quality_test.py  
+python3 feature_quality_test.py
 # Success: 200-300 features/frame
 
 # Solver convergence test
@@ -259,7 +259,7 @@ cp ../config/rpi_camera_v3/rpi_v3_mono_config_CORRECTED.yaml \
 
 # Run all validation tests
 python3 static_drift_test.py
-python3 feature_quality_test.py  
+python3 feature_quality_test.py
 python3 solver_convergence_monitor.py
 
 # Check topics

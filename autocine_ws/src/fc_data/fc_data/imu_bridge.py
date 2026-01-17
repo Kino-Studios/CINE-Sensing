@@ -36,8 +36,6 @@ class IMUBridge(Node):
             vins_qos
         )
         
-        self.get_logger().info(f'IMU Bridge started (transform enabled: {self.use_transform})')
-        
     def imu_callback(self, msg):
         if self.use_transform:
             accel_x = msg.linear_acceleration.x
@@ -52,6 +50,8 @@ class IMUBridge(Node):
             msg.angular_velocity.x = gyro_y
             msg.angular_velocity.y = gyro_x
             msg.angular_velocity.z = -msg.angular_velocity.z
+            
+            self.get_logger().info(f'Transform applied: accel {accel_x:.2f},{accel_y:.2f} -> {msg.linear_acceleration.x:.2f},{msg.linear_acceleration.y:.2f}', once=True)
         
         msg.header.frame_id = 'imu'
         
