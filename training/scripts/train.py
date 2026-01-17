@@ -1,10 +1,11 @@
 import os
 from comet_ml import start
 import torch
+import numpy as np
 from ultralytics import YOLO
 
 if __name__ == '__main__':
-    model = YOLO("training/checkpoints/pretrained/yolo11n.pt")
+    model = YOLO("training/checkpoints/pre-export/homeobjects_yolo11n_trained.pt")
     # model = YOLO("runs/detect/train34/weights/best.pt")
 
     api_key = os.getenv("COMET_API_KEY", "")
@@ -33,7 +34,7 @@ if __name__ == '__main__':
     resume = False
     device = "mps" # change if windows
     save_period = 3
-    freeze = 3
+    freeze = 0
     rect = True
     project = "runs/detect"
     search_space = {
@@ -71,34 +72,48 @@ if __name__ == '__main__':
     experiment.log_other("model_name", "Yolo11n")
     experiment.log_other("model_type", "YOLO11n")
 
-    results=model.train(
-      data="training/configs/HomeObjects-3K.yaml",
-      resume=resume,
-      fraction=fraction,
-      epochs=epochs,
-      imgsz=imgsz,
-      batch=batch_size,
-      workers=workers,
-      hsv_v=hsv_v,
-      hsv_s=hsv_s,
-      lr0=lr0,
-      lrf=lrf,
-      # warmup_epochs=warmup_epochs,
-      # close_mosaic=close_mosaic,
-      cos_lr=cos_lr,
-      optimizer=optimizer,
-      patience=patience,
-      pretrained=pretrained,
-      device=device,
-      save_period=save_period,
-      project=project,
-      freeze=freeze,
-      amp=True,
-      cache=True,
-      # rect=rect,
-      val=True,
-      plots=True,
-      save=True
+    # results=model.train(
+    #   data="training/configs/HomeObjects-3K.yaml",
+    #   resume=resume,
+    #   fraction=fraction,
+    #   epochs=epochs,
+    #   imgsz=imgsz,
+    #   batch=batch_size,
+    #   workers=workers,
+    #   hsv_v=hsv_v,
+    #   hsv_s=hsv_s,
+    #   lr0=lr0,
+    #   lrf=lrf,
+    #   # warmup_epochs=warmup_epochs,
+    #   # close_mosaic=close_mosaic,
+    #   cos_lr=cos_lr,
+    #   optimizer=optimizer,
+    #   patience=patience,
+    #   pretrained=pretrained,
+    #   device=device,
+    #   save_period=save_period,
+    #   project=project,
+    #   freeze=freeze,
+    #   amp=True,
+    #   cache=True,
+    #   # rect=rect,
+    #   val=True,
+    #   plots=True,
+    #   save=True
+    # )
+
+    cm_full = metrics.confusion_matrix.matrix.astype(float)
+
+    # remove background class
+    cm = cm_full[:-1, :-1]
+
+    row_sums = cm.sum(axis=1, keepdims=True)
+    cm_norm = np.divide(
+        cm,
+        row_sums,
+        out=np.zeros_like(cm),
+        where=row_sums != 0
     )
 
     experiment.end()
+    np.save("confusion_matrix_row_normalized.npy", cm_norm)

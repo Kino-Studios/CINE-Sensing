@@ -8,17 +8,17 @@
 cd /home/fishnos/CINE-Sensing
 
 # 1. Read this first (5 min)
-cat autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/EXECUTIVE_SUMMARY.md
+cat sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/EXECUTIVE_SUMMARY.md
 
 # 2. Measure actual IMU noise (5 min - CRITICAL!)
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
 
 # 3. Apply corrected configuration (1 min)
-cp autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config_CORRECTED.yaml \
-   autocine_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml
+cp sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config_CORRECTED.yaml \
+   sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono_config.yaml
 
 # 4. Validate fixes (5 min)
-python3 autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
+python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
 ```
 
 **Expected improvement:** Drift drops from 10+m → < 0.2m

@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Allow all files in third_party folder (override above rules)
-!autocine_ws/src/third_party/**
+!sensing_ws/src/third_party/**
 
 # models and runs
 runs/
@@ -16,6 +16,10 @@ runs/
 # bloat
 # *.onnx
 # *.tflite
+
+# Local large artifacts (do not commit)
+training_env_venv.zip
+ziGzAjL1
 
 # Distribution / packaging
 .Python
@@ -38,9 +42,9 @@ share/python-wheels/
 MANIFEST
 
 # Allow build directories in third_party
-!autocine_ws/src/third_party/**/build/
-!autocine_ws/src/third_party/**/lib/
-!autocine_ws/src/third_party/**/lib64/
+!sensing_ws/src/third_party/**/build/
+!sensing_ws/src/third_party/**/lib/
+!sensing_ws/src/third_party/**/lib64/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -78,16 +82,16 @@ db.sqlite3
 db.sqlite3-journal
 
 # Allow log files in third_party
-!autocine_ws/src/third_party/**/*.log
+!sensing_ws/src/third_party/**/*.log
 
-# Ignore autocine_ws log directory and symlinks
-autocine_ws/log/
-autocine_ws/log/latest*
+# Ignore sensing_ws log directory and symlinks
+sensing_ws/log/
+sensing_ws/log/latest*
 
 # Ignore embedded git repositories (submodules)
-autocine_ws/opencv/
-autocine_ws/opencv_contrib/
-autocine_ws/src/vision_opencv/
+sensing_ws/opencv/
+sensing_ws/opencv_contrib/
+sensing_ws/src/vision_opencv/
 
 # Flask stuff:
 instance/
