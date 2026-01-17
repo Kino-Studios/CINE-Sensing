@@ -1,1 +1,1 @@
-# bspline-cinematography-generator-research
+# CINE-Sensing

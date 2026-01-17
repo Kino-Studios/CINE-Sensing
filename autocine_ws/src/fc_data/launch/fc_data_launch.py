@@ -7,10 +7,10 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'config_file',
-            default_value='/home/fishnos/bspline-cinematography-generator-research/configs/gyroscope/comms.yaml',
+            default_value='/home/fishnos/CINE-Sensing/configs/gyroscope/comms.yaml',
             description='Path to the configuration file'
         ),
-        
+
         Node(
             package='fc_data',
             executable='gyroscope_publisher',
@@ -18,7 +18,7 @@ def generate_launch_description():
             output='screen',
             parameters=[LaunchConfiguration('config_file')]
         ),
-        
+
         Node(
             package='fc_data',
             executable='vio_publisher',

@@ -8,10 +8,10 @@ if __name__ == '__main__':
     # model = YOLO("runs/detect/train34/weights/best.pt")
 
     api_key = os.getenv("COMET_API_KEY", "")
-    
+
     experiment = start(
       api_key=api_key,
-      project_name="bspline-cinematography-generator-research-llm",
+      project_name="CINE-Sensing-llm",
       workspace="fishnos"
     )
 
@@ -37,11 +37,11 @@ if __name__ == '__main__':
     rect = True
     project = "runs/detect"
     search_space = {
-      "lr0": (1e-4, 1e-2),     
-      "lrf": (0.01, 0.1),       
-      "warmup_epochs": (1.0, 3.0), 
+      "lr0": (1e-4, 1e-2),
+      "lrf": (0.01, 0.1),
+      "warmup_epochs": (1.0, 3.0),
       "momentum": (0.8, 0.95),
-      "weight_decay": (1e-4, 1e-3) 
+      "weight_decay": (1e-4, 1e-3)
     }
 
     hyper_params = {
