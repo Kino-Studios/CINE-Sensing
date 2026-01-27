@@ -25,8 +25,8 @@ This guide walks through systematic testing and validation of your VINS-Fusion c
 
 ### Setup:
 ```bash
-cd /home/fishnos/bspline-cinematography-generator-research
-chmod +x sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/*.py
+cd /home/fishnos/CINE-Sensing
+chmod +x autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/*.py
 ```
 
 ---
@@ -47,7 +47,7 @@ ros2 launch mavros px4.launch fcu_url:=/dev/ttyACM0:921600
 4. Start IMU bridge:
 ```bash
 # Terminal 2
-cd ~/bspline-cinematography-generator-research
+cd ~/CINE-Sensing
 source source_scripts.sh
 ros2 run fc_data imu_bridge
 ```
@@ -56,7 +56,7 @@ ros2 run fc_data imu_bridge
 
 ```bash
 # Terminal 3
-cd ~/bspline-cinematography-generator-research
+cd ~/CINE-Sensing
 source source_scripts.sh
 python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/imu_noise_analyzer.py
 ```
@@ -109,7 +109,7 @@ nano sensing_ws/src/VINS-Fusion-ROS2-humble-arm/config/rpi_camera_v3/rpi_v3_mono
 
 ```bash
 # Terminal 1: Run complete VINS stack
-cd ~/bspline-cinematography-generator-research
+cd ~/CINE-Sensing
 source source_scripts.sh
 python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/run_vins.py
 ```
@@ -123,7 +123,7 @@ python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/run_vins.py
 
 ```bash
 # Terminal 2
-cd ~/bspline-cinematography-generator-research
+cd ~/CINE-Sensing
 source source_scripts.sh
 python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py
 ```
@@ -160,7 +160,7 @@ python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.
 
 ```bash
 # Terminal 2
-cd ~/bspline-cinematography-generator-research
+cd ~/CINE-Sensing
 source source_scripts.sh
 python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/feature_quality_test.py
 ```
@@ -189,7 +189,7 @@ python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/feature_quality_te
 
 1. **Clustered features:**
    - Increase `min_dist` from 15 → 25
-   
+
 2. **Unstable tracking (high CV):**
    - Check camera exposure (may be too high/low)
    - Increase shutter speed if motion blur visible
@@ -208,7 +208,7 @@ python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/feature_quality_te
 
 ```bash
 # Terminal 2
-cd ~/bspline-cinematography-generator-research
+cd ~/CINE-Sensing
 source source_scripts.sh
 python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/solver_convergence_monitor.py
 ```
@@ -303,7 +303,7 @@ ros2 topic echo /odometry
    ```yaml
    # WRONG (current)
    acc_n: 0.5
-   
+
    # CORRECT (typical)
    acc_n: 0.1
    ```
@@ -312,7 +312,7 @@ ros2 topic echo /odometry
    ```yaml
    # WRONG
    max_solver_time: 0.04
-   
+
    # CORRECT
    max_solver_time: 0.10
    ```
