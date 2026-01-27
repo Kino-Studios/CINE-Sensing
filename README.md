@@ -1,5 +1,4 @@
 # CINE-Sensing
-<<<<<<< HEAD
 
 **Cinematic Intelligent Navigation Engine - Sensing Module**
 
@@ -27,5 +26,3 @@ Configuration files are available in multiple formats for cross-platform compati
 ## Related Repository
 
 - [CINE](https://github.com/fishnos/CINE) - Main trajectory optimization and planning module
-=======
->>>>>>> 8d5a5ed33209708afc2da3441ec786221012673c
