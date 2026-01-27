@@ -1,0 +1,50 @@
+{
+    "camera_publisher": {
+        "ros__parameters": {
+            "camera_id": 0,
+            "image_width": 1152,
+            "image_height": 648,
+            "fps": 30.0,
+            "image_format": "BGR8",
+            "jpeg_quality": 95,
+            "camera_topic": "/camera/image_raw",
+            "camera_info_topic": "/camera/camera_info",
+            "camera_matrix": {
+                "rows": 3,
+                "cols": 3,
+                "data": [
+                    1000.0,
+                    0.0,
+                    960.0,
+                    0.0,
+                    1000.0,
+                    540.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
+            },
+            "distortion_coefficients": {
+                "rows": 1,
+                "cols": 5,
+                "data": [
+                    0.1,
+                    -0.2,
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "camera_frame_id": "camera_optical_frame",
+            "auto_exposure": true,
+            "exposure_time_us": 10000,
+            "analog_gain": 1.0,
+            "digital_gain": 1.0,
+            "white_balance_auto": true,
+            "white_balance_red_gain": 1.0,
+            "white_balance_blue_gain": 1.0,
+            "buffer_size": 1,
+            "publish_rate": 30.0
+        }
+    }
+}
