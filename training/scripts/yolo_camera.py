@@ -10,7 +10,7 @@ import os
 import sys
 from ultralytics import YOLO
 
-sys.path.append('/home/fishnos/bspline-cinematography-generator-research/venv/lib/python3.12/site-packages')
+sys.path.append('/home/fishnos/CINE-Sensing/venv/lib/python3.12/site-packages')
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 if project_root not in sys.path:

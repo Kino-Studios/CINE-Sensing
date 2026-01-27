@@ -4,6 +4,10 @@ if [ -f "/opt/ros/jazzy/setup.bash" ]; then
     source /opt/ros/jazzy/setup.bash
 fi
 
+if [ -f "$PROJECT_ROOT/autocine_ws/install/setup.bash" ]; then
+    source "$PROJECT_ROOT/autocine_ws/install/setup.bash"
+fi
+
 if [ -f "$PROJECT_ROOT/sensing_ws/install/setup.bash" ]; then
     source "$PROJECT_ROOT/sensing_ws/install/setup.bash"
 fi

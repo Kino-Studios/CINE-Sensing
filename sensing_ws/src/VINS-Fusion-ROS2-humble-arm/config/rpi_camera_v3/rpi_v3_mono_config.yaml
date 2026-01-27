@@ -7,7 +7,7 @@ num_of_cam: 1
 imu_topic: "/imu_bridge/data_raw"
 image0_topic: "/camera/image_raw"
 
-output_path: "/home/fishnos/bspline-cinematography-generator-research/vins_output/"
+output_path: "/home/fishnos/CINE-Sensing/vins_output/"
 
 cam0_intrinsics: [750.99681791, 748.9227188, 578.86898934, 326.60855341]
 cam0_distortion_coeffs: [-0.04369182, 0.04562136, 0.00000456, 0.0003494, 0]
@@ -27,29 +27,29 @@ body_T_cam0:
 
 multiple_thread: 1
 feature_tracker: 1
-min_parallax: 12
-max_cnt: 150
-min_dist: 30
+min_parallax: 8
+max_cnt: 250
+min_dist: 15
 freq: 30
-F_threshold: 1.0
+F_threshold: 1.5
 detect_threshold: 10
-show_track: 0
+show_track: 1
 flow_back: 1
 equalize: 1
-clahe_clip: 4.0
-pyramid_levels: 3
-win_size: 15
+clahe_clip: 3.0
+pyramid_levels: 5
+win_size: 25
 
 # optimizer
 keyframe_parallax: 10.0
 
-acc_n: 0.1       
-gyr_n: 0.01      
-acc_w: 0.00002     
-gyr_w: 0.00002      
-g_norm: 9.8
+acc_n: 0.1
+gyr_n: 0.01
+acc_w: 0.00002
+gyr_w: 0.00002
+g_norm: 9.81
 
-gravity_aligned: 0
+gravity_aligned: 1
 
 # time offset
 estimate_td: 0
@@ -58,5 +58,5 @@ tr: 0.0
 
 loop_closure: 1
 load_previous_pose_graph: 0
-pose_graph_save_path: "/home/fishnos/bspline-cinematography-generator-research/vins_output/pose_graph/"
+pose_graph_save_path: "/home/fishnos/CINE-Sensing/vins_output/pose_graph/"
 save_image: 0

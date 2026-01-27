@@ -1,5 +1,4 @@
 # CINE-Sensing
-
 **Cinematic Intelligent Navigation Engine - Sensing Module**
 
 This repository contains the sensing and perception components for the CINE project, including camera integration, object detection, and data collection for cinematographic drone navigation.
