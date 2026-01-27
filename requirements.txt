@@ -1,14 +1,23 @@
-# B-spline Cinematography Generator Research - Python Dependencies
-# 
-# Setup Instructions:
-# 1. Create virtual environment: python -m venv venv
-# 2. Activate virtual environment: source venv/bin/activate
-# 3. Install dependencies: pip install -r requirements.txt
-# 4. Run training script: python training/scripts/train.py
-#
-# To activate the virtual environment in the future:
+# setup instructions:
+# python3 -m venv venv
 # source venv/bin/activate
+# pip install -r requirements.txt
 
-torch>=2.0.0
-ultralytics>=8.0.0
-comet-ml>=3.0.0
+# deep learning and CV
+torch>=2.2.0
+torchvision>=0.17.0
+torchaudio>=2.2.0
+ultralytics>=8.2.0
+comet-ml>=3.37.0
+opencv-python>=4.8.0
+
+# data and visualization
+numpy>=1.23.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+scipy>=1.10.0
+Pillow>=9.5.0
+
+# utils
+pyyaml>=6.0.0
+requests>=2.31.0
