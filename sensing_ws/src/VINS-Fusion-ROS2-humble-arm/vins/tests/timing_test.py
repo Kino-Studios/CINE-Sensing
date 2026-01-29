@@ -12,7 +12,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from configs.python import CameraConfig
+from configs.python import CameraConfig, VinsConfig
 
 class TimeSyncTest(Node):
     def __init__(self):
@@ -23,7 +23,7 @@ class TimeSyncTest(Node):
         imu_qos = QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT)
         img_qos = QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
 
-        self.imu_sub = self.create_subscription(Imu, '/mavros/imu/data_raw', self.imu_cb, imu_qos)
+        self.imu_sub = self.create_subscription(Imu, VinsConfig.IMU_TOPIC, self.imu_cb, imu_qos)
         self.img_sub = self.create_subscription(Image, CameraConfig.CAMERA_TOPIC, self.img_cb, img_qos)
         self.timer = self.create_timer(2.0, self.analyze)
 

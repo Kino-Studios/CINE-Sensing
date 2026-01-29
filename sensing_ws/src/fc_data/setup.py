@@ -10,7 +10,14 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', ['launch/gyroscope_publish.py', 'launch/vio_publisher.py', 'launch/fc_data_launch.py', 'launch/imu_bridge_launch.py']),
+        ('share/' + package_name + '/launch', [
+            'launch/gyroscope_publish.py',
+            'launch/vio_publisher.py',
+            'launch/fc_data_launch.py',
+            'launch/imu_bridge.py',
+            'launch/imu_bridge_launch.py',
+            'launch/start_mavros.sh'
+        ]),
         ('share/' + package_name + '/config', ['../../../configs/gyroscope/comms.yaml']),
     ],
     install_requires=['setuptools'],

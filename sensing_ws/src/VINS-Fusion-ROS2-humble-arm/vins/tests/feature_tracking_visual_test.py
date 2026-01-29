@@ -13,7 +13,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from configs.python import CameraConfig
+from configs.python import CameraConfig, VinsConfig
 
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 HEADLESS = True
@@ -26,14 +26,14 @@ class FeatureTrackingTest(Node):
         self.prev_pts = None
 
         self.feature_params = dict(
-            maxCorners=300,  # Match VINS config
+            maxCorners=VinsConfig.MAX_CNT,  # Match VINS config
             qualityLevel=0.01,
-            minDistance=20,
+            minDistance=VinsConfig.MIN_DIST,
             blockSize=7
         )
 
         self.lk_params = dict(
-            winSize=(21, 21),
+            winSize=(VinsConfig.WIN_SIZE, VinsConfig.WIN_SIZE),
             maxLevel=3,
             criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 30, 0.01)
         )
