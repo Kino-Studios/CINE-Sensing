@@ -189,11 +189,11 @@ class FeatureQualityTest(Node):
             if project_root not in sys.path:
                 sys.path.insert(0, project_root)
 
-            from configs.python import RuleOfThirdsConstants
+            from configs.python import RuleOfThirdsConstants, CameraConfig
 
             # Expected image dimensions (from config)
-            img_width = RuleOfThirdsConstants.FRAME_WIDTH
-            img_height = RuleOfThirdsConstants.FRAME_HEIGHT
+            img_width = CameraConfig.IMAGE_WIDTH
+            img_height = CameraConfig.IMAGE_HEIGHT
 
             # Divide into grid cells
             grid_rows = 4

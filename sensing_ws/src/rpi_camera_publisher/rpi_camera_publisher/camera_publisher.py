@@ -116,8 +116,10 @@ class CameraPublisher(Node):
 
         while not self.shutdown_event.is_set() and rclpy.ok():
             ret, frame = self.camera.read()
+            capture_time = self.get_clock().now()
+
             if ret and frame is not None:
-                self._publish_frame(frame)
+                self._publish_frame(frame, capture_time)
 
             next_frame_time += frame_period
             current_time = time.time()
@@ -158,13 +160,15 @@ class CameraPublisher(Node):
                     soi = buffer.find(b'\xff\xd8')
                     eoi = buffer.find(b'\xff\xd9', soi + 2)
                     if soi != -1 and eoi != -1:
+                        capture_time = self.get_clock().now()
+
                         jpg = buffer[soi:eoi + 2]
                         buffer = buffer[eoi + 2:]
 
                         np_arr = np.frombuffer(jpg, dtype=np.uint8)
                         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
                         if frame is not None:
-                            self._publish_frame(frame)
+                            self._publish_frame(frame, capture_time)
                     else:
                         break
 
@@ -176,13 +180,12 @@ class CameraPublisher(Node):
                 except:
                     process.kill()
 
-    def _publish_frame(self, frame):
+    def _publish_frame(self, frame, timestamp):
         try:
             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             msg = self.bridge.cv2_to_imgmsg(gray_frame, encoding='mono8')
 
-            current_time = self.get_clock().now()
-            msg.header.stamp = current_time.to_msg()
+            msg.header.stamp = timestamp.to_msg()
             msg.header.frame_id = self.frame_id
 
             self.image_publisher.publish(msg)

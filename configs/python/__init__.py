@@ -15,6 +15,7 @@ def _load_json(filename: str) -> dict:
 _user_params = _load_json('user_params.json')
 _camera_config = _load_json('camera.json')
 _gyroscope_config = _load_json('gyroscope.json')
+_vins_config = _load_json('vins.json')
 
 class ModelDetectionConstants:
     _data = _user_params.get('ModelDetectionConstants', {})
@@ -82,10 +83,51 @@ class GyroscopeConfig:
     SERIAL_PORT = _data.get('serial_port', '/dev/ttyAMA0')
     SERIAL_PORT_BAUD_RATE = _data.get('serial_port_baud_rate', 921600)
 
+class VinsConfig:
+    _data = _vins_config.get('vins_config', {})
+
+    IMU = _data.get('imu', 1)
+    NUM_OF_CAM = _data.get('num_of_cam', 1)
+    IMU_TOPIC = _data.get('imu_topic', '/imu_bridge/data_raw')
+    IMAGE0_TOPIC = _data.get('image0_topic', '/camera/image_raw')
+    OUTPUT_PATH = _data.get('output_path', 'CINE-Sensing/vins_output/')
+    CAM0_CALIB = _data.get('cam0_calib', 'cam0_wide.yaml')
+    ESTIMATE_EXTRINSIC = _data.get('estimate_extrinsic', 0)
+    BODY_T_CAM0 = _data.get('body_T_cam0', {})
+    MULTIPLE_THREAD = _data.get('multiple_thread', 1)
+    FEATURE_TRACKER = _data.get('feature_tracker', 1)
+    MIN_PARALLAX = _data.get('min_parallax', 10.0)
+    MAX_CNT = _data.get('max_cnt', 150)
+    MIN_DIST = _data.get('min_dist', 30)
+    FREQ = _data.get('freq', 30)
+    F_THRESHOLD = _data.get('F_threshold', 1.0)
+    DETECT_THRESHOLD = _data.get('detect_threshold', 10)
+    SHOW_TRACK = _data.get('show_track', 1)
+    FLOW_BACK = _data.get('flow_back', 1)
+    EQUALIZE = _data.get('equalize', 0)
+    CLAHE_CLIP = _data.get('clahe_clip', 3.0)
+    PYRAMID_LEVELS = _data.get('pyramid_levels', 5)
+    WIN_SIZE = _data.get('win_size', 25)
+    KEYFRAME_PARALLAX = _data.get('keyframe_parallax', 10.0)
+    ACC_N = _data.get('acc_n', 0.1)
+    GYR_N = _data.get('gyr_n', 0.01)
+    ACC_W = _data.get('acc_w', 0.00002)
+    GYR_W = _data.get('gyr_w', 0.00002)
+    G_NORM = _data.get('g_norm', 9.81)
+    GRAVITY_ALIGNED = _data.get('gravity_aligned', 1)
+    ESTIMATE_TD = _data.get('estimate_td', 1)
+    TD = _data.get('td', 0.0)
+    TR = _data.get('tr', 0.0)
+    LOOP_CLOSURE = _data.get('loop_closure', 1)
+    LOAD_PREVIOUS_POSE_GRAPH = _data.get('load_previous_pose_graph', 0)
+    POSE_GRAPH_SAVE_PATH = _data.get('pose_graph_save_path', 'CINE-Sensing/vins_output/pose_graph/')
+    SAVE_IMAGE = _data.get('save_image', 0)
+
 __all__ = [
     'ModelDetectionConstants',
     'UserRequestedParameters',
     'RuleOfThirdsConstants',
     'CameraConfig',
-    'GyroscopeConfig'
+    'GyroscopeConfig',
+    'VinsConfig'
 ]
