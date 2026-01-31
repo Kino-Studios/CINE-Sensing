@@ -12,7 +12,7 @@ echo ""
 source /opt/ros/jazzy/setup.bash
 
 # Move to workspace
-cd /home/fishnos/CINE-Sensing/autocine_ws
+cd /home/fishnos/CINE-Sensing/sensing_ws
 
 # Check memory
 echo "Current memory status:"

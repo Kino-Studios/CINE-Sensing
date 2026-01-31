@@ -12,7 +12,7 @@ def generate_launch_description():
         default_value='0',
         description='Camera device ID (usually 0 for RPi camera)'
     )
-    
+
     config_file_arg = DeclareLaunchArgument(
         'config_file',
         default_value=PathJoinSubstitution([
@@ -22,25 +22,31 @@ def generate_launch_description():
         ]),
         description='Path to camera configuration file'
     )
-    
+
     image_topic_arg = DeclareLaunchArgument(
         'image_topic',
         default_value='/camera/image_raw',
         description='Topic name for publishing raw images'
     )
-    
+
     camera_info_topic_arg = DeclareLaunchArgument(
         'camera_info_topic',
         default_value='/camera/camera_info',
         description='Topic name for publishing camera info'
     )
-    
+
     frame_id_arg = DeclareLaunchArgument(
         'frame_id',
         default_value='camera_optical_frame',
         description='Frame ID for camera optical frame'
     )
-    
+
+    save_latest_frame_arg = DeclareLaunchArgument(
+        'save_latest_frame',
+        default_value='false',
+        description='Whether to save the latest frame to a file'
+    )
+
     camera_publisher_node = Node(
         package='rpi_camera_publisher',
         executable='camera_publisher',
@@ -53,6 +59,7 @@ def generate_launch_description():
                 'camera_topic': LaunchConfiguration('image_topic'),
                 'camera_info_topic': LaunchConfiguration('camera_info_topic'),
                 'camera_frame_id': LaunchConfiguration('frame_id'),
+                'save_latest_frame': LaunchConfiguration('save_latest_frame'),
             }
         ],
         remappings=[
@@ -60,7 +67,7 @@ def generate_launch_description():
             ('/camera/camera_info', LaunchConfiguration('camera_info_topic')),
         ]
     )
-    
+
     static_transform_node = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -72,7 +79,7 @@ def generate_launch_description():
             'camera_link'
         ]
     )
-    
+
     optical_transform_node = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -84,7 +91,7 @@ def generate_launch_description():
             LaunchConfiguration('frame_id')
         ]
     )
-    
+
     launch_info = LogInfo(
         msg=[
             'Starting Raspberry Pi Camera Publisher...\n',
@@ -94,16 +101,17 @@ def generate_launch_description():
             'Frame ID: ', LaunchConfiguration('frame_id')
         ]
     )
-    
+
     return LaunchDescription([
         camera_id_arg,
         config_file_arg,
         image_topic_arg,
         camera_info_topic_arg,
         frame_id_arg,
-        
+        save_latest_frame_arg,
+
         launch_info,
-        
+
         camera_publisher_node,
         static_transform_node,
         optical_transform_node,

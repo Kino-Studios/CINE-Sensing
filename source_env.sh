@@ -5,4 +5,4 @@ export DISPLAY=192.168.1.156:0
 
 source ~/CINE-Sensing/venv/bin/activate
 source /opt/ros/jazzy/setup.bash
-source ~/CINE-Sensing/autocine_ws/install/setup.bash
+source ~/CINE-Sensing/sensing_ws/install/setup.bash

@@ -14,7 +14,7 @@ class VINSRunner(Node):
         self.start_vins()
 
     def start_vins(self):
-        vins_ws = '/home/fishnos/CINE-Sensing/autocine_ws/src/VINS-Fusion-ROS2-humble-arm'
+        vins_ws = '/home/fishnos/CINE-Sensing/sensing_ws/src/VINS-Fusion-ROS2-humble-arm'
 
         os.chdir(vins_ws)
 
