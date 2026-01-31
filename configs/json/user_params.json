@@ -1,0 +1,84 @@
+{
+    "ModelDetectionConstants": {
+        "MODEL_PATH": "/home/fishnos/bspline-cinematography-generator-research/training/checkpoints/pre-export/homeobjects_yolo11n_trained.pt",
+        "CAMERA_IMAGE_TOPIC": "/camera/image_raw",
+        "BOUNDING_BOX_TOPIC": "/object_detection/bounding_box",
+        "IMAGE_ENCODING": "bgr8",
+        "IMAGE_DIR": "~/object_detection_images",
+        "OBB_COORDS_LENGTH": 8,
+        "NUM_BOUNDING_BOX_POINTS": 4,
+        "QOS_DEPTH": 10,
+        "QOS_RELIABILITY": "RELIABLE",
+        "QOS_DURABILITY": "VOLATILE",
+        "QOS_HISTORY": "KEEP_LAST",
+        "CONFIDENCE_THRESHOLD": 0.25,
+        "IOU_THRESHOLD": 0.4
+    },
+    "UserRequestedParameters": {
+        "USER_OBJECT_ID": 2
+    },
+    "RuleOfThirdsConstants": {
+        "FRAME_WIDTH": 1152,
+        "FRAME_HEIGHT": 648,
+        "GRID_LINE_1_X": 384.0,
+        "GRID_LINE_2_X": 768.0,
+        "GRID_LINE_1_Y": 216.0,
+        "GRID_LINE_2_Y": 432.0,
+        "ANCHOR_POINTS": [
+            [
+                384.0,
+                216.0
+            ],
+            [
+                768.0,
+                216.0
+            ],
+            [
+                1152.0,
+                216.0
+            ],
+            [
+                384.0,
+                432.0
+            ],
+            [
+                768.0,
+                432.0
+            ],
+            [
+                1152.0,
+                432.0
+            ],
+            [
+                384.0,
+                648.0
+            ],
+            [
+                768.0,
+                648.0
+            ],
+            [
+                1152.0,
+                648.0
+            ]
+        ],
+        "CORE_ANCHOR_POINTS": [
+            [
+                384.0,
+                216.0
+            ],
+            [
+                768.0,
+                216.0
+            ],
+            [
+                384.0,
+                432.0
+            ],
+            [
+                768.0,
+                432.0
+            ]
+        ]
+    }
+}

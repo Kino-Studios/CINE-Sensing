@@ -1,0 +1,141 @@
+import os
+import sys
+
+def find_project_root(start_path):
+    current_path = os.path.abspath(start_path)
+    while current_path != os.path.dirname(current_path):
+        if os.path.isdir(os.path.join(current_path, 'configs')) and os.path.isdir(os.path.join(current_path, 'sensing_ws')):
+            return current_path
+        current_path = os.path.dirname(current_path)
+    return None
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = find_project_root(script_dir)
+
+if not project_root:
+    # Fallback to absolute path or environment variable if needed
+    project_root = "/Users/vtsyp/Desktop/HSR-2026/CINE-Sensing"
+
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+try:
+    from configs.python import CameraConfig, VinsConfig
+except ImportError:
+    print(f"Error: Could not import configs.python. Ensure {project_root} is in PYTHONPATH.")
+    sys.exit(1)
+
+def resolve_cam0_calib_path(cam0_calib, project_root):
+    if os.path.isabs(cam0_calib):
+        return cam0_calib
+
+    candidate_dirs = []
+    if project_root:
+        candidate_dirs.extend([
+            os.path.join(project_root, "sensing_ws", "src", "VINS-Fusion-ROS2-humble-arm", "config", "rpi_camera_v3"),
+            os.path.join(project_root, "sensing_ws", "src", "VINS-Fusion-ROS2-humble-arm", "config"),
+            os.path.join(project_root, "configs"),
+            project_root,
+        ])
+
+    for base_dir in candidate_dirs:
+        candidate = os.path.join(base_dir, cam0_calib)
+        if os.path.isfile(candidate):
+            return candidate
+
+    return cam0_calib
+
+def generate_config(output_path):
+    print(f"Generating VINS configuration using centralized parameters...")
+    cam0_calib_path = resolve_cam0_calib_path(VinsConfig.CAM0_CALIB, project_root)
+
+    config = {
+        "imu": VinsConfig.IMU,
+        "num_of_cam": VinsConfig.NUM_OF_CAM,
+        "imu_topic": VinsConfig.IMU_TOPIC,
+        "image0_topic": VinsConfig.IMAGE0_TOPIC,
+        "output_path": os.path.join(os.path.expanduser("~"), VinsConfig.OUTPUT_PATH),
+
+        "cam0_intrinsics": [
+            CameraConfig.CAMERA_MATRIX[0],
+            CameraConfig.CAMERA_MATRIX[4],
+            CameraConfig.CAMERA_MATRIX[2],
+            CameraConfig.CAMERA_MATRIX[5]
+        ],
+        
+        "cam0_distortion_coeffs": CameraConfig.DISTORTION_COEFFICIENTS,
+        "cam0_calib": cam0_calib_path,
+
+        "image_width": CameraConfig.IMAGE_WIDTH,
+        "image_height": CameraConfig.IMAGE_HEIGHT,
+
+        "estimate_extrinsic": VinsConfig.ESTIMATE_EXTRINSIC,
+        "body_T_cam0": VinsConfig.BODY_T_CAM0,
+
+        "multiple_thread": VinsConfig.MULTIPLE_THREAD,
+        "feature_tracker": VinsConfig.FEATURE_TRACKER,
+        "min_parallax": VinsConfig.MIN_PARALLAX,
+        "max_cnt": VinsConfig.MAX_CNT,
+        "min_dist": VinsConfig.MIN_DIST,
+        "freq": VinsConfig.FREQ,
+        "F_threshold": VinsConfig.F_THRESHOLD,
+        "detect_threshold": VinsConfig.DETECT_THRESHOLD,
+        "show_track": VinsConfig.SHOW_TRACK,
+        "flow_back": VinsConfig.FLOW_BACK,
+        "equalize": VinsConfig.EQUALIZE,
+        "clahe_clip": VinsConfig.CLAHE_CLIP,
+        "pyramid_levels": VinsConfig.PYRAMID_LEVELS,
+        "win_size": VinsConfig.WIN_SIZE,
+
+        "keyframe_parallax": VinsConfig.KEYFRAME_PARALLAX,
+
+        "acc_n": VinsConfig.ACC_N,
+        "gyr_n": VinsConfig.GYR_N,
+        "acc_w": VinsConfig.ACC_W,
+        "gyr_w": VinsConfig.GYR_W,
+        "g_norm": VinsConfig.G_NORM,
+
+        "gravity_aligned": VinsConfig.GRAVITY_ALIGNED,
+
+        "estimate_td": VinsConfig.ESTIMATE_TD,
+        "td": VinsConfig.TD,
+        "tr": VinsConfig.TR,
+
+        "loop_closure": VinsConfig.LOOP_CLOSURE,
+        "load_previous_pose_graph": VinsConfig.LOAD_PREVIOUS_POSE_GRAPH,
+        "pose_graph_save_path": os.path.join(os.path.expanduser("~"), VinsConfig.POSE_GRAPH_SAVE_PATH),
+        "save_image": VinsConfig.SAVE_IMAGE
+    }
+
+    try:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        with open(output_path, 'w') as f:
+            f.write("%YAML:1.0\n")
+            f.write("---\n\n")
+            for key, value in config.items():
+                if isinstance(value, dict) and "rows" in value:
+                    f.write(f"{key}:\n")
+                    f.write(f"  rows: {value['rows']}\n")
+                    f.write(f"  cols: {value['cols']}\n")
+                    f.write(f"  dt: {value['dt']}\n")
+                    f.write(f"  data: {value['data']}\n")
+                elif isinstance(value, list):
+                    f.write(f"{key}: {value}\n")
+                else:
+                    if isinstance(value, str):
+                        f.write(f'{key}: "{value}"\n')
+                    else:
+                        f.write(f"{key}: {value}\n")
+
+        print(f"Generated VINS config at {output_path}")
+    except Exception as e:
+        print(f"Error writing config: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        output_path = sys.argv[1]
+    else:
+        output_path = os.path.join(os.path.dirname(__file__), "generated_vins_config.yaml")
+
+    generate_config(output_path)
