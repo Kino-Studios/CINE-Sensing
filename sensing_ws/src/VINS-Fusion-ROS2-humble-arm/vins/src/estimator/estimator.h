@@ -1,14 +1,14 @@
 /*******************************************************
  * Copyright (C) 2019, Aerial Robotics Group, Hong Kong University of Science and Technology
- * 
+ *
  * This file is part of VINS.
- * 
+ *
  * Licensed under the GNU General Public License v3.0;
  * you may not use this file except in compliance with the License.
  *******************************************************/
 
 #pragma once
- 
+
 #include <thread>
 #include <mutex>
 #include <std_msgs/msg/header.h>
@@ -52,7 +52,7 @@ class Estimator
     void initFirstPose(Eigen::Vector3d p, Eigen::Matrix3d r);
     void inputIMU(double t, const Vector3d &linearAcceleration, const Vector3d &angularVelocity);
     void inputFeature(double t, const map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> &featureFrame);
-    void inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1 = cv::Mat());
+    void inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1 = cv::Mat(), const cv::Mat &_depth = cv::Mat());
     void processIMU(double t, double dt, const Vector3d &linear_acceleration, const Vector3d &angular_velocity);
     void processImage(const map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> &image, const double header);
     void processMeasurements();
@@ -70,14 +70,14 @@ class Estimator
     void vector2double();
     void double2vector();
     bool failureDetection();
-    bool getIMUInterval(double t0, double t1, vector<pair<double, Eigen::Vector3d>> &accVector, 
+    bool getIMUInterval(double t0, double t1, vector<pair<double, Eigen::Vector3d>> &accVector,
                                               vector<pair<double, Eigen::Vector3d>> &gyrVector);
     void getPoseInWorldFrame(Eigen::Matrix4d &T);
     void getPoseInWorldFrame(int index, Eigen::Matrix4d &T);
     void predictPtsInNextFrame();
     void outliersRejection(set<int> &removeIndex);
     double reprojectionError(Matrix3d &Ri, Vector3d &Pi, Matrix3d &rici, Vector3d &tici,
-                                     Matrix3d &Rj, Vector3d &Pj, Matrix3d &ricj, Vector3d &ticj, 
+                                     Matrix3d &Rj, Vector3d &Pj, Matrix3d &ricj, Vector3d &ticj,
                                      double depth, Vector3d &uvi, Vector3d &uvj);
     void updateLatestStates();
     void fastPredictIMU(double t, Eigen::Vector3d linear_acceleration, Eigen::Vector3d angular_velocity);

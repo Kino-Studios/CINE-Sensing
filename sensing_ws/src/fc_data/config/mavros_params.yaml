@@ -1,9 +1,0 @@
-mavros:
-  ros__parameters:
-    fcu_protocol: "v2.0"
-    conn:
-      heartbeat_rate: 1.0
-      timeout: 10.0
-      system_time_rate: 1.0     
-      timesync_rate: 10.0    
-      timesync_mode: "mavlink"  # if your MAVROS build exposes it; use MAVLink TIMESYNC

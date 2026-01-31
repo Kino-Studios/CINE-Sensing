@@ -1,8 +1,8 @@
 /*******************************************************
  * Copyright (C) 2019, Aerial Robotics Group, Hong Kong University of Science and Technology
- * 
+ *
  * This file is part of VINS.
- * 
+ *
  * Licensed under the GNU General Public License v3.0;
  * you may not use this file except in compliance with the License.
  *
@@ -26,6 +26,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <unistd.h>
 #include <eigen3/Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -112,7 +113,7 @@ void image_callback(const sensor_msgs::msg::Image::SharedPtr image_msg)
     // detect unstable camera stream
     if (last_image_time == -1)
         last_image_time = image_msg->header.stamp.sec + image_msg->header.stamp.nanosec * (1e-9);
-    else if (image_msg->header.stamp.sec + image_msg->header.stamp.nanosec * (1e-9) - last_image_time > 1.0 
+    else if (image_msg->header.stamp.sec + image_msg->header.stamp.nanosec * (1e-9) - last_image_time > 1.0
                     || image_msg->header.stamp.sec + image_msg->header.stamp.nanosec * (1e-9) < last_image_time)
     {
         ROS_WARN("image discontinue! detect a new sequence!");
@@ -130,7 +131,7 @@ void point_callback(const sensor_msgs::msg::PointCloud::SharedPtr point_msg)
     /*
     for (unsigned int i = 0; i < point_msg->points.size(); i++)
     {
-        printf("%d, 3D point: %f, %f, %f 2D point %f, %f \n",i , point_msg->points[i].x, 
+        printf("%d, 3D point: %f, %f, %f 2D point %f, %f \n",i , point_msg->points[i].x,
                                                      point_msg->points[i].y,
                                                      point_msg->points[i].z,
                                                      point_msg->channels[i].values[0],
@@ -225,7 +226,7 @@ void vio_callback(const nav_msgs::msg::Odometry::SharedPtr pose_msg)
     Vector3d vio_t_cam;
     Quaterniond vio_q_cam;
     vio_t_cam = vio_t + vio_q * tic;
-    vio_q_cam = vio_q * qic;        
+    vio_q_cam = vio_q * qic;
 
     cameraposevisual.reset();
     cameraposevisual.add_pose(vio_t_cam, vio_q_cam);
@@ -259,34 +260,34 @@ void process()
         m_buf.lock();
         if(!image_buf.empty() && !point_buf.empty() && !pose_buf.empty())
         {
-            if (image_buf.front()->header.stamp.sec + image_buf.front()->header.stamp.nanosec * (1e-9) 
+            if (image_buf.front()->header.stamp.sec + image_buf.front()->header.stamp.nanosec * (1e-9)
                     > pose_buf.front()->header.stamp.sec + pose_buf.front()->header.stamp.nanosec * (1e-9))
             {
                 pose_buf.pop();
                 printf("throw pose at beginning\n");
             }
-            else if (image_buf.front()->header.stamp.sec + image_buf.front()->header.stamp.nanosec * (1e-9) 
+            else if (image_buf.front()->header.stamp.sec + image_buf.front()->header.stamp.nanosec * (1e-9)
                     > point_buf.front()->header.stamp.sec + point_buf.front()->header.stamp.nanosec * (1e-9))
             {
                 point_buf.pop();
                 printf("throw point at beginning\n");
             }
-            else if (image_buf.back()->header.stamp.sec + image_buf.back()->header.stamp.nanosec * (1e-9) 
+            else if (image_buf.back()->header.stamp.sec + image_buf.back()->header.stamp.nanosec * (1e-9)
                         >= pose_buf.front()->header.stamp.sec + pose_buf.front()->header.stamp.nanosec * (1e-9)
-                && point_buf.back()->header.stamp.sec + point_buf.back()->header.stamp.nanosec * (1e-9) 
+                && point_buf.back()->header.stamp.sec + point_buf.back()->header.stamp.nanosec * (1e-9)
                         >= pose_buf.front()->header.stamp.sec + pose_buf.front()->header.stamp.nanosec * (1e-9))
             {
                 pose_msg = pose_buf.front();
                 pose_buf.pop();
                 while (!pose_buf.empty())
                     pose_buf.pop();
-                while (image_buf.front()->header.stamp.sec + image_buf.front()->header.stamp.nanosec * (1e-9) 
+                while (image_buf.front()->header.stamp.sec + image_buf.front()->header.stamp.nanosec * (1e-9)
                         < pose_msg->header.stamp.sec + pose_msg->header.stamp.nanosec * (1e-9))
                     image_buf.pop();
                 image_msg = image_buf.front();
                 image_buf.pop();
 
-                while (point_buf.front()->header.stamp.sec + point_buf.front()->header.stamp.nanosec * (1e-9) 
+                while (point_buf.front()->header.stamp.sec + point_buf.front()->header.stamp.nanosec * (1e-9)
                         < pose_msg->header.stamp.sec + pose_msg->header.stamp.nanosec * (1e-9))
                     point_buf.pop();
                 point_msg = point_buf.front();
@@ -332,7 +333,7 @@ void process()
             }
             else
                 ptr = cv_bridge::toCvCopy(image_msg, sensor_msgs::image_encodings::MONO8);
-            
+
             cv::Mat image = ptr->image;
             // build keyframe
             Vector3d T = Vector3d(pose_msg->pose.pose.position.x,
@@ -344,8 +345,8 @@ void process()
                                      pose_msg->pose.pose.orientation.z).toRotationMatrix();
             if((T - last_t).norm() > SKIP_DIS)
             {
-                vector<cv::Point3f> point_3d; 
-                vector<cv::Point2f> point_2d_uv; 
+                vector<cv::Point3f> point_3d;
+                vector<cv::Point2f> point_2d_uv;
                 vector<cv::Point2f> point_2d_normal;
                 vector<double> point_id;
 
@@ -372,7 +373,7 @@ void process()
                 }
 
                 KeyFrame* keyframe = new KeyFrame(pose_msg->header.stamp.sec + pose_msg->header.stamp.nanosec * (1e-9), frame_index, T, R, image,
-                                   point_3d, point_2d_uv, point_2d_normal, point_id, sequence);   
+                                   point_3d, point_2d_uv, point_2d_normal, point_id, sequence);
                 m_process.lock();
                 start_flag = 1;
                 posegraph.addKeyFrame(keyframe, 1);
@@ -413,20 +414,20 @@ int main(int argc, char **argv)
     rclcpp::init(argc, argv);
     auto n = rclcpp::Node::make_shared("loop_fusion");
     posegraph.registerPub(n);
-    
+
     VISUALIZATION_SHIFT_X = 0;
     VISUALIZATION_SHIFT_Y = 0;
     SKIP_CNT = 0;
     SKIP_DIS = 0;
 
-    if(argc != 2)
+    if(argc < 2)
     {
-        printf("please intput: rosrun loop_fusion loop_fusion_node [config file] \n"
-               "for example: rosrun loop_fusion loop_fusion_node "
+        printf("please input: ros2 run loop_fusion loop_fusion_node [config file] \n"
+               "for example: ros2 run loop_fusion loop_fusion_node "
                "/home/tony-ws1/catkin_ws/src/VINS-Fusion/config/euroc/euroc_stereo_imu_config.yaml \n");
         return 0;
     }
-    
+
     string config_file = argv[1];
     printf("config_file: %s\n", argv[1]);
 
@@ -462,7 +463,7 @@ int main(int argc, char **argv)
     printf("cam calib path: %s\n", cam0Path.c_str());
     m_camera = camodocal::CameraFactory::instance()->generateCameraFromYamlFile(cam0Path.c_str());
 
-    fsSettings["image0_topic"] >> IMAGE_TOPIC;        
+    fsSettings["image0_topic"] >> IMAGE_TOPIC;
     fsSettings["pose_graph_save_path"] >> POSE_GRAPH_SAVE_PATH;
     fsSettings["output_path"] >> VINS_RESULT_PATH;
     fsSettings["save_image"] >> DEBUG_IMAGE;
@@ -509,8 +510,11 @@ int main(int argc, char **argv)
     std::thread keyboard_command_process;
 
     measurement_process = std::thread(process);
-    keyboard_command_process = std::thread(command);
-    
+    if (isatty(STDIN_FILENO))
+        keyboard_command_process = std::thread(command);
+    else
+        printf("No TTY detected, skipping keyboard command thread.\n");
+
     rclcpp::spin(n);
 
     return 0;

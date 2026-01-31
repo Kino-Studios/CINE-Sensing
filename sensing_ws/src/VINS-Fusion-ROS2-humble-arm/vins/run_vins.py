@@ -41,7 +41,9 @@ class VINSRunner(Node):
             env['ROS_DOMAIN_ID'] = '0'
 
             self.vins_process = subprocess.Popen(vins_cmd, env=env)
+            self.mavros_process = subprocess.Popen(mavros_cmd, env=env)
             self.imu_bridge_process = subprocess.Popen(imu_bridge_cmd, env=env)
+            self.loop_process = subprocess.Popen(loop_cmd, env=env)
 
             self.get_logger().info('VINS-Fusion started')
 

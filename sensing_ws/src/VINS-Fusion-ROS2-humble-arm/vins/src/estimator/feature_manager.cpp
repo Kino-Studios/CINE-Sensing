@@ -1,8 +1,8 @@
 /*******************************************************
  * Copyright (C) 2019, Aerial Robotics Group, Hong Kong University of Science and Technology
- * 
+ *
  * This file is part of VINS.
- * 
+ *
  * Licensed under the GNU General Public License v3.0;
  * you may not use this file except in compliance with the License.
  *******************************************************/
@@ -78,6 +78,14 @@ bool FeatureManager::addFeatureCheckParallax(int frame_count, const map<int, vec
         if (it == feature.end())
         {
             feature.push_back(FeaturePerId(feature_id, frame_count));
+
+            // Use sensor depth if available
+            if (f_per_fra.depth > 0.1 && f_per_fra.depth < 40.0)
+            {
+                feature.back().estimated_depth = f_per_fra.depth;
+                feature.back().solve_flag = 1;
+            }
+
             feature.back().feature_per_frame.push_back(f_per_fra);
             new_feature_num++;
         }
@@ -132,7 +140,7 @@ vector<pair<Vector3d, Vector3d>> FeatureManager::getCorresponding(int frame_coun
             a = it.feature_per_frame[idx_l].point;
 
             b = it.feature_per_frame[idx_r].point;
-            
+
             corres.push_back(make_pair(a, b));
         }
     }
@@ -212,13 +220,13 @@ void FeatureManager::triangulatePoint(Eigen::Matrix<double, 3, 4> &Pose0, Eigen:
 }
 
 
-bool FeatureManager::solvePoseByPnP(Eigen::Matrix3d &R, Eigen::Vector3d &P, 
+bool FeatureManager::solvePoseByPnP(Eigen::Matrix3d &R, Eigen::Vector3d &P,
                                       vector<cv::Point2f> &pts2D, vector<cv::Point3f> &pts3D)
 {
     Eigen::Matrix3d R_initial;
     Eigen::Vector3d P_initial;
 
-    // w_T_cam ---> cam_T_w 
+    // w_T_cam ---> cam_T_w
     R_initial = R.inverse();
     P_initial = -(R_initial * P);
 
@@ -232,7 +240,7 @@ bool FeatureManager::solvePoseByPnP(Eigen::Matrix3d &R, Eigen::Vector3d &P,
     cv::eigen2cv(R_initial, tmp_r);
     cv::Rodrigues(tmp_r, rvec);
     cv::eigen2cv(P_initial, t);
-    cv::Mat K = (cv::Mat_<double>(3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);  
+    cv::Mat K = (cv::Mat_<double>(3, 3) << 1, 0, 0, 0, 1, 0, 0, 0, 1);
     bool pnp_succ;
     pnp_succ = cv::solvePnP(pts3D, pts2D, K, D, rvec, t, 1);
     //pnp_succ = solvePnPRansac(pts3D, pts2D, K, D, rvec, t, true, 100, 8.0 / focalLength, 0.99, inliers);
@@ -276,7 +284,7 @@ void FeatureManager::initFramePoseByPnP(int frameCnt, Vector3d Ps[], Matrix3d Rs
                     cv::Point3f point3d(ptsInWorld.x(), ptsInWorld.y(), ptsInWorld.z());
                     cv::Point2f point2d(it_per_id.feature_per_frame[index].point.x(), it_per_id.feature_per_frame[index].point.y());
                     pts3D.push_back(point3d);
-                    pts2D.push_back(point2d); 
+                    pts2D.push_back(point2d);
                 }
             }
         }
@@ -289,7 +297,7 @@ void FeatureManager::initFramePoseByPnP(int frameCnt, Vector3d Ps[], Matrix3d Rs
         if(solvePoseByPnP(RCam, PCam, pts2D, pts3D))
         {
             // trans to w_T_imu
-            Rs[frameCnt] = RCam * ric[0].transpose(); 
+            Rs[frameCnt] = RCam * ric[0].transpose();
             Ps[frameCnt] = -RCam * ric[0].transpose() * tic[0] + PCam;
 
             Eigen::Quaterniond Q(Rs[frameCnt]);
@@ -458,7 +466,7 @@ void FeatureManager::removeBackShiftDepth(Eigen::Matrix3d marg_R, Eigen::Vector3
             it->start_frame--;
         else
         {
-            Eigen::Vector3d uv_i = it->feature_per_frame[0].point;  
+            Eigen::Vector3d uv_i = it->feature_per_frame[0].point;
             it->feature_per_frame.erase(it->feature_per_frame.begin());
             if (it->feature_per_frame.size() < 2)
             {

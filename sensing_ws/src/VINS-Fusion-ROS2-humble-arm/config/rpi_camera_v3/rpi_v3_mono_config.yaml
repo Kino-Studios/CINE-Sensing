@@ -60,3 +60,7 @@ loop_closure: 1
 load_previous_pose_graph: 0
 pose_graph_save_path: "/home/fishnos/CINE-Sensing/vins_output/pose_graph/"
 save_image: 0
+
+# Depth usage
+use_depth: 0
+depth_topic: "/camera/depth/image_rect_raw"

@@ -20,13 +20,12 @@ def generate_launch_description():
 
     generator_script = os.path.join(vins_pkg, 'launch', 'generate_vins_config.py')
 
-    # Define the generator process
-    config_generator = ExecuteProcess(
-        cmd=['python3', generator_script, generated_config_path],
-        output='screen'
-    )
+    # Run the generator script synchronously before launching nodes
+    import subprocess
+    generated_config_path_str = '/tmp/rpi_v3_mono_config_generated.yaml'
+    subprocess.run(['python3', generator_script, generated_config_path_str], check=True)
 
-    # Define the nodes/processes that depend on the config
+    # Define the nodes/processes
     mavros_starter = ExecuteProcess(
         cmd=[os.path.join(fc_data_pkg, 'launch', 'start_mavros.sh')],
         output='screen',
@@ -50,7 +49,7 @@ def generate_launch_description():
     vins_estimator_node = Node(
         package='vins',
         executable='vins_node',
-        arguments=[generated_config_path],
+        arguments=[generated_config_path_str],
         name='vins_estimator',
         output='screen'
     )
@@ -58,36 +57,16 @@ def generate_launch_description():
     loop_fusion_node = Node(
         package='loop_fusion',
         executable='loop_fusion_node',
-        arguments=[generated_config_path],
+        arguments=[generated_config_path_str],
         name='loop_fusion',
         output='screen'
     )
 
-    # Optional: depth publisher
-    depth_publisher_node = Node(
-        package='depth_publisher',
-        executable='depth_publisher_node',
-        name='depth_publisher',
-        output='screen'
-    )
-
-    # Event handler to start dependent nodes after config is generated
-    start_vins_system = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_process=config_generator,
-            on_exit=[
-                mavros_starter,
-                imu_bridge_node,
-                camera_publisher_node,
-                vins_estimator_node,
-                loop_fusion_node,
-                depth_publisher_node
-            ]
-        )
-    )
-
     return LaunchDescription([
         config_path_arg,
-        config_generator,
-        start_vins_system
+        mavros_starter,
+        imu_bridge_node,
+        camera_publisher_node,
+        vins_estimator_node,
+        loop_fusion_node
     ])

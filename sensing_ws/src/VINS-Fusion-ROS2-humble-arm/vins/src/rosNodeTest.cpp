@@ -1,8 +1,8 @@
 /*******************************************************
  * Copyright (C) 2019, Aerial Robotics Group, Hong Kong University of Science and Technology
- * 
+ *
  * This file is part of VINS.
- * 
+ *
  * Licensed under the GNU General Public License v3.0;
  * you may not use this file except in compliance with the License.
  *
@@ -27,6 +27,7 @@ queue<sensor_msgs::msg::Imu::ConstPtr> imu_buf;
 queue<sensor_msgs::msg::PointCloud::ConstPtr> feature_buf;
 queue<sensor_msgs::msg::Image::ConstPtr> img0_buf;
 queue<sensor_msgs::msg::Image::ConstPtr> img1_buf;
+queue<sensor_msgs::msg::Image::ConstPtr> depth_buf;
 std::mutex m_buf;
 
 // header: 1403715278
@@ -43,6 +44,13 @@ void img1_callback(const sensor_msgs::msg::Image::SharedPtr img_msg)
     m_buf.lock();
     // std::cout << "Right: " << img_msg->header.stamp.sec << "." << img_msg->header.stamp.nanosec << endl;
     img1_buf.push(img_msg);
+    m_buf.unlock();
+}
+
+void depth_callback(const sensor_msgs::msg::Image::SharedPtr img_msg)
+{
+    m_buf.lock();
+    depth_buf.push(img_msg);
     m_buf.unlock();
 }
 
@@ -66,6 +74,14 @@ cv::Mat getImageFromMsg(const sensor_msgs::msg::Image::ConstPtr &img_msg)
     else
         ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::MONO8);
 
+    cv::Mat img = ptr->image.clone();
+    return img;
+}
+
+cv::Mat getDepthFromMsg(const sensor_msgs::msg::Image::ConstPtr &img_msg)
+{
+    cv_bridge::CvImageConstPtr ptr;
+    ptr = cv_bridge::toCvCopy(img_msg, sensor_msgs::image_encodings::TYPE_32FC1);
     cv::Mat img = ptr->image.clone();
     return img;
 }
@@ -109,12 +125,48 @@ void sync_process()
 
                     // std::cout << std::fixed << img0_buf.front()->header.stamp.sec + img0_buf.front()->header.stamp.nanosec * (1e-9) << std::endl;
                     // assert(0);
-                    
+
                 }
             }
             m_buf.unlock();
             if(!image0.empty())
                 estimator.inputImage(time, image0, image1);
+        }
+        else if(USE_DEPTH) // Mono + Depth
+        {
+            cv::Mat image, depth;
+            std_msgs::msg::Header header;
+            double time = 0;
+            m_buf.lock();
+            if(!img0_buf.empty() && !depth_buf.empty())
+            {
+                double time0 = img0_buf.front()->header.stamp.sec + img0_buf.front()->header.stamp.nanosec * (1e-9);
+                double timeDepth = depth_buf.front()->header.stamp.sec + depth_buf.front()->header.stamp.nanosec * (1e-9);
+
+                // 0.005s sync tolerance for depth
+                if(time0 < timeDepth - 0.005)
+                {
+                    img0_buf.pop();
+                    printf("throw img0 (wait for depth)\n");
+                }
+                else if(time0 > timeDepth + 0.005)
+                {
+                    depth_buf.pop();
+                    printf("throw depth (wait for img0)\n");
+                }
+                else
+                {
+                    time = img0_buf.front()->header.stamp.sec + img0_buf.front()->header.stamp.nanosec * (1e-9);
+                    header = img0_buf.front()->header;
+                    image = getImageFromMsg(img0_buf.front());
+                    img0_buf.pop();
+                    depth = getDepthFromMsg(depth_buf.front());
+                    depth_buf.pop();
+                }
+            }
+            m_buf.unlock();
+            if(!image.empty() && !depth.empty())
+                estimator.inputImage(time, image, cv::Mat(), depth); // Pass depth here
         }
         else
         {
@@ -243,10 +295,10 @@ int main(int argc, char **argv)
 	auto n = rclcpp::Node::make_shared("vins_estimator");
     // ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
 
-    if(argc != 2)
+    if(argc < 2)
     {
-        printf("please intput: rosrun vins vins_node [config file] \n"
-               "for example: rosrun vins vins_node "
+        printf("please input: ros2 run vins vins_node [config file] \n"
+               "for example: ros2 run vins vins_node "
                "~/catkin_ws/src/VINS-Fusion/config/euroc/euroc_stereo_imu_config.yaml \n");
         return 1;
     }
@@ -273,13 +325,19 @@ int main(int argc, char **argv)
     }
     auto sub_feature = n->create_subscription<sensor_msgs::msg::PointCloud>("/feature_tracker/feature", rclcpp::QoS(rclcpp::KeepLast(2000)), feature_callback);
     auto sub_img0 = n->create_subscription<sensor_msgs::msg::Image>(IMAGE0_TOPIC, rclcpp::QoS(rclcpp::KeepLast(100)), img0_callback);
-    
+
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr sub_img1 = NULL;
     if(STEREO)
     {
         sub_img1 = n->create_subscription<sensor_msgs::msg::Image>(IMAGE1_TOPIC, rclcpp::QoS(rclcpp::KeepLast(100)), img1_callback);
     }
-    
+
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr sub_depth = NULL;
+    if(USE_DEPTH)
+    {
+        sub_depth = n->create_subscription<sensor_msgs::msg::Image>(DEPTH_TOPIC, rclcpp::QoS(rclcpp::KeepLast(100)), depth_callback);
+    }
+
     auto sub_restart = n->create_subscription<std_msgs::msg::Bool>("/vins_restart", rclcpp::QoS(rclcpp::KeepLast(100)), restart_callback);
     auto sub_imu_switch = n->create_subscription<std_msgs::msg::Bool>("/vins_imu_switch", rclcpp::QoS(rclcpp::KeepLast(100)), imu_switch_callback);
     auto sub_cam_switch = n->create_subscription<std_msgs::msg::Bool>("/vins_cam_switch", rclcpp::QoS(rclcpp::KeepLast(100)), cam_switch_callback);

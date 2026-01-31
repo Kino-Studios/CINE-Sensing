@@ -1,8 +1,8 @@
 /*******************************************************
  * Copyright (C) 2019, Aerial Robotics Group, Hong Kong University of Science and Technology
- * 
+ *
  * This file is part of VINS.
- * 
+ *
  * Licensed under the GNU General Public License v3.0;
  * you may not use this file except in compliance with the License.
  *******************************************************/
@@ -50,6 +50,9 @@ double F_THRESHOLD;
 int SHOW_TRACK;
 int FLOW_BACK;
 
+int USE_DEPTH = 0;
+std::string DEPTH_TOPIC;
+
 
 template <typename T>
 T readParam(rclcpp::Node::SharedPtr n, std::string name)
@@ -74,7 +77,7 @@ void readParameters(std::string config_file)
     if(fh == NULL){
         ROS_WARN("config_file dosen't exist; wrong config_file path");
         // ROS_BREAK();
-        return;          
+        return;
     }
     fclose(fh);
 
@@ -91,6 +94,17 @@ void readParameters(std::string config_file)
     F_THRESHOLD = fsSettings["F_threshold"];
     SHOW_TRACK = fsSettings["show_track"];
     FLOW_BACK = fsSettings["flow_back"];
+
+    // Optional depth
+    if (!fsSettings["use_depth"].empty())
+    {
+        USE_DEPTH = fsSettings["use_depth"];
+        if (USE_DEPTH)
+        {
+            fsSettings["depth_topic"] >> DEPTH_TOPIC;
+            printf("USE_DEPTH enabled. Subscribing to: %s\n", DEPTH_TOPIC.c_str());
+        }
+    }
 
     MULTIPLE_THREAD = fsSettings["multiple_thread"];
 
@@ -130,7 +144,7 @@ void readParameters(std::string config_file)
         TIC.push_back(Eigen::Vector3d::Zero());
         EX_CALIB_RESULT_PATH = OUTPUT_FOLDER + "/extrinsic_parameter.csv";
     }
-    else 
+    else
     {
         if ( ESTIMATE_EXTRINSIC == 1)
         {
@@ -146,8 +160,8 @@ void readParameters(std::string config_file)
         cv::cv2eigen(cv_T, T);
         RIC.push_back(T.block<3, 3>(0, 0));
         TIC.push_back(T.block<3, 1>(0, 3));
-    } 
-    
+    }
+
     NUM_OF_CAM = fsSettings["num_of_cam"];
     printf("camera number %d\n", NUM_OF_CAM);
 
@@ -160,7 +174,7 @@ void readParameters(std::string config_file)
 
     int pn = config_file.find_last_of('/');
     std::string configPath = config_file.substr(0, pn);
-    
+
     std::string cam0Calib;
     fsSettings["cam0_calib"] >> cam0Calib;
     std::string cam0Path = configPath + "/" + cam0Calib;
@@ -171,10 +185,10 @@ void readParameters(std::string config_file)
         STEREO = 1;
         std::string cam1Calib;
         fsSettings["cam1_calib"] >> cam1Calib;
-        std::string cam1Path = configPath + "/" + cam1Calib; 
+        std::string cam1Path = configPath + "/" + cam1Calib;
         //printf("%s cam1 path\n", cam1Path.c_str() );
         CAM_NAMES.push_back(cam1Path);
-        
+
         cv::Mat cv_T;
         fsSettings["body_T_cam1"] >> cv_T;
         Eigen::Matrix4d T;

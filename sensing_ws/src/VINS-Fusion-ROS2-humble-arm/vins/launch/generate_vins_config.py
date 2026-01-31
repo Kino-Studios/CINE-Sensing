@@ -47,7 +47,15 @@ def resolve_cam0_calib_path(cam0_calib, project_root):
 
 def generate_config(output_path):
     print(f"Generating VINS configuration using centralized parameters...")
-    cam0_calib_path = resolve_cam0_calib_path(VinsConfig.CAM0_CALIB, project_root)
+    cam0_calib_full_path = resolve_cam0_calib_path(VinsConfig.CAM0_CALIB, project_root)
+
+    # Calculate relative path from the output config file location to the calibration file
+    # This works around the VINS bug where it prepends the config directory to the path
+    try:
+        output_dir = os.path.dirname(os.path.abspath(output_path))
+        cam0_calib_path = os.path.relpath(cam0_calib_full_path, output_dir)
+    except:
+        cam0_calib_path = cam0_calib_full_path
 
     config = {
         "imu": VinsConfig.IMU,
@@ -62,7 +70,7 @@ def generate_config(output_path):
             CameraConfig.CAMERA_MATRIX[2],
             CameraConfig.CAMERA_MATRIX[5]
         ],
-        
+
         "cam0_distortion_coeffs": CameraConfig.DISTORTION_COEFFICIENTS,
         "cam0_calib": cam0_calib_path,
 

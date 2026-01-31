@@ -18,7 +18,6 @@ setup(
             'launch/imu_bridge_launch.py',
             'launch/start_mavros.sh'
         ]),
-        ('share/' + package_name + '/config', ['../../../configs/gyroscope/comms.yaml']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
