@@ -77,7 +77,7 @@ class CameraPublisher(Node):
                                   capture_output=True, text=True, timeout=5)
             if result.returncode == 0 and 'Available cameras' in result.stdout:
                 return 'libcamera'
-        except:
+        except Exception:
             pass
 
         candidate_ids = [self.camera_id] + [cid for cid in [0, 1, 2] if cid != self.camera_id]
@@ -91,7 +91,7 @@ class CameraPublisher(Node):
                         cap.release()
                         return 'opencv'
                 cap.release()
-            except:
+            except Exception:
                 pass
 
         return 'none'

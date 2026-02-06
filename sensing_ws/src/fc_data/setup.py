@@ -23,9 +23,9 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='fishnos',
-    maintainer_email='fishnos@todo.todo',
+    maintainer_email='fishnos@cine-sensing.dev',
     description='Flight controller data processing and VIO integration package',
-    license='TODO: License declaration',
+    license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

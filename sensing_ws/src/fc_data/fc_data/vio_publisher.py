@@ -12,7 +12,7 @@ import numpy as np
 class VIOPublisher(Node):
     def __init__(self):
         super().__init__('vio_publisher')
-        
+
         sensor_sub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
@@ -25,41 +25,41 @@ class VIOPublisher(Node):
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=10
         )
-        
+
         self.imu_subscription = self.create_subscription(
             Imu,
             'mavros/imu/data',
             self.imu_callback,
             sensor_sub_qos
         )
-        
+
         self.vins_odom_subscription = self.create_subscription(
             Odometry,
             '/vins_estimator/odometry',
             self.vins_odom_callback,
             vins_pub_qos
         )
-        
+
         self.vins_imu_publisher = self.create_publisher(
             Imu,
             '/imu_bridge/data_raw',
             vins_pub_qos
         )
-        
+
         self.pose_publisher = self.create_publisher(
             PoseStamped,
             '/vio/pose',
             vins_pub_qos
         )
-        
+
         self.odometry_publisher = self.create_publisher(
             Odometry,
             '/vio/odometry',
             vins_pub_qos
         )
-        
+
         self.tf_broadcaster = TransformBroadcaster(self)
-    
+
         self.last_imu_time = None
         self.last_image_time = None
 
@@ -73,7 +73,7 @@ class VIOPublisher(Node):
         vins_imu_msg.linear_acceleration_covariance = msg.linear_acceleration_covariance
         vins_imu_msg.angular_velocity_covariance = msg.angular_velocity_covariance
         vins_imu_msg.orientation_covariance = msg.orientation_covariance
-        
+
         self.vins_imu_publisher.publish(vins_imu_msg)
         self.last_imu_time = msg.header.stamp
 
@@ -84,14 +84,14 @@ class VIOPublisher(Node):
         vio_odom_msg.child_frame_id = "base_link"
         vio_odom_msg.pose = msg.pose
         vio_odom_msg.twist = msg.twist
-        
+
         self.odometry_publisher.publish(vio_odom_msg)
-        
+
         pose_msg = PoseStamped()
         pose_msg.header = vio_odom_msg.header
         pose_msg.pose = msg.pose.pose
         self.pose_publisher.publish(pose_msg)
-        
+
         t = TransformStamped()
         t.header.stamp = msg.header.stamp
         t.header.frame_id = "map"
@@ -100,16 +100,13 @@ class VIOPublisher(Node):
         t.transform.translation.y = msg.pose.pose.position.y
         t.transform.translation.z = msg.pose.pose.position.z
         t.transform.rotation = msg.pose.pose.orientation
-        
+
         self.tf_broadcaster.sendTransform(t)
-        
-        if msg.header.stamp.sec % 5 == 0:
-            pos = msg.pose.pose.position
 
 def main(args=None):
     rclpy.init(args=args)
     node = VIOPublisher()
-    
+
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

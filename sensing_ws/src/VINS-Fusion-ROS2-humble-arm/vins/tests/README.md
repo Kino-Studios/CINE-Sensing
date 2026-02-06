@@ -5,7 +5,7 @@
 **Your VINS configuration has critical errors. Start here:**
 
 ```bash
-cd /home/fishnos/CINE-Sensing
+cd $CINE_SENSING_ROOT  # or ~/CINE-Sensing
 
 # 1. Read this first (5 min)
 cat sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/EXECUTIVE_SUMMARY.md
