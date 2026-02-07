@@ -1,8 +1,7 @@
-export ROS_DOMAIN_ID=0
+source ~/CINE-Sensing/source_env.sh
+
 PORT=/dev/ttyAMA0
 BAUD=921600
-
-source /opt/ros/jazzy/setup.bash
 
 ros2 launch mavros apm.launch \
   fcu_url:=serial://$PORT:$BAUD \

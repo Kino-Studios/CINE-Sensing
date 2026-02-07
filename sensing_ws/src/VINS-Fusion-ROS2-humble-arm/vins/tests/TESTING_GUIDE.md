@@ -26,7 +26,7 @@ This guide walks through systematic testing and validation of your VINS-Fusion c
 ### Setup:
 ```bash
 cd /home/fishnos/CINE-Sensing
-chmod +x autocine_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/*.py
+chmod +x sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/*.py
 ```
 
 ---

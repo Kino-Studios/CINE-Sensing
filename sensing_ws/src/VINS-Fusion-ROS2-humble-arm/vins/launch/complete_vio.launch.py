@@ -1,10 +1,9 @@
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, DeclareLaunchArgument, RegisterEventHandler
-from launch.event_handlers import OnProcessExit
+from launch.actions import ExecuteProcess, DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 import os
-from ament_index_python.packages import get_package_share_directory
+from ament_index_python.packages import get_package_share_directory, PackageNotFoundError
 
 def generate_launch_description():
     config_path_arg = DeclareLaunchArgument(
@@ -20,12 +19,10 @@ def generate_launch_description():
 
     generator_script = os.path.join(vins_pkg, 'launch', 'generate_vins_config.py')
 
-    # Run the generator script synchronously before launching nodes
     import subprocess
     generated_config_path_str = '/tmp/rpi_v3_mono_config_generated.yaml'
     subprocess.run(['python3', generator_script, generated_config_path_str], check=True)
 
-    # Define the nodes/processes
     mavros_starter = ExecuteProcess(
         cmd=[os.path.join(fc_data_pkg, 'launch', 'start_mavros.sh')],
         output='screen',
@@ -62,20 +59,26 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Optional: depth publisher (if available)
-    depth_publisher_node = Node(
-        package='depth_publisher',
-        executable='depth_publisher_node',
-        name='depth_publisher',
-        output='screen'
-    )
-
-    return LaunchDescription([
+    nodes_to_launch = [
         config_path_arg,
         mavros_starter,
         imu_bridge_node,
         camera_publisher_node,
         vins_estimator_node,
         loop_fusion_node,
-        depth_publisher_node
-    ])
+    ]
+
+    try:
+        get_package_share_directory('depth_publisher')
+        depth_publisher_node = Node(
+            package='depth_publisher',
+            executable='depth_publisher_node',
+            name='depth_publisher',
+            output='screen'
+        )
+        nodes_to_launch.append(depth_publisher_node)
+        print("[complete_vio.launch.py] depth_publisher package found - will launch depth node")
+    except PackageNotFoundError:
+        print("[complete_vio.launch.py] depth_publisher package not found - skipping depth node")
+
+    return LaunchDescription(nodes_to_launch)
