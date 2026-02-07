@@ -8,12 +8,10 @@ class IMUBridge(Node):
     def __init__(self):
         super().__init__('imu_bridge')
 
-        self.get_logger().info("IMU Bridge Node Started (Debug Mode)")
+        self.get_logger().info("bridge started")
 
-        self.declare_parameter('use_transform', True)
+        self.declare_parameter('use_transform', False)
         self.use_transform = self.get_parameter('use_transform').value
-
-        self.get_logger().info(f"Subscribing to /mavros/imu/data_raw with SENSOR_DATA QoS")
 
         self.mavros_imu_sub = self.create_subscription(
             Imu,
@@ -55,7 +53,7 @@ class IMUBridge(Node):
             msg.angular_velocity.y = gyro_x
             msg.angular_velocity.z = -msg.angular_velocity.z
 
-            self.get_logger().info(f'Transform applied: accel {accel_x:.2f},{accel_y:.2f} -> {msg.linear_acceleration.x:.2f},{msg.linear_acceleration.y:.2f}', once=True)
+            self.get_logger().info(f'transform applied: accel {accel_x:.2f},{accel_y:.2f} -> {msg.linear_acceleration.x:.2f},{msg.linear_acceleration.y:.2f}', once=True)
 
         msg.header.frame_id = 'imu'
 
