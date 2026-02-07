@@ -49,6 +49,12 @@ def generate_launch_description():
         description='Frame ID for camera optical frame'
     )
 
+    save_latest_frame_arg = DeclareLaunchArgument(
+        'save_latest_frame',
+        default_value='false',
+        description='Whether to save the latest frame to disk'
+    )
+
     camera_publisher_node = Node(
         package='rpi_camera_publisher',
         executable='camera_publisher',
@@ -110,6 +116,7 @@ def generate_launch_description():
         image_topic_arg,
         camera_info_topic_arg,
         frame_id_arg,
+        save_latest_frame_arg,
 
         launch_info,
 

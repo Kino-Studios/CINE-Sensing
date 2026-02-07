@@ -62,11 +62,20 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Optional: depth publisher (if available)
+    depth_publisher_node = Node(
+        package='depth_publisher',
+        executable='depth_publisher_node',
+        name='depth_publisher',
+        output='screen'
+    )
+
     return LaunchDescription([
         config_path_arg,
         mavros_starter,
         imu_bridge_node,
         camera_publisher_node,
         vins_estimator_node,
-        loop_fusion_node
+        loop_fusion_node,
+        depth_publisher_node
     ])

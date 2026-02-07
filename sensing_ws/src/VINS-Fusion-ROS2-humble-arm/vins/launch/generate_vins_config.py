@@ -13,8 +13,7 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = find_project_root(script_dir)
 
 if not project_root:
-    # Fallback to absolute path or environment variable if needed
-    project_root = "/Users/vtsyp/Desktop/HSR-2026/CINE-Sensing"
+    project_root = os.path.expanduser("~/CINE-Sensing")
 
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
@@ -49,12 +48,10 @@ def generate_config(output_path):
     print(f"Generating VINS configuration using centralized parameters...")
     cam0_calib_full_path = resolve_cam0_calib_path(VinsConfig.CAM0_CALIB, project_root)
 
-    # Calculate relative path from the output config file location to the calibration file
-    # This works around the VINS bug where it prepends the config directory to the path
     try:
         output_dir = os.path.dirname(os.path.abspath(output_path))
         cam0_calib_path = os.path.relpath(cam0_calib_full_path, output_dir)
-    except:
+    except Exception:
         cam0_calib_path = cam0_calib_full_path
 
     config = {
@@ -112,7 +109,9 @@ def generate_config(output_path):
         "loop_closure": VinsConfig.LOOP_CLOSURE,
         "load_previous_pose_graph": VinsConfig.LOAD_PREVIOUS_POSE_GRAPH,
         "pose_graph_save_path": os.path.join(os.path.expanduser("~"), VinsConfig.POSE_GRAPH_SAVE_PATH),
-        "save_image": VinsConfig.SAVE_IMAGE
+        "save_image": VinsConfig.SAVE_IMAGE,
+        "use_depth": VinsConfig.USE_DEPTH,
+        "depth_topic": VinsConfig.DEPTH_TOPIC
     }
 
     try:

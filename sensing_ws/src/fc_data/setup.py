@@ -18,13 +18,14 @@ setup(
             'launch/imu_bridge_launch.py',
             'launch/start_mavros.sh'
         ]),
+        ('share/' + package_name + '/config', ['config/comms.yaml']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='fishnos',
-    maintainer_email='fishnos@todo.todo',
+    maintainer_email='fishnos@cine-sensing.dev',
     description='Flight controller data processing and VIO integration package',
-    license='TODO: License declaration',
+    license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

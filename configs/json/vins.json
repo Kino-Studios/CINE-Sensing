@@ -57,6 +57,8 @@
         "loop_closure": 1,
         "load_previous_pose_graph": 0,
         "pose_graph_save_path": "CINE-Sensing/vins_output/pose_graph/",
-        "save_image": 0
+        "save_image": 0,
+        "use_depth": 1,
+        "depth_topic": "/depth_publisher/depth"
     }
 }

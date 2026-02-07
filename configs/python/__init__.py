@@ -122,6 +122,8 @@ class VinsConfig:
     LOAD_PREVIOUS_POSE_GRAPH = _data.get('load_previous_pose_graph', 0)
     POSE_GRAPH_SAVE_PATH = _data.get('pose_graph_save_path', 'CINE-Sensing/vins_output/pose_graph/')
     SAVE_IMAGE = _data.get('save_image', 0)
+    USE_DEPTH = _data.get('use_depth', 0)
+    DEPTH_TOPIC = _data.get('depth_topic', '/depth_publisher/depth')
 
 __all__ = [
     'ModelDetectionConstants',
