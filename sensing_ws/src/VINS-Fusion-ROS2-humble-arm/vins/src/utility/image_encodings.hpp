@@ -35,11 +35,14 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <string>
+#include <regex>
 
 namespace sensor_msgs
 {
 namespace image_encodings
 {
+const char ABSTRACT_REGEX_STR[] = "^(8UC|8SC|16UC|16SC|32SC|32FC|64FC)([0-9]+)?$";
+
 const char RGB8[] = "rgb8";
 const char RGBA8[] = "rgba8";
 const char RGB16[] = "rgb16";
@@ -172,23 +175,15 @@ static inline int numChannels(const std::string & encoding)
   }
 
   // Now all the generic content encodings
-  // TODO(clalancette): Rewrite with regex when ROS supports C++11
-  for (size_t i = 0; i < sizeof(ABSTRACT_ENCODING_PREFIXES) / sizeof(*ABSTRACT_ENCODING_PREFIXES);
-    i++)
-  {
-    std::string prefix = ABSTRACT_ENCODING_PREFIXES[i];
-    if (encoding.substr(0, prefix.size()) != prefix) {
-      continue;
+  static const std::regex expression(ABSTRACT_REGEX_STR);
+  std::smatch match;
+  if (std::regex_match(encoding, match, expression)) {
+    if (match[2].length() == 0) {
+      return 1;
     }
-    if (encoding.size() == prefix.size()) {
-      return 1;  // ex. 8UC -> 1
-    }
-    int n_channel = atoi(
-      encoding.substr(
-        prefix.size(), encoding.size() - prefix.size()
-      ).c_str());  // ex. 8UC5 -> 5
+    int n_channel = std::atoi(match[2].str().c_str());
     if (n_channel != 0) {
-      return n_channel;  // valid encoding string
+      return n_channel;
     }
   }
 
@@ -236,23 +231,11 @@ static inline int bitDepth(const std::string & encoding)
   }
 
   // Now all the generic content encodings
-  // TODO(clalancette): Rewrite with regex when ROS supports C++11
-  for (size_t i = 0; i < sizeof(ABSTRACT_ENCODING_PREFIXES) / sizeof(*ABSTRACT_ENCODING_PREFIXES);
-    i++)
-  {
-    std::string prefix = ABSTRACT_ENCODING_PREFIXES[i];
-    if (encoding.substr(0, prefix.size()) != prefix) {
-      continue;
-    }
-    if (encoding.size() == prefix.size()) {
-      return atoi(prefix.c_str());  // ex. 8UC -> 8
-    }
-    int n_channel = atoi(
-      encoding.substr(
-        prefix.size(), encoding.size() - prefix.size()
-      ).c_str());  // ex. 8UC10 -> 10
-    if (n_channel != 0) {
-      return atoi(prefix.c_str());  // valid encoding string
+  static const std::regex expression(ABSTRACT_REGEX_STR);
+  std::smatch match;
+  if (std::regex_match(encoding, match, expression)) {
+    if (match[2].length() == 0 || std::atoi(match[2].str().c_str()) != 0) {
+      return std::atoi(match[1].str().c_str());
     }
   }
 
