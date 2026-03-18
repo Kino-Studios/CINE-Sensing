@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>model_framing</name>
+  <name>yolo_detection</name>
   <version>0.0.0</version>
-  <description>Object detection and model framing package</description>
+  <description>YOLO object detection node and inference scripts</description>
   <maintainer email="your_email@example.com">Your Name</maintainer>
   <license>MIT</license>
 

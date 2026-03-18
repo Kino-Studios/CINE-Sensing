@@ -1,5 +1,5 @@
 class ModelDetectionConstants:
-    MODEL_PATH = '/home/fishnos/CINE-Sensing/training/checkpoints/pre-export/homeobjects_yolo11n_trained.pt'
+    MODEL_PATH = '/workspace/sensing_ws/src/yolo_detection/models/homeobjects_yolo11n_trained.pt'
 
     CAMERA_IMAGE_TOPIC = '/camera/image_raw'
     BOUNDING_BOX_TOPIC = '/object_detection/bounding_box'

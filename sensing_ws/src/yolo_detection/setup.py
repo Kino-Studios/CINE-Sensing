@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'model_framing'
+package_name = 'yolo_detection'
 
 setup(
     name=package_name,
@@ -13,14 +13,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Your Name',
-    maintainer_email='your_email@example.com',
-    description='Object detection and model framing package',
+    maintainer='Daniel Kosukhin',
+    maintainer_email='180136815+fishnos@users.noreply.github.com',
+    description='YOLO object detection node and inference scripts',
     license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'object_detector = model_framing.object_framer:main',
+            'bb_extractor = yolo_detection.bb_extractor:main',
         ],
     },
 )

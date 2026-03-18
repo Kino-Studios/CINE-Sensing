@@ -10,9 +10,9 @@ import os
 import sys
 from ultralytics import YOLO
 
-sys.path.append('/home/fishnos/CINE-Sensing/venv/lib/python3.12/site-packages')
+sys.path.append('/workspace/venv/lib/python3.12/site-packages')
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
@@ -40,7 +40,7 @@ class YOLODetectionNode(Node):
             return
 
         self.frame_count = 0
-        self.get_logger().info('YOLO Detection Node initialized - waiting for camera images')
+        self.get_logger().info('YOLO Detection Node initialized')
 
     def image_callback(self, msg):
         try:
