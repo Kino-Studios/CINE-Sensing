@@ -72,7 +72,7 @@ def main(args=None):
             imu_bridge.destroy_node()
         try:
             rclpy.shutdown()
-        except:
+        except Exception:
             pass
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ import glob
 import matplotlib.pyplot as plt
 import os
 
-def calibrate(showsPics=True):
+def calibrate(shows_pics=True):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     calibration_path = os.path.join(script_dir, 'images')
     images = glob.glob(os.path.join(calibration_path, '*.jpg'))
@@ -44,7 +44,7 @@ def calibrate(showsPics=True):
             if image_shape is None:
                 image_shape = img_gray.shape[::-1]
 
-            if showsPics:
+            if shows_pics:
                 cv.drawChessboardCorners(img, (n_rows, n_cols), corners_refined, corners_found)
                 cv.imshow('Chessboard', img)
                 cv.waitKey(500)
@@ -78,7 +78,7 @@ def calibrate(showsPics=True):
     return camera_matrix, distort_coeff
 
 def run_calibration():
-    calibrate(showsPics=False)
+    calibrate(shows_pics=False)
 
 def remove_distortion(camera_matrix, distort_coeff):
     script_dir = os.path.dirname(os.path.abspath(__file__))

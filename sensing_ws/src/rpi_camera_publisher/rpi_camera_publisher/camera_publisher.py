@@ -177,7 +177,7 @@ class CameraPublisher(Node):
                 process.terminate()
                 try:
                     process.wait(timeout=2)
-                except:
+                except subprocess.TimeoutExpired:
                     process.kill()
 
     def _publish_frame(self, frame, timestamp):
@@ -219,7 +219,7 @@ def main():
         node.destroy_node()
         try:
             rclpy.shutdown()
-        except:
+        except Exception:
             pass
 
 if __name__ == '__main__':
