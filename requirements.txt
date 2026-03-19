@@ -2,6 +2,9 @@
 # python3 -m venv venv
 # source venv/bin/activate
 # pip install -r requirements.txt
+#
+# Windows (CUDA): pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# then: pip install -r requirements.txt --ignore-installed torch torchvision torchaudio
 
 # deep learning and CV
 torch>=2.2.0

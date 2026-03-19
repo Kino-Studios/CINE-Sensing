@@ -1,9 +1,0 @@
-%YAML:1.0
----
-cam0:
-  camera_model: pinhole
-  intrinsics: [750.99681791, 748.9227188, 578.86898934, 326.60855341]
-  distortion_model: radtan
-  distortion_coeffs: [-0.04369182, 0.04562136, 0.00000456, 0.0003494]
-  resolution: [1152, 648]
-  rostopic: /camera/image_raw

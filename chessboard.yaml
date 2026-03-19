@@ -1,7 +1,0 @@
-%YAML:1.0
----
-target_type: 'checkerboard'
-targetRows: 6
-targetCols: 6
-rowSpacingMeters: 0.03
-colSpacingMeters: 0.03
