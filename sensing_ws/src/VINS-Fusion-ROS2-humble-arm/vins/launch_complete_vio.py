@@ -11,17 +11,17 @@ def generate_launch_description():
 
     return LaunchDescription([
         ExecuteProcess(
-            cmd=['bash', os.path.join(vins_ws, 'src/fc_data/launch/start_mavros.sh')],
+            cmd=['bash', os.path.join(vins_ws, 'src/imu_publisher/launch/start_mavros.sh')],
             output='screen'
         ),
 
         ExecuteProcess(
-            cmd=['python3', os.path.join(vins_ws, 'src/fc_data/launch/imu_bridge.py')],
+            cmd=['python3', os.path.join(vins_ws, 'src/imu_publisher/launch/imu_bridge.py')],
             output='screen'
         ),
 
         ExecuteProcess(
-            cmd=['python3', os.path.join(vins_ws, 'src/rpi_camera_publisher/rpi_camera_publisher/camera_publisher.py')],
+            cmd=['python3', os.path.join(vins_ws, 'src/camera_publisher/camera_publisher/camera_publisher.py')],
             output='screen'
         ),
 

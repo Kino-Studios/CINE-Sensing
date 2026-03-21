@@ -4,7 +4,7 @@ package_name = 'setpoint_processor'
 
 setup(
     name=package_name,
-    version='0.0.1',
+    version='1.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -14,7 +14,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='fishnos',
-    maintainer_email='fishnos@cine-sensing.dev',
+    maintainer_email='fishnos@users.noreply.github.com',
     description='Bridges cinematography setpoints to MAVROS',
     license='MIT',
     tests_require=['pytest'],

@@ -24,7 +24,7 @@ def generate_launch_description():
     config_file_arg = DeclareLaunchArgument(
         'config_file',
         default_value=PathJoinSubstitution([
-            FindPackageShare('rpi_camera_publisher'),
+            FindPackageShare('camera_publisher'),
             'config',
             'camera_params.yaml'
         ]),
@@ -56,7 +56,7 @@ def generate_launch_description():
     )
 
     camera_publisher_node = Node(
-        package='rpi_camera_publisher',
+        package='camera_publisher',
         executable='camera_publisher',
         name='camera_publisher',
         output='screen',

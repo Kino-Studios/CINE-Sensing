@@ -16,7 +16,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from configs.user_params.constants import ModelDetectionConstants, UserRequestedParameters
+from configs.python.constants import ModelDetectionConstants, UserRequestedParameters
 
 class BoundingBoxPublisher(Node):
     def __init__(self):

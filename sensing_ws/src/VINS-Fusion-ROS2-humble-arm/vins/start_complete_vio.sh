@@ -4,19 +4,19 @@ echo "Set ROS_DOMAIN_ID to: $ROS_DOMAIN_ID"
 source /opt/ros/jazzy/setup.bash
 source /home/fishnos/bspline-cinematography-generator-research/sensing_ws/install/setup.bash
 
-/home/fishnos/bspline-cinematography-generator-research/sensing_ws/src/fc_data/launch/start_mavros.sh &
+/home/fishnos/bspline-cinematography-generator-research/sensing_ws/src/imu_publisher/launch/start_mavros.sh &
 MAVROS_PID=$!
 echo "MAVROS started with PID: $MAVROS_PID"
 
 sleep 5
 
-python3 /home/fishnos/bspline-cinematography-generator-research/sensing_ws/src/fc_data/launch/imu_bridge.py &
+python3 /home/fishnos/bspline-cinematography-generator-research/sensing_ws/src/imu_publisher/launch/imu_bridge.py &
 IMU_BRIDGE_PID=$!
 echo "IMU bridge started with PID: $IMU_BRIDGE_PID"
 
 sleep 2
 
-python3 /home/fishnos/bspline-cinematography-generator-research/sensing_ws/src/rpi_camera_publisher/rpi_camera_publisher/camera_publisher.py &
+python3 /home/fishnos/bspline-cinematography-generator-research/sensing_ws/src/camera_publisher/camera_publisher/camera_publisher.py &
 CAMERA_PID=$!
 echo "Camera publisher started with PID: $CAMERA_PID"
 

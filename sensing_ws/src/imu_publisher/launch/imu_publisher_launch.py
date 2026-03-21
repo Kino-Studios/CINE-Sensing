@@ -12,7 +12,7 @@ def generate_launch_description():
         ),
 
         Node(
-            package='fc_data',
+            package='imu_publisher',
             executable='gyroscope_publisher',
             name='gyroscope_publisher',
             output='screen',
@@ -20,7 +20,7 @@ def generate_launch_description():
         ),
 
         Node(
-            package='fc_data',
+            package='imu_publisher',
             executable='vio_publisher',
             name='vio_publisher',
             output='screen'

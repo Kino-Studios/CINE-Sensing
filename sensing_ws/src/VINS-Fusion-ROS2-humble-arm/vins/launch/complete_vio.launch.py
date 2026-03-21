@@ -15,7 +15,7 @@ def generate_launch_description():
     generated_config_path = LaunchConfiguration('config_path')
 
     vins_pkg = get_package_share_directory('vins')
-    fc_data_pkg = get_package_share_directory('fc_data')
+    imu_publisher_pkg = get_package_share_directory('imu_publisher')
 
     generator_script = os.path.join(vins_pkg, 'launch', 'generate_vins_config.py')
 
@@ -24,20 +24,20 @@ def generate_launch_description():
     subprocess.run(['python3', generator_script, generated_config_path_str], check=True)
 
     mavros_starter = ExecuteProcess(
-        cmd=[os.path.join(fc_data_pkg, 'launch', 'start_mavros.sh')],
+        cmd=[os.path.join(imu_publisher_pkg, 'launch', 'start_mavros.sh')],
         output='screen',
         shell=True
     )
 
     imu_bridge_node = Node(
-        package='fc_data',
+        package='imu_publisher',
         executable='imu_bridge',
         name='imu_bridge',
         output='screen'
     )
 
     camera_publisher_node = Node(
-        package='rpi_camera_publisher',
+        package='camera_publisher',
         executable='camera_publisher',
         name='camera_publisher',
         output='screen'
