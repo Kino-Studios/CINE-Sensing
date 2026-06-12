@@ -15,6 +15,7 @@ Author: VINS Diagnostics
 Date: November 12, 2025
 """
 
+import logging
 import numpy as np
 from scipy import stats
 import time
@@ -30,8 +31,185 @@ try:
 except Exception:
     HAVE_RCLPY = False
 
+EXPECTED_GRAVITY = 9.80665
+WINDOW_SIZE = 100
+DEFAULT_CURRENT_CONFIG = {'acc_n': 0.5, 'gyr_n': 0.02, 'acc_w': 0.01, 'gyr_w': 0.001}
+
+logger = logging.getLogger(__name__)
+
+
+def load_current_config() -> dict:
+    """Return the active VINS noise config, falling back to safe defaults."""
+    try:
+        from configs.python import VinsConfig
+        return {
+            'acc_n': VinsConfig.ACC_N,
+            'gyr_n': VinsConfig.GYR_N,
+            'acc_w': VinsConfig.ACC_W,
+            'gyr_w': VinsConfig.GYR_W,
+        }
+    except ImportError:
+        return dict(DEFAULT_CURRENT_CONFIG)
+
+
+def compute_noise_statistics(accel, gyro, timestamps, warmup_time: float = 10.0) -> dict:
+    """Compute all IMU noise statistics from raw samples.
+
+    Pure math with no side effects. Both the offline array entry point and the
+    live ROS2 node feed their collected samples through this single function so
+    the analysis logic exists in exactly one place.
+
+    accel: (N,3) array-like of accelerometer samples [m/s^2]
+    gyro:  (N,3) array-like of gyro samples [rad/s]
+    timestamps: array-like of elapsed times corresponding to samples
+    warmup_time: seconds discarded at start, subtracted from reported duration
+
+    Returns a dict of derived values, including a plain ``measured`` dict keyed
+    by config name (acc_n/acc_w/gyr_n/gyr_w) used for safe validation lookups.
+    """
+    accel = np.array(accel)
+    gyro = np.array(gyro)
+    timestamps = np.array(timestamps)
+
+    duration = timestamps[-1] - warmup_time if len(timestamps) > 1 else 0.0
+    sample_rate = len(accel) / duration if duration > 0 else 0.0
+
+    accel_mean = np.mean(accel, axis=0)
+    accel_std = np.std(accel, axis=0)
+    gravity_mag = np.linalg.norm(accel_mean)
+    gravity_error = abs(gravity_mag - EXPECTED_GRAVITY)
+    acc_n_measured = np.sqrt(np.mean(accel_std**2))
+
+    gyro_mean = np.mean(gyro, axis=0)
+    gyro_std = np.std(gyro, axis=0)
+    gyro_bias_mag = np.linalg.norm(gyro_mean)
+    gyr_n_measured = np.sqrt(np.mean(gyro_std**2))
+
+    num_windows = len(accel) // WINDOW_SIZE
+    if num_windows >= 2:
+        accel_window_means = np.array([np.mean(accel[i*WINDOW_SIZE:(i+1)*WINDOW_SIZE], axis=0)
+                                       for i in range(num_windows)])
+        acc_w_measured = np.std(np.diff(accel_window_means, axis=0), axis=0).mean() / np.sqrt(2)
+        gyro_window_means = np.array([np.mean(gyro[i*WINDOW_SIZE:(i+1)*WINDOW_SIZE], axis=0)
+                                      for i in range(num_windows)])
+        gyr_w_measured = np.std(np.diff(gyro_window_means, axis=0), axis=0).mean() / np.sqrt(2)
+    else:
+        acc_w_measured = 0.0
+        gyr_w_measured = 0.0
+
+    measured = {
+        'acc_n': acc_n_measured,
+        'acc_w': acc_w_measured,
+        'gyr_n': gyr_n_measured,
+        'gyr_w': gyr_w_measured,
+    }
+
+    recommended = {
+        'acc_n': min(max(acc_n_measured * 1.2, 0.08), 0.15),
+        'gyr_n': min(max(gyr_n_measured * 1.2, 0.004), 0.02),
+        'acc_w': min(max(acc_w_measured * 1.5, 0.00004), 0.001),
+        'gyr_w': min(max(gyr_w_measured * 1.5, 0.00001), 0.0001),
+    }
+
+    return {
+        'num_samples': len(accel),
+        'duration': duration,
+        'sample_rate': sample_rate,
+        'accel_mean': accel_mean,
+        'accel_std': accel_std,
+        'gravity_mag': gravity_mag,
+        'gravity_error': gravity_error,
+        'gyro_mean': gyro_mean,
+        'gyro_std': gyro_std,
+        'gyro_bias_mag': gyro_bias_mag,
+        'measured': measured,
+        'recommended': recommended,
+    }
+
+
+def format_analysis_report(stats_result: dict, current_config: dict) -> list:
+    """Render computed statistics into ordered report lines (no I/O)."""
+    accel_mean = stats_result['accel_mean']
+    accel_std = stats_result['accel_std']
+    gyro_mean = stats_result['gyro_mean']
+    gyro_std = stats_result['gyro_std']
+    gravity_mag = stats_result['gravity_mag']
+    gravity_error = stats_result['gravity_error']
+    gyro_bias_mag = stats_result['gyro_bias_mag']
+    measured = stats_result['measured']
+    recommended = stats_result['recommended']
+
+    lines = []
+    lines.append("\n" + "=" * 70)
+    lines.append("IMU NOISE ANALYSIS - RESULTS")
+    lines.append("=" * 70)
+    lines.append(f"Total samples: {stats_result['num_samples']}")
+    lines.append(f"Duration: {stats_result['duration']:.1f}s")
+    if stats_result['duration'] > 0:
+        lines.append(f"Sample rate: {stats_result['sample_rate']:.1f} Hz")
+
+    lines.append("\n" + "-" * 70)
+    lines.append("ACCELEROMETER STATISTICS")
+    lines.append("-" * 70)
+    lines.append(f"Mean (m/s²):  X={accel_mean[0]:8.4f}  Y={accel_mean[1]:8.4f}  Z={accel_mean[2]:8.4f}")
+    lines.append(f"Std Dev:      X={accel_std[0]:8.4f}  Y={accel_std[1]:8.4f}  Z={accel_std[2]:8.4f}")
+    lines.append(f"\nGravity magnitude: {gravity_mag:.4f} m/s²  (expected: {EXPECTED_GRAVITY:.4f})")
+
+    if gravity_error > 0.5:
+        lines.append(f"⚠️  Gravity error: {gravity_error:.4f} m/s² (> 0.5 m/s²)")
+    else:
+        lines.append(f"✅ Gravity alignment good (error: {gravity_error:.4f} m/s²)")
+
+    lines.append(f"\n📊 MEASURED NOISE PARAMETERS:")
+    lines.append(f"   acc_n (white noise):  {measured['acc_n']:.4f} m/s²")
+    lines.append(f"   acc_w (bias drift):   {measured['acc_w']:.6f} m/s³/√Hz")
+
+    lines.append("\n" + "-" * 70)
+    lines.append("GYROSCOPE STATISTICS")
+    lines.append("-" * 70)
+    lines.append(f"Mean (rad/s): X={gyro_mean[0]:8.5f}  Y={gyro_mean[1]:8.5f}  Z={gyro_mean[2]:8.5f}")
+    lines.append(f"Std Dev:      X={gyro_std[0]:8.5f}  Y={gyro_std[1]:8.5f}  Z={gyro_std[2]:8.5f}")
+
+    if gyro_bias_mag > 0.05:
+        lines.append(f"⚠️  High gyro bias: {gyro_bias_mag:.5f} rad/s ({np.degrees(gyro_bias_mag):.2f}°/s)")
+    else:
+        lines.append(f"✅ Gyro bias acceptable: {gyro_bias_mag:.5f} rad/s ({np.degrees(gyro_bias_mag):.2f}°/s)")
+
+    lines.append(f"\n📊 MEASURED NOISE PARAMETERS:")
+    lines.append(f"   gyr_n (white noise):  {measured['gyr_n']:.6f} rad/s")
+    lines.append(f"   gyr_w (bias drift):   {measured['gyr_w']:.8f} rad/s²/√Hz")
+
+    lines.append("\n# IMU noise parameters (add to rpi_v3_mono_config.yaml)")
+    lines.append(f"acc_n: {recommended['acc_n']:.4f}          # accelerometer measurement noise")
+    lines.append(f"gyr_n: {recommended['gyr_n']:.6f}        # gyroscope measurement noise")
+    lines.append(f"acc_w: {recommended['acc_w']:.8f}      # accelerometer bias random walk")
+    lines.append(f"gyr_w: {recommended['gyr_w']:.8f}      # gyroscope bias random walk")
+    lines.append(f"g_norm: {gravity_mag:.5f}         # measured gravity magnitude")
+
+    lines.append(f"\n{'Parameter':<10} {'Current':<12} {'Measured':<12} {'Recommended':<12} {'Error Factor':<15}")
+    lines.append("-" * 70)
+    for key in current_config.keys():
+        current = current_config[key]
+        recommended_val = recommended[key]
+        measured_val = measured.get(key, 0.0)
+        error_factor = current / recommended_val if recommended_val > 0 else 0
+        status = "❌" if error_factor > 2.0 or error_factor < 0.5 else "✅"
+        lines.append(f"{key:<10} {current:<12.6f} {measured_val:<12.6f} "
+                     f"{recommended_val:<12.6f} {error_factor:<6.1f}x {status}")
+
+    lines.append("\n" + "=" * 70)
+    lines.append("ANALYSIS COMPLETE")
+    lines.append("=" * 70)
+    lines.append("\n📋 NEXT STEPS:")
+    lines.append("1. Copy recommended parameters to rpi_v3_mono_config.yaml")
+    lines.append("2. If error factors > 2x, update config IMMEDIATELY")
+    lines.append("3. Run static_drift_test.py to validate improvements")
+
+    return lines
+
+
 def run_analysis_from_arrays(accel, gyro, timestamps, warmup_time=10.0, collection_duration=300.0):
-    """Perform the same comprehensive noise analysis but operate on provided numpy arrays.
+    """Perform the comprehensive noise analysis on provided numpy arrays.
 
     accel: (N,3) numpy array of accelerometer samples [m/s^2]
     gyro:  (N,3) numpy array of gyro samples [rad/s]
@@ -41,130 +219,11 @@ def run_analysis_from_arrays(accel, gyro, timestamps, warmup_time=10.0, collecti
         print("❌ Not enough data for analysis (need >=100 samples)")
         return
 
-    accel = np.array(accel)
-    gyro = np.array(gyro)
-    timestamps = np.array(timestamps)
+    stats_result = compute_noise_statistics(accel, gyro, timestamps, warmup_time)
+    current_config = load_current_config()
 
-    print("\n" + "=" * 70)
-    print("IMU NOISE ANALYSIS - RESULTS")
-    print("=" * 70)
-    print(f"Total samples: {len(accel)}")
-    duration = timestamps[-1] - warmup_time if len(timestamps) > 1 else 0.0
-    print(f"Duration: {duration:.1f}s")
-    if duration > 0:
-        print(f"Sample rate: {len(accel) / duration:.1f} Hz")
-
-    # ACCELEROMETER
-    print("\n" + "-" * 70)
-    print("ACCELEROMETER STATISTICS")
-    print("-" * 70)
-
-    accel_mean = np.mean(accel, axis=0)
-    accel_std = np.std(accel, axis=0)
-
-    print(f"Mean (m/s²):  X={accel_mean[0]:8.4f}  Y={accel_mean[1]:8.4f}  Z={accel_mean[2]:8.4f}")
-    print(f"Std Dev:      X={accel_std[0]:8.4f}  Y={accel_std[1]:8.4f}  Z={accel_std[2]:8.4f}")
-
-    gravity_mag = np.linalg.norm(accel_mean)
-    expected_gravity = 9.80665
-    gravity_error = abs(gravity_mag - expected_gravity)
-
-    print(f"\nGravity magnitude: {gravity_mag:.4f} m/s²  (expected: {expected_gravity:.4f})")
-    if gravity_error > 0.5:
-        print(f"⚠️  Gravity error: {gravity_error:.4f} m/s² (> 0.5 m/s²)")
-    else:
-        print(f"✅ Gravity alignment good (error: {gravity_error:.4f} m/s²)")
-
-    acc_n_measured = np.sqrt(np.mean(accel_std**2))
-    print(f"\n📊 MEASURED NOISE PARAMETERS:")
-    print(f"   acc_n (white noise):  {acc_n_measured:.4f} m/s²")
-
-    # Bias stability
-    window_size = 100
-    num_windows = len(accel) // window_size
-    if num_windows >= 2:
-        window_means = np.array([np.mean(accel[i*window_size:(i+1)*window_size], axis=0)
-                                  for i in range(num_windows)])
-        acc_w_measured = np.std(np.diff(window_means, axis=0), axis=0).mean() / np.sqrt(2)
-    else:
-        acc_w_measured = 0.0
-
-    print(f"   acc_w (bias drift):   {acc_w_measured:.6f} m/s³/√Hz")
-
-    # GYROSCOPE
-    print("\n" + "-" * 70)
-    print("GYROSCOPE STATISTICS")
-    print("-" * 70)
-
-    gyro_mean = np.mean(gyro, axis=0)
-    gyro_std = np.std(gyro, axis=0)
-
-    print(f"Mean (rad/s): X={gyro_mean[0]:8.5f}  Y={gyro_mean[1]:8.5f}  Z={gyro_mean[2]:8.5f}")
-    print(f"Std Dev:      X={gyro_std[0]:8.5f}  Y={gyro_std[1]:8.5f}  Z={gyro_std[2]:8.5f}")
-
-    gyro_bias_mag = np.linalg.norm(gyro_mean)
-    if gyro_bias_mag > 0.05:
-        print(f"⚠️  High gyro bias: {gyro_bias_mag:.5f} rad/s ({np.degrees(gyro_bias_mag):.2f}°/s)")
-    else:
-        print(f"✅ Gyro bias acceptable: {gyro_bias_mag:.5f} rad/s ({np.degrees(gyro_bias_mag):.2f}°/s)")
-
-    gyr_n_measured = np.sqrt(np.mean(gyro_std**2))
-    print(f"\n📊 MEASURED NOISE PARAMETERS:")
-    print(f"   gyr_n (white noise):  {gyr_n_measured:.6f} rad/s")
-
-    if num_windows >= 2:
-        gyro_window_means = np.array([np.mean(gyro[i*window_size:(i+1)*window_size], axis=0)
-                                       for i in range(num_windows)])
-        gyr_w_measured = np.std(np.diff(gyro_window_means, axis=0), axis=0).mean() / np.sqrt(2)
-    else:
-        gyr_w_measured = 0.0
-
-    print(f"   gyr_w (bias drift):   {gyr_w_measured:.8f} rad/s²/√Hz")
-
-    # Recommendations
-    acc_n_recommended = min(max(acc_n_measured * 1.2, 0.08), 0.15)
-    gyr_n_recommended = min(max(gyr_n_measured * 1.2, 0.004), 0.02)
-    acc_w_recommended = min(max(acc_w_measured * 1.5, 0.00004), 0.001)
-    gyr_w_recommended = min(max(gyr_w_measured * 1.5, 0.00001), 0.0001)
-
-    print("\n# IMU noise parameters (add to rpi_v3_mono_config.yaml)")
-    print(f"acc_n: {acc_n_recommended:.4f}          # accelerometer measurement noise")
-    print(f"gyr_n: {gyr_n_recommended:.6f}        # gyroscope measurement noise")
-    print(f"acc_w: {acc_w_recommended:.8f}      # accelerometer bias random walk")
-    print(f"gyr_w: {gyr_w_recommended:.8f}      # gyroscope bias random walk")
-    print(f"g_norm: {gravity_mag:.5f}         # measured gravity magnitude")
-
-    # Validation against current config
-    try:
-        from configs.python import VinsConfig
-        current_config = {
-            'acc_n': VinsConfig.ACC_N,
-            'gyr_n': VinsConfig.GYR_N,
-            'acc_w': VinsConfig.ACC_W,
-            'gyr_w': VinsConfig.GYR_W
-        }
-    except ImportError:
-        current_config = {'acc_n': 0.5, 'gyr_n': 0.02, 'acc_w': 0.01, 'gyr_w': 0.001}
-
-    recommended_config = {'acc_n': acc_n_recommended, 'gyr_n': gyr_n_recommended, 'acc_w': acc_w_recommended, 'gyr_w': gyr_w_recommended}
-
-    print(f"\n{'Parameter':<10} {'Current':<12} {'Measured':<12} {'Recommended':<12} {'Error Factor':<15}")
-    print("-" * 70)
-    for key in current_config.keys():
-        current = current_config[key]
-        recommended = recommended_config[key]
-        measured_val = locals().get(f"{key}_measured", 0.0)
-        error_factor = current / recommended if recommended > 0 else 0
-        status = "❌" if error_factor > 2.0 or error_factor < 0.5 else "✅"
-        print(f"{key:<10} {current:<12.6f} {measured_val:<12.6f} {recommended:<12.6f} {error_factor:<6.1f}x {status}")
-
-    print("\n" + "=" * 70)
-    print("ANALYSIS COMPLETE")
-    print("=" * 70)
-    print("\n📋 NEXT STEPS:")
-    print("1. Copy recommended parameters to rpi_v3_mono_config.yaml")
-    print("2. If error factors > 2x, update config IMMEDIATELY")
-    print("3. Run static_drift_test.py to validate improvements")
+    for line in format_analysis_report(stats_result, current_config):
+        print(line)
 
 class IMUNoiseAnalyzer(Node):
     def __init__(self):
@@ -230,171 +289,19 @@ class IMUNoiseAnalyzer(Node):
             self.get_logger().info(f"📊 {progress:.1f}% complete | {samples} samples collected")
 
     def analyze_data(self):
-        """Perform comprehensive noise analysis"""
+        """Perform comprehensive noise analysis and log the report."""
 
         if len(self.accel_data) < 100:
             self.get_logger().error("❌ Not enough data collected!")
             return
 
-        accel = np.array(self.accel_data)
-        gyro = np.array(self.gyro_data)
+        stats_result = compute_noise_statistics(
+            self.accel_data, self.gyro_data, self.timestamps, self.warmup_time
+        )
+        current_config = load_current_config()
 
-        self.get_logger().info("\n" + "=" * 70)
-        self.get_logger().info("IMU NOISE ANALYSIS - RESULTS")
-        self.get_logger().info("=" * 70)
-        self.get_logger().info(f"Total samples: {len(accel)}")
-        self.get_logger().info(f"Duration: {self.timestamps[-1] - self.warmup_time:.1f}s")
-        self.get_logger().info(f"Sample rate: {len(accel) / (self.timestamps[-1] - self.warmup_time):.1f} Hz")
-
-        # ================================================================
-        # ACCELEROMETER ANALYSIS
-        # ================================================================
-        self.get_logger().info("\n" + "-" * 70)
-        self.get_logger().info("ACCELEROMETER STATISTICS")
-        self.get_logger().info("-" * 70)
-
-        # Mean (should be close to [0, 0, -9.81] in NED frame)
-        accel_mean = np.mean(accel, axis=0)
-        accel_std = np.std(accel, axis=0)
-
-        self.get_logger().info(f"Mean (m/s²):  X={accel_mean[0]:8.4f}  Y={accel_mean[1]:8.4f}  Z={accel_mean[2]:8.4f}")
-        self.get_logger().info(f"Std Dev:      X={accel_std[0]:8.4f}  Y={accel_std[1]:8.4f}  Z={accel_std[2]:8.4f}")
-
-        # Check gravity alignment
-        gravity_mag = np.linalg.norm(accel_mean)
-        expected_gravity = 9.80665
-        gravity_error = abs(gravity_mag - expected_gravity)
-
-        self.get_logger().info(f"\nGravity magnitude: {gravity_mag:.4f} m/s²  (expected: {expected_gravity:.4f})")
-
-        if gravity_error > 0.5:
-            self.get_logger().warn(f"⚠️  Gravity error: {gravity_error:.4f} m/s² (> 0.5 m/s²)")
-            self.get_logger().warn("    IMU may be poorly calibrated or moving!")
-        else:
-            self.get_logger().info(f"✅ Gravity alignment good (error: {gravity_error:.4f} m/s²)")
-
-        # White noise (measurement noise) - use std dev
-        acc_n_measured = np.sqrt(np.mean(accel_std**2))  # RMS of std devs
-
-        self.get_logger().info(f"\n📊 MEASURED NOISE PARAMETERS:")
-        self.get_logger().info(f"   acc_n (white noise):  {acc_n_measured:.4f} m/s²")
-
-        # Bias stability - look at slow drift over time
-        # Split into windows and look at mean variation
-        window_size = 100
-        num_windows = len(accel) // window_size
-        window_means = np.array([np.mean(accel[i*window_size:(i+1)*window_size], axis=0)
-                                  for i in range(num_windows)])
-        acc_w_measured = np.std(np.diff(window_means, axis=0), axis=0).mean() / np.sqrt(2)
-
-        self.get_logger().info(f"   acc_w (bias drift):   {acc_w_measured:.6f} m/s³/√Hz")
-
-        # ================================================================
-        # GYROSCOPE ANALYSIS
-        # ================================================================
-        self.get_logger().info("\n" + "-" * 70)
-        self.get_logger().info("GYROSCOPE STATISTICS")
-        self.get_logger().info("-" * 70)
-
-        gyro_mean = np.mean(gyro, axis=0)
-        gyro_std = np.std(gyro, axis=0)
-
-        self.get_logger().info(f"Mean (rad/s): X={gyro_mean[0]:8.5f}  Y={gyro_mean[1]:8.5f}  Z={gyro_mean[2]:8.5f}")
-        self.get_logger().info(f"Std Dev:      X={gyro_std[0]:8.5f}  Y={gyro_std[1]:8.5f}  Z={gyro_std[2]:8.5f}")
-
-        # Check for excessive bias
-        gyro_bias_mag = np.linalg.norm(gyro_mean)
-        if gyro_bias_mag > 0.05:  # 2.8 degrees/sec
-            self.get_logger().warn(f"⚠️  High gyro bias: {gyro_bias_mag:.5f} rad/s ({np.degrees(gyro_bias_mag):.2f}°/s)")
-            self.get_logger().warn("    Consider recalibrating IMU!")
-        else:
-            self.get_logger().info(f"✅ Gyro bias acceptable: {gyro_bias_mag:.5f} rad/s ({np.degrees(gyro_bias_mag):.2f}°/s)")
-
-        # White noise
-        gyr_n_measured = np.sqrt(np.mean(gyro_std**2))
-
-        self.get_logger().info(f"\n📊 MEASURED NOISE PARAMETERS:")
-        self.get_logger().info(f"   gyr_n (white noise):  {gyr_n_measured:.6f} rad/s")
-
-        # Bias stability
-        gyro_window_means = np.array([np.mean(gyro[i*window_size:(i+1)*window_size], axis=0)
-                                       for i in range(num_windows)])
-        gyr_w_measured = np.std(np.diff(gyro_window_means, axis=0), axis=0).mean() / np.sqrt(2)
-
-        self.get_logger().info(f"   gyr_w (bias drift):   {gyr_w_measured:.8f} rad/s²/√Hz")
-
-        # ================================================================
-        # CONFIGURATION RECOMMENDATIONS
-        # ================================================================
-        self.get_logger().info("\n" + "=" * 70)
-        self.get_logger().info("RECOMMENDED VINS CONFIG PARAMETERS")
-        self.get_logger().info("=" * 70)
-
-        # Add safety margins
-        acc_n_recommended = min(max(acc_n_measured * 1.2, 0.08), 0.15)  # Clip to reasonable range
-        gyr_n_recommended = min(max(gyr_n_measured * 1.2, 0.004), 0.02)
-        acc_w_recommended = min(max(acc_w_measured * 1.5, 0.00004), 0.001)
-        gyr_w_recommended = min(max(gyr_w_measured * 1.5, 0.00001), 0.0001)
-
-        print("\n# IMU noise parameters (add to rpi_v3_mono_config.yaml)")
-        print(f"acc_n: {acc_n_recommended:.4f}          # accelerometer measurement noise")
-        print(f"gyr_n: {gyr_n_recommended:.6f}        # gyroscope measurement noise")
-        print(f"acc_w: {acc_w_recommended:.8f}      # accelerometer bias random walk")
-        print(f"gyr_w: {gyr_w_recommended:.8f}      # gyroscope bias random walk")
-        print(f"g_norm: {gravity_mag:.5f}         # measured gravity magnitude")
-
-        # ================================================================
-        # VALIDATION AGAINST CURRENT CONFIG
-        # ================================================================
-        self.get_logger().info("\n" + "=" * 70)
-        self.get_logger().info("VALIDATION AGAINST CURRENT CONFIG")
-        self.get_logger().info("=" * 70)
-
-        # Typical values from current config (read from VinsConfig if available)
-        try:
-            from configs.python import VinsConfig
-            current_config = {
-                'acc_n': VinsConfig.ACC_N,
-                'gyr_n': VinsConfig.GYR_N,
-                'acc_w': VinsConfig.ACC_W,
-                'gyr_w': VinsConfig.GYR_W
-            }
-        except ImportError:
-            current_config = {
-                'acc_n': 0.5,
-                'gyr_n': 0.02,
-                'acc_w': 0.01,
-                'gyr_w': 0.001
-            }
-
-        recommended_config = {
-            'acc_n': acc_n_recommended,
-            'gyr_n': gyr_n_recommended,
-            'acc_w': acc_w_recommended,
-            'gyr_w': gyr_w_recommended
-        }
-
-        print(f"\n{'Parameter':<10} {'Current':<12} {'Measured':<12} {'Recommended':<12} {'Error Factor':<15}")
-        print("-" * 70)
-
-        for key in current_config.keys():
-            current = current_config[key]
-            recommended = recommended_config[key]
-            measured_val = eval(f"{key}_measured")
-            error_factor = current / recommended if recommended > 0 else 0
-
-            status = "❌" if error_factor > 2.0 or error_factor < 0.5 else "✅"
-
-            print(f"{key:<10} {current:<12.6f} {measured_val:<12.6f} {recommended:<12.6f} {error_factor:<6.1f}x {status}")
-
-        self.get_logger().info("\n" + "=" * 70)
-        self.get_logger().info("ANALYSIS COMPLETE")
-        self.get_logger().info("=" * 70)
-        self.get_logger().info("\n📋 NEXT STEPS:")
-        self.get_logger().info("1. Copy recommended parameters to rpi_v3_mono_config.yaml")
-        self.get_logger().info("2. If error factors > 2x, update config IMMEDIATELY")
-        self.get_logger().info("3. Run static_drift_test.py to validate improvements")
-        self.get_logger().info("=" * 70)
+        for line in format_analysis_report(stats_result, current_config):
+            self.get_logger().info(line)
 
 def main():
     parser = argparse.ArgumentParser(description='IMU Noise Analyzer (live ROS2 or offline CSV mode)')
