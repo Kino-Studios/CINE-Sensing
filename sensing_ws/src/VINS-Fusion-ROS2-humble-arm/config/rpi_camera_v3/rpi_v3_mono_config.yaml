@@ -1,13 +1,15 @@
 %YAML:1.0
 ---
-
 imu: 1
 num_of_cam: 1
 
 imu_topic: "/imu_bridge/data_raw"
 image0_topic: "/camera/image_raw"
 
-output_path: "/home/fishnos/CINE-Sensing/vins_output/"
+# Launcher (run_vins.py / launch_complete_vio.py) overrides this with a resolved
+# absolute path in the generated config. This relative default is a safe fallback
+# for direct vins_node launches (writes under cwd, not filesystem root).
+output_path: "vins_output/"
 
 cam0_intrinsics: [750.99681791, 748.9227188, 578.86898934, 326.60855341]
 cam0_distortion_coeffs: [-0.04369182, 0.04562136, 0.00000456, 0.0003494, 0]
@@ -20,10 +22,25 @@ body_T_cam0:
   rows: 4
   cols: 4
   dt: d
-  data: [-0.70894393, 0.08628109, -0.6999672, 0.00392914,
-         -0.7052093, -0.07426853, 0.70509859, 0.00097993,
-         0.00885114, 0.99349875, 0.11349845, -0.01318157,
-         0, 0, 0, 1]
+  data:
+    [
+      -0.70894393,
+      0.08628109,
+      -0.6999672,
+      0.00392914,
+      -0.7052093,
+      -0.07426853,
+      0.70509859,
+      0.00097993,
+      0.00885114,
+      0.99349875,
+      0.11349845,
+      -0.01318157,
+      0,
+      0,
+      0,
+      1,
+    ]
 
 multiple_thread: 1
 feature_tracker: 1
@@ -58,7 +75,9 @@ tr: 0.0
 
 loop_closure: 1
 load_previous_pose_graph: 0
-pose_graph_save_path: "/home/fishnos/CINE-Sensing/vins_output/pose_graph/"
+# Launcher overrides this with a resolved absolute path in the generated config.
+# This relative default is a safe fallback for direct vins_node launches.
+pose_graph_save_path: "vins_output/pose_graph/"
 save_image: 0
 
 # Depth usage

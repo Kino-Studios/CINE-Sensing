@@ -10,8 +10,6 @@ import os
 import sys
 from ultralytics import YOLO
 
-sys.path.append('/workspace/venv/lib/python3.12/site-packages')
-
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)

@@ -1,6 +1,7 @@
 {
+  "_note": "MODEL_PATH is relative to repo root. Runtime code resolves it via CINE_SENSING_ROOT or sentinel walk. Do not hardcode absolute paths here.",
   "ModelDetectionConstants": {
-    "MODEL_PATH": "/workspace/sensing_ws/src/yolo_detection/models/homeobjects_yolo11n_trained.pt",
+    "MODEL_PATH": "sensing_ws/src/yolo_detection/models/homeobjects_yolo11n_trained.pt",
     "CAMERA_IMAGE_TOPIC": "/camera/image_raw",
     "BOUNDING_BOX_TOPIC": "/object_detection/bounding_box",
     "IMAGE_ENCODING": "bgr8",
