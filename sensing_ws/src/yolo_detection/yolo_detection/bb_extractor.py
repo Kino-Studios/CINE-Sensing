@@ -1,26 +1,28 @@
-import rclpy
-from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
-from geometry_msgs.msg import PolygonStamped, Point32
-from std_msgs.msg import Header
-import numpy as np
-from ultralytics import YOLO
-from threading import Event
-from ultralytics.utils.plotting import Annotator
-import sys
 import os
+import sys
+from threading import Event
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..'))
+import numpy as np
+import rclpy
+from cv_bridge import CvBridge
+from geometry_msgs.msg import Point32, PolygonStamped
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
+from sensor_msgs.msg import Image
+from std_msgs.msg import Header
+from ultralytics import YOLO
+from ultralytics.utils.plotting import Annotator
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from configs.python.constants import ModelDetectionConstants, UserRequestedParameters
 
+
 class BoundingBoxPublisher(Node):
     def __init__(self):
-        super().__init__('bb_extractor')
+        super().__init__("bb_extractor")
 
         self.bridge = CvBridge()
         self.shutdown_event = Event()
@@ -32,58 +34,55 @@ class BoundingBoxPublisher(Node):
             reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.VOLATILE,
             history=HistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
 
         self.image_subscriber = self.create_subscription(
             Image,
             ModelDetectionConstants.CAMERA_IMAGE_TOPIC,
             self._bounding_box_capture_callback,
-            qos_profile
+            qos_profile,
         )
 
         self.bounding_box_publisher = self.create_publisher(
-            PolygonStamped,
-            ModelDetectionConstants.BOUNDING_BOX_TOPIC,
-            qos_profile
+            PolygonStamped, ModelDetectionConstants.BOUNDING_BOX_TOPIC, qos_profile
         )
 
         self.dimensions_publisher = self.create_publisher(
-            PolygonStamped,
-            '/object_detection/dimensions',
-            qos_profile
+            PolygonStamped, "/object_detection/dimensions", qos_profile
         )
 
         self.center_point_publisher = self.create_publisher(
-            PolygonStamped,
-            '/object_detection/center_point',
-            qos_profile
+            PolygonStamped, "/object_detection/center_point", qos_profile
         )
 
     def _bounding_box_capture_callback(self, image_message):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(image_message, desired_encoding=ModelDetectionConstants.IMAGE_ENCODING)
+            cv_image = self.bridge.imgmsg_to_cv2(
+                image_message, desired_encoding=ModelDetectionConstants.IMAGE_ENCODING
+            )
 
-            inference_results = self.detection_model(cv_image, classes=[UserRequestedParameters.USER_OBJECT_ID])
+            inference_results = self.detection_model(
+                cv_image, classes=[UserRequestedParameters.USER_OBJECT_ID]
+            )
 
-            if len(inference_results) == 0 or inference_results[0].boxes is None or len(inference_results[0].boxes) == 0:
+            if (
+                len(inference_results) == 0
+                or inference_results[0].boxes is None
+                or len(inference_results[0].boxes) == 0
+            ):
                 return
 
             bounding_boxes = inference_results[0].boxes
             xyxy_tensors = bounding_boxes.xyxy[0]
 
-            if hasattr(xyxy_tensors, 'cpu'):
+            if hasattr(xyxy_tensors, "cpu"):
                 xyxy_numpy = xyxy_tensors.cpu().numpy()
             else:
                 xyxy_numpy = np.array(xyxy_tensors)
 
             x1, y1, x2, y2 = xyxy_numpy
-            corners = np.array([
-                [x1, y1],
-                [x2, y1],
-                [x2, y2],
-                [x1, y2]
-            ])
+            corners = np.array([[x1, y1], [x2, y1], [x2, y2], [x1, y2]])
 
             width, height, area = Annotator.get_bbox_dimension([x1, y1, x2, y2])
 
@@ -128,11 +127,12 @@ class BoundingBoxPublisher(Node):
             self.dimensions_publisher.publish(dimensions_message)
             self.center_point_publisher.publish(center_message)
         except Exception as error_message:
-            self.get_logger().error(f'Error processing image: {str(error_message)}')
+            self.get_logger().error(f"Error processing image: {str(error_message)}")
 
     def destroy_node(self):
         self.shutdown_event.set()
         super().destroy_node()
+
 
 def main():
     rclpy.init()
@@ -146,5 +146,6 @@ def main():
         node.destroy_node()
         rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

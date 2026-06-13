@@ -36,28 +36,28 @@ def _default_config_path() -> str:
 
 
 def generate_launch_description() -> LaunchDescription:
-    return LaunchDescription([
-        DeclareLaunchArgument(
-            "config_file",
-            default_value=_default_config_path(),
-            description=(
-                "Absolute path to gyroscope comms.yaml.  "
-                "Override with CINE_SENSING_ROOT env var or pass explicitly."
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument(
+                "config_file",
+                default_value=_default_config_path(),
+                description=(
+                    "Absolute path to gyroscope comms.yaml.  "
+                    "Override with CINE_SENSING_ROOT env var or pass explicitly."
+                ),
             ),
-        ),
-
-        Node(
-            package="imu_publisher",
-            executable="gyroscope_publisher",
-            name="gyroscope_publisher",
-            output="screen",
-            parameters=[LaunchConfiguration("config_file")],
-        ),
-
-        Node(
-            package="imu_publisher",
-            executable="vio_publisher",
-            name="vio_publisher",
-            output="screen",
-        ),
-    ])
+            Node(
+                package="imu_publisher",
+                executable="gyroscope_publisher",
+                name="gyroscope_publisher",
+                output="screen",
+                parameters=[LaunchConfiguration("config_file")],
+            ),
+            Node(
+                package="imu_publisher",
+                executable="vio_publisher",
+                name="vio_publisher",
+                output="screen",
+            ),
+        ]
+    )

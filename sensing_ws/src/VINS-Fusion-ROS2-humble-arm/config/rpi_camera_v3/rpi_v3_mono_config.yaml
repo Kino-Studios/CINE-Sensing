@@ -17,6 +17,18 @@ cam0_calib: "cam0_wide.yaml"
 image_width: 1152
 image_height: 648
 
+# body_T_cam0: 4x4 camera->body(IMU) extrinsic, used fixed (estimate_extrinsic: 0,
+# i.e. NOT refined online by VINS).
+# Provenance (from repo evidence, 2026-06-13): these values first appear together
+# as a single block in commit ada6c39 "cleanup and naming changes" (2026-01-03)
+# and have not changed since. The repo's calibration/ dir contains a Kalibr
+# camera-IMU dataset (calibration/kalibr_bags/kalibr_cam/) and a camera intrinsics
+# calibration (calibration/calibrate_camera.py + camera_calibration.yaml), which is
+# the most likely origin of this extrinsic. However there is NO camchain/Kalibr
+# output yaml or vins_output/extrinsic_parameter.csv checked into the repo that
+# directly produces these exact numbers, so the provenance is INFERRED, not proven.
+# TODO(hardware): re-derive from a fresh Kalibr cam-IMU calibration and record the
+# source file/run here. Do not hand-edit these values without that calibration.
 estimate_extrinsic: 0
 body_T_cam0:
   rows: 4

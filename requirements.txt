@@ -5,22 +5,25 @@
 #
 # Windows (CUDA): pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 # then: pip install -r requirements.txt --ignore-installed torch torchvision torchaudio
+#
+# ROS 2 deps (rclpy, sensor_msgs, cv_bridge, geometry_msgs, etc.) are provided
+# by the ROS 2 Jazzy install and rosdep — do NOT install them via pip.
 
 # deep learning and CV
-torch>=2.2.0
-torchvision>=0.17.0
-torchaudio>=2.2.0
-ultralytics>=8.2.0
-comet-ml>=3.37.0
-opencv-python>=4.8.0
+torch>=2.2.0,<3
+torchvision>=0.17.0,<1
+torchaudio>=2.2.0,<3
+ultralytics>=8.2.0,<9
+comet-ml>=3.37.0,<4
+opencv-python>=4.8.0,<5
 
 # data and visualization
-numpy>=1.23.0
-pandas>=2.0.0
-matplotlib>=3.7.0
-scipy>=1.10.0
-Pillow>=9.5.0
+numpy>=1.23.0,<3
+pandas>=2.0.0,<3
+matplotlib>=3.7.0,<4
+scipy>=1.10.0,<2
+Pillow>=9.5.0,<12
 
 # utils
-pyyaml>=6.0.0
-requests>=2.31.0
+pyyaml>=6.0.0,<7
+requests>=2.31.0,<3

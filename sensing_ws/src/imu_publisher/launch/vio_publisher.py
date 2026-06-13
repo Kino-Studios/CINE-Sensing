@@ -1,78 +1,54 @@
-import rclpy
-from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
-from sensor_msgs.msg import Imu, Image
-from geometry_msgs.msg import Vector3Stamped, PoseStamped
-from nav_msgs.msg import Odometry
-import tf2_ros
-from tf2_ros import TransformBroadcaster
-from geometry_msgs.msg import TransformStamped
-import numpy as np
-
-import sys
 import os
+import sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../..'))
+import rclpy
+from geometry_msgs.msg import PoseStamped, TransformStamped
+from nav_msgs.msg import Odometry
+from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
+from sensor_msgs.msg import Image, Imu
+from tf2_ros import TransformBroadcaster
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../.."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from configs.python import CameraConfig
 
+
 class VIOPublisher(Node):
     def __init__(self):
-        super().__init__('vio_publisher')
+        super().__init__("vio_publisher")
 
         sensor_sub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
-        
+
         vins_pub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
 
         self.imu_subscription = self.create_subscription(
-            Imu,
-            'mavros/imu/data',
-            self.imu_callback,
-            sensor_sub_qos
+            Imu, "mavros/imu/data", self.imu_callback, sensor_sub_qos
         )
 
         self.image_subscription = self.create_subscription(
-            Image,
-            CameraConfig.CAMERA_TOPIC,
-            self.image_callback,
-            sensor_sub_qos
+            Image, CameraConfig.CAMERA_TOPIC, self.image_callback, sensor_sub_qos
         )
 
-        self.vins_imu_publisher = self.create_publisher(
-            Imu,
-            '/vins/imu',
-            vins_pub_qos
-        )
+        self.vins_imu_publisher = self.create_publisher(Imu, "/vins/imu", vins_pub_qos)
 
-        self.vins_image_publisher = self.create_publisher(
-            Image,
-            '/vins/image',
-            vins_pub_qos
-        )
+        self.vins_image_publisher = self.create_publisher(Image, "/vins/image", vins_pub_qos)
 
-        self.pose_publisher = self.create_publisher(
-            PoseStamped,
-            '/vio/pose',
-            vins_pub_qos
-        )
+        self.pose_publisher = self.create_publisher(PoseStamped, "/vio/pose", vins_pub_qos)
 
-        self.odometry_publisher = self.create_publisher(
-            Odometry,
-            '/vio/odometry',
-            vins_pub_qos
-        )
+        self.odometry_publisher = self.create_publisher(Odometry, "/vio/odometry", vins_pub_qos)
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -94,7 +70,9 @@ class VIOPublisher(Node):
         self.last_imu_time = msg.header.stamp
 
         if self.last_imu_time and (self.last_imu_time.sec % 5 == 0):
-            self.get_logger().info(f'IMU: angular_vel=[{msg.angular_velocity.x:.3f}, {msg.angular_velocity.y:.3f}, {msg.angular_velocity.z:.3f}], linear_acc=[{msg.linear_acceleration.x:.3f}, {msg.linear_acceleration.y:.3f}, {msg.linear_acceleration.z:.3f}]')
+            self.get_logger().info(
+                f"IMU: angular_vel=[{msg.angular_velocity.x:.3f}, {msg.angular_velocity.y:.3f}, {msg.angular_velocity.z:.3f}], linear_acc=[{msg.linear_acceleration.x:.3f}, {msg.linear_acceleration.y:.3f}, {msg.linear_acceleration.z:.3f}]"
+            )
 
     def image_callback(self, msg: Image):
         vins_image_msg = Image()
@@ -139,6 +117,7 @@ class VIOPublisher(Node):
 
         self.odometry_publisher.publish(odom_msg)
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = VIOPublisher()
@@ -151,5 +130,6 @@ def main(args=None):
         node.destroy_node()
         rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -14,7 +14,10 @@ MODELS = [
 
 MODELS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "sensing_ws", "src", "yolo_detection", "models"
+    "sensing_ws",
+    "src",
+    "yolo_detection",
+    "models",
 )
 
 BASE_URL = f"https://github.com/{GITHUB_REPO}/releases/download/{RELEASE_TAG}"
@@ -30,6 +33,7 @@ def download(filename, dest_dir):
 
     print(f"downloading {filename}...")
     try:
+
         def progress(count, block_size, total_size):
             if total_size > 0:
                 pct = min(count * block_size * 100 // total_size, 100)

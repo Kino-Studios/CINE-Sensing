@@ -1,51 +1,61 @@
-import rclpy
-from rclpy.node import Node
-from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
-from sensor_msgs.msg import Image, CameraInfo
-from cv_bridge import CvBridge
+import os
+import subprocess
+import sys
+import time
+from threading import Event, Thread
+
 import cv2
 import numpy as np
-from threading import Thread, Event
-import time
-import subprocess
+import rclpy
+from cv_bridge import CvBridge
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile, ReliabilityPolicy
+from sensor_msgs.msg import Image
 
-import sys
-import os
-
-project_root = os.path.expanduser('~/CINE-Sensing')
+project_root = os.path.expanduser("~/CINE-Sensing")
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from configs.python import CameraConfig
 
+
 class CameraPublisher(Node):
     def __init__(self):
-        super().__init__('camera_publisher')
+        super().__init__("camera_publisher")
 
         self.declare_parameters(
-            '',
+            "",
             [
-                ('camera_id', CameraConfig.CAMERA_ID),
-                ('image_width', CameraConfig.IMAGE_WIDTH),
-                ('image_height', CameraConfig.IMAGE_HEIGHT),
-                ('fps', CameraConfig.FPS),
-                ('camera_topic', CameraConfig.CAMERA_TOPIC),
-                ('frame_id', CameraConfig.CAMERA_FRAME_ID),
-                ('save_latest_frame', False),
-                ('libcamera_shutter', CameraConfig.EXPOSURE_TIME_US), # Using exposure time as shutter
-                ('libcamera_gain', CameraConfig.ANALOG_GAIN), # Using analog gain
+                ("camera_id", CameraConfig.CAMERA_ID),
+                ("image_width", CameraConfig.IMAGE_WIDTH),
+                ("image_height", CameraConfig.IMAGE_HEIGHT),
+                ("fps", CameraConfig.FPS),
+                ("camera_topic", CameraConfig.CAMERA_TOPIC),
+                ("frame_id", CameraConfig.CAMERA_FRAME_ID),
+                ("save_latest_frame", False),
+                (
+                    "libcamera_shutter",
+                    CameraConfig.EXPOSURE_TIME_US,
+                ),  # Using exposure time as shutter
+                ("libcamera_gain", CameraConfig.ANALOG_GAIN),  # Using analog gain
             ],
         )
 
-        self.camera_id = self.get_parameter('camera_id').get_parameter_value().integer_value
-        self.image_width = self.get_parameter('image_width').get_parameter_value().integer_value
-        self.image_height = self.get_parameter('image_height').get_parameter_value().integer_value
-        self.fps = float(self.get_parameter('fps').get_parameter_value().double_value)
-        self.camera_topic = self.get_parameter('camera_topic').get_parameter_value().string_value
-        self.frame_id = self.get_parameter('frame_id').get_parameter_value().string_value
-        self.save_latest_frame = self.get_parameter('save_latest_frame').get_parameter_value().bool_value
-        self.libcamera_shutter = self.get_parameter('libcamera_shutter').get_parameter_value().integer_value
-        self.libcamera_gain = float(self.get_parameter('libcamera_gain').get_parameter_value().double_value)
+        self.camera_id = self.get_parameter("camera_id").get_parameter_value().integer_value
+        self.image_width = self.get_parameter("image_width").get_parameter_value().integer_value
+        self.image_height = self.get_parameter("image_height").get_parameter_value().integer_value
+        self.fps = float(self.get_parameter("fps").get_parameter_value().double_value)
+        self.camera_topic = self.get_parameter("camera_topic").get_parameter_value().string_value
+        self.frame_id = self.get_parameter("frame_id").get_parameter_value().string_value
+        self.save_latest_frame = (
+            self.get_parameter("save_latest_frame").get_parameter_value().bool_value
+        )
+        self.libcamera_shutter = (
+            self.get_parameter("libcamera_shutter").get_parameter_value().integer_value
+        )
+        self.libcamera_gain = float(
+            self.get_parameter("libcamera_gain").get_parameter_value().double_value
+        )
 
         self.bridge = CvBridge()
         self.shutdown_event = Event()
@@ -56,27 +66,24 @@ class CameraPublisher(Node):
             reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.VOLATILE,
             history=HistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
 
-        self.image_publisher = self.create_publisher(
-            Image,
-            self.camera_topic,
-            qos_profile
-        )
+        self.image_publisher = self.create_publisher(Image, self.camera_topic, qos_profile)
 
         # start publishing
-        if self.camera_method == 'opencv':
+        if self.camera_method == "opencv":
             self._start_opencv_capture()
-        elif self.camera_method == 'libcamera':
+        elif self.camera_method == "libcamera":
             self._start_libcamera_capture()
 
     def _detect_camera_method(self):
         try:
-            result = subprocess.run(['rpicam-hello', '--list-cameras'],
-                                  capture_output=True, text=True, timeout=5)
-            if result.returncode == 0 and 'Available cameras' in result.stdout:
-                return 'libcamera'
+            result = subprocess.run(
+                ["rpicam-hello", "--list-cameras"], capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0 and "Available cameras" in result.stdout:
+                return "libcamera"
         except Exception:
             pass
 
@@ -89,12 +96,12 @@ class CameraPublisher(Node):
                     if ret and frame is not None:
                         self.camera_id = cam_id
                         cap.release()
-                        return 'opencv'
+                        return "opencv"
                 cap.release()
             except Exception:
                 pass
 
-        return 'none'
+        return "none"
 
     def _start_opencv_capture(self):
         self.camera = cv2.VideoCapture(self.camera_id)
@@ -132,20 +139,35 @@ class CameraPublisher(Node):
 
     def _libcamera_capture_loop(self):
         try:
-            process = subprocess.Popen([
-                'rpicam-vid',
-                '--codec', 'mjpeg',
-                '--width', str(self.image_width),
-                '--height', str(self.image_height),
-                '--framerate', str(int(self.fps)),
-                '--timeout', '0',
-                '--nopreview',
-                '--shutter', str(self.libcamera_shutter),
-                '--gain', str(self.libcamera_gain),
-                '--awb', 'auto',
-                '--quality', '90',
-                '--output', '-',
-            ], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8)
+            process = subprocess.Popen(
+                [
+                    "rpicam-vid",
+                    "--codec",
+                    "mjpeg",
+                    "--width",
+                    str(self.image_width),
+                    "--height",
+                    str(self.image_height),
+                    "--framerate",
+                    str(int(self.fps)),
+                    "--timeout",
+                    "0",
+                    "--nopreview",
+                    "--shutter",
+                    str(self.libcamera_shutter),
+                    "--gain",
+                    str(self.libcamera_gain),
+                    "--awb",
+                    "auto",
+                    "--quality",
+                    "90",
+                    "--output",
+                    "-",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                bufsize=10**8,
+            )
 
             self.get_logger().info("libcamera capture at " + str(self.fps) + " Hz")
 
@@ -157,13 +179,13 @@ class CameraPublisher(Node):
                 buffer += chunk
 
                 while True:
-                    soi = buffer.find(b'\xff\xd8')
-                    eoi = buffer.find(b'\xff\xd9', soi + 2)
+                    soi = buffer.find(b"\xff\xd8")
+                    eoi = buffer.find(b"\xff\xd9", soi + 2)
                     if soi != -1 and eoi != -1:
                         capture_time = self.get_clock().now()
 
-                        jpg = buffer[soi:eoi + 2]
-                        buffer = buffer[eoi + 2:]
+                        jpg = buffer[soi : eoi + 2]
+                        buffer = buffer[eoi + 2 :]
 
                         np_arr = np.frombuffer(jpg, dtype=np.uint8)
                         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -173,7 +195,7 @@ class CameraPublisher(Node):
                         break
 
         finally:
-            if 'process' in locals():
+            if "process" in locals():
                 process.terminate()
                 try:
                     process.wait(timeout=2)
@@ -183,7 +205,7 @@ class CameraPublisher(Node):
     def _publish_frame(self, frame, timestamp):
         try:
             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            msg = self.bridge.cv2_to_imgmsg(gray_frame, encoding='mono8')
+            msg = self.bridge.cv2_to_imgmsg(gray_frame, encoding="mono8")
 
             msg.header.stamp = timestamp.to_msg()
             msg.header.frame_id = self.frame_id
@@ -191,7 +213,7 @@ class CameraPublisher(Node):
             self.image_publisher.publish(msg)
 
             if self.save_latest_frame:
-                cv2.imwrite('latest_frame.png', frame)
+                cv2.imwrite("latest_frame.png", frame)
 
         except Exception as e:
             self.get_logger().error(f"Failed to publish frame: {e}")
@@ -199,13 +221,14 @@ class CameraPublisher(Node):
     def destroy_node(self):
         self.shutdown_event.set()
 
-        if hasattr(self, 'capture_thread') and self.capture_thread.is_alive():
+        if hasattr(self, "capture_thread") and self.capture_thread.is_alive():
             self.capture_thread.join(timeout=2.0)
 
-        if hasattr(self, 'camera') and self.camera:
+        if hasattr(self, "camera") and self.camera:
             self.camera.release()
 
         super().destroy_node()
+
 
 def main():
     rclpy.init()
@@ -222,5 +245,6 @@ def main():
         except Exception:
             pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -1,62 +1,42 @@
 import rclpy
-from rclpy.node import Node
-from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDurabilityPolicy
-from sensor_msgs.msg import Imu, Image
-from geometry_msgs.msg import Vector3Stamped, PoseStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped
 from nav_msgs.msg import Odometry
-import tf2_ros
+from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
+from sensor_msgs.msg import Imu
 from tf2_ros import TransformBroadcaster
-from geometry_msgs.msg import TransformStamped
-import numpy as np
+
 
 class VIOPublisher(Node):
     def __init__(self):
-        super().__init__('vio_publisher')
+        super().__init__("vio_publisher")
 
         sensor_sub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
         vins_pub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=10
+            depth=10,
         )
 
         self.imu_subscription = self.create_subscription(
-            Imu,
-            'mavros/imu/data',
-            self.imu_callback,
-            sensor_sub_qos
+            Imu, "mavros/imu/data", self.imu_callback, sensor_sub_qos
         )
 
         self.vins_odom_subscription = self.create_subscription(
-            Odometry,
-            '/vins_estimator/odometry',
-            self.vins_odom_callback,
-            vins_pub_qos
+            Odometry, "/vins_estimator/odometry", self.vins_odom_callback, vins_pub_qos
         )
 
-        self.vins_imu_publisher = self.create_publisher(
-            Imu,
-            '/imu_bridge/data_raw',
-            vins_pub_qos
-        )
+        self.vins_imu_publisher = self.create_publisher(Imu, "/imu_bridge/data_raw", vins_pub_qos)
 
-        self.pose_publisher = self.create_publisher(
-            PoseStamped,
-            '/vio/pose',
-            vins_pub_qos
-        )
+        self.pose_publisher = self.create_publisher(PoseStamped, "/vio/pose", vins_pub_qos)
 
-        self.odometry_publisher = self.create_publisher(
-            Odometry,
-            '/vio/odometry',
-            vins_pub_qos
-        )
+        self.odometry_publisher = self.create_publisher(Odometry, "/vio/odometry", vins_pub_qos)
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -103,6 +83,7 @@ class VIOPublisher(Node):
 
         self.tf_broadcaster.sendTransform(t)
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = VIOPublisher()
@@ -115,5 +96,6 @@ def main(args=None):
         node.destroy_node()
         rclpy.shutdown()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
