@@ -5,6 +5,20 @@ from pathlib import Path
 _CONFIG_DIR = Path(__file__).parent.parent / 'json'
 
 
+def _repo_root() -> Path:
+    """Return repo root via CINE_SENSING_ROOT env var, or resolve from fixed depth.
+
+    This file lives at <repo_root>/configs/python/__init__.py, so the repo
+    root is two directory levels up (parents[2]). Used to resolve repo-relative
+    paths stored in the JSON source of truth into absolute paths for runtime consumers.
+    """
+    root_env = os.environ.get("CINE_SENSING_ROOT", "")
+    if root_env:
+        return Path(root_env)
+
+    return Path(__file__).resolve().parents[2]
+
+
 def _load_json(filename: str) -> dict:
     json_path = _CONFIG_DIR / filename
     if not json_path.exists():
@@ -17,10 +31,27 @@ _camera_config = _load_json('camera.json')
 _gyroscope_config = _load_json('gyroscope.json')
 _vins_config = _load_json('vins.json')
 
+def _resolve_model_path(rel_or_abs: str) -> str:
+    """Resolve a repo-relative MODEL_PATH from JSON into an absolute path.
+
+    The JSON source stores the path relative to the repo root (see the
+    "_note" key in user_params.json). An empty value is passed through
+    unchanged, and an already-absolute path is left as-is.
+    """
+    if not rel_or_abs:
+        return rel_or_abs
+
+    candidate = Path(rel_or_abs)
+    if candidate.is_absolute():
+        return str(candidate)
+
+    return str(_repo_root() / candidate)
+
+
 class ModelDetectionConstants:
     _data = _user_params.get('ModelDetectionConstants', {})
 
-    MODEL_PATH = _data.get('MODEL_PATH', '')
+    MODEL_PATH = _resolve_model_path(_data.get('MODEL_PATH', ''))
     CAMERA_IMAGE_TOPIC = _data.get('CAMERA_IMAGE_TOPIC', '/camera/image_raw')
     BOUNDING_BOX_TOPIC = _data.get('BOUNDING_BOX_TOPIC', '/object_detection/bounding_box')
     IMAGE_ENCODING = _data.get('IMAGE_ENCODING', 'bgr8')

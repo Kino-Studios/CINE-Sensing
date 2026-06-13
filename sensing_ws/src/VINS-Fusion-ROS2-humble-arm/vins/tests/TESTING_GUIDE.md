@@ -49,7 +49,7 @@ ros2 launch mavros px4.launch fcu_url:=/dev/ttyACM0:921600
 # Terminal 2
 cd ~/CINE-Sensing
 source source_scripts.sh
-ros2 run fc_data imu_bridge
+ros2 run imu_publisher imu_bridge
 ```
 
 ### Step 1.2: Run IMU Noise Analysis

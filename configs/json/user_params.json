@@ -1,5 +1,5 @@
 {
-  "_note": "MODEL_PATH is relative to repo root. Runtime code resolves it via CINE_SENSING_ROOT or sentinel walk. Do not hardcode absolute paths here.",
+  "_note": "MODEL_PATH is relative to repo root. Runtime code resolves it via CINE_SENSING_ROOT env var, or two directory levels up from configs/python/__init__.py. Do not hardcode absolute paths here.",
   "ModelDetectionConstants": {
     "MODEL_PATH": "sensing_ws/src/yolo_detection/models/homeobjects_yolo11n_trained.pt",
     "CAMERA_IMAGE_TOPIC": "/camera/image_raw",
