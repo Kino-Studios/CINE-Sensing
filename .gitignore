@@ -149,6 +149,7 @@ instance/
 .webassets-cache
 .scrapy
 docs/_build/
+docs/
 /site
 
 # =============================================================================
@@ -176,3 +177,6 @@ Thumbs.db
 .env
 .envrc
 ziGzAjL1
+
+# VIO test bags (large binaries, keep on the Pi)
+datasets/vio_bags/
