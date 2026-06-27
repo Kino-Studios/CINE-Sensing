@@ -47,13 +47,11 @@ class PositionMonitor(Node):
             msg.pose.pose.position.z
         ])
         
-        # Calculate drift from start
         drift = np.linalg.norm(current_pos - self.start_pos)
         
         self.positions.append(current_pos)
         self.timestamps.append(elapsed)
         
-        # Print every 5 seconds
         if len(self.positions) % 125 == 0:  # ~125 samples = 5 seconds at 25Hz
             print(f"[{elapsed:.1f}s] Position: X={current_pos[0]:.2f}, Y={current_pos[1]:.2f}, Z={current_pos[2]:.2f} | Drift from start: {drift:.3f}m")
     
@@ -65,7 +63,6 @@ class PositionMonitor(Node):
         positions = np.array(self.positions)
         total_time = self.timestamps[-1]
         
-        # Calculate drift over time
         drifts = [np.linalg.norm(pos - self.start_pos) for pos in positions]
         final_drift = drifts[-1]
         max_drift = max(drifts)

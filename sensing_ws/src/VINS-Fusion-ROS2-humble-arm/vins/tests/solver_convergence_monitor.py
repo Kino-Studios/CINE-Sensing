@@ -25,14 +25,13 @@ class SolverConvergenceMonitor(Node):
     def __init__(self):
         super().__init__('solver_convergence_monitor')
         
-        # Statistics
         self.total_optimizations = 0
         self.solver_failures = 0
         self.cholesky_failures = 0
         self.iteration_times = []
         self.start_time = None
-        self.test_duration = 60.0  # 1 minute
-        
+        self.test_duration = 60.0
+
         # Monitor odometry to count optimizations
         self.odom_sub = self.create_subscription(
             Odometry,
@@ -78,7 +77,6 @@ class SolverConvergenceMonitor(Node):
     
     def analyze_results(self):
         """Analyze solver performance"""
-        
         if self.total_optimizations == 0:
             self.get_logger().error("❌ No optimizations detected - is VINS running?")
             return
@@ -87,7 +85,6 @@ class SolverConvergenceMonitor(Node):
         self.get_logger().info("SOLVER CONVERGENCE ANALYSIS")
         self.get_logger().info("=" * 70)
         
-        # Calculate failure rate
         failure_rate = (self.solver_failures / self.total_optimizations * 100) if self.total_optimizations > 0 else 0
         cholesky_rate = (self.cholesky_failures / self.total_optimizations * 100) if self.total_optimizations > 0 else 0
         
@@ -95,7 +92,6 @@ class SolverConvergenceMonitor(Node):
         self.get_logger().info(f"Solver failures: {self.solver_failures} ({failure_rate:.1f}%)")
         self.get_logger().info(f"Cholesky failures: {self.cholesky_failures} ({cholesky_rate:.1f}%)")
         
-        # Assessment
         self.get_logger().info("\n" + "-" * 70)
         self.get_logger().info("ASSESSMENT")
         self.get_logger().info("-" * 70)
@@ -115,7 +111,6 @@ class SolverConvergenceMonitor(Node):
             self.get_logger().info("❌ CRITICAL: Very high failure rate (> 20%)")
             self.get_logger().info("   System is unstable - major configuration error")
             
-        # Cholesky-specific failures
         if cholesky_failures > 0:
             self.get_logger().info("\n⚠️  CHOLESKY FACTORIZATION FAILURES DETECTED")
             self.get_logger().info("   This indicates ill-conditioned optimization problem")
@@ -125,7 +120,6 @@ class SolverConvergenceMonitor(Node):
             self.get_logger().info("   3. Insufficient parallax for triangulation")
             self.get_logger().info("   4. Conflicting IMU and vision estimates")
         
-        # Timing analysis
         if len(self.iteration_times) > 10:
             import numpy as np
             times = np.array(self.iteration_times)
@@ -140,7 +134,6 @@ class SolverConvergenceMonitor(Node):
                 self.get_logger().warn("⚠️  Some iterations exceed 100ms")
                 self.get_logger().warn("   May cause real-time issues at 25Hz")
         
-        # Recommendations
         self.get_logger().info("\n" + "=" * 70)
         self.get_logger().info("RECOMMENDATIONS")
         self.get_logger().info("=" * 70)

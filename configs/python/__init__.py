@@ -23,8 +23,9 @@ def _load_json(filename: str) -> dict:
     json_path = _CONFIG_DIR / filename
     if not json_path.exists():
         raise FileNotFoundError(f"Config file not found: {json_path}")
-    with open(json_path, "r") as f:
-        return json.load(f)
+
+    with open(json_path, "r") as file_handle:
+        return json.load(file_handle)
 
 
 _user_params = _load_json("user_params.json")

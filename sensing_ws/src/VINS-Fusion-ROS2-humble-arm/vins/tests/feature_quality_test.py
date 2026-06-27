@@ -26,16 +26,13 @@ class FeatureQualityTest(Node):
     def __init__(self):
         super().__init__('feature_quality_test')
 
-        # Statistics tracking
         self.frame_count = 0
         self.feature_counts = []
         self.start_time = None
-        self.test_duration = 30.0  # 30 seconds
+        self.test_duration = 30.0
 
-        # Feature distribution tracking
         self.feature_positions = []
 
-        # Subscribe to feature point cloud from VINS
         self.feature_sub = self.create_subscription(
             PointCloud,
             '/feature_tracker/feature',
@@ -65,11 +62,9 @@ class FeatureQualityTest(Node):
         num_features = len(msg.points)
         self.feature_counts.append(num_features)
 
-        # Extract feature positions (x, y are image coordinates)
-        positions = [(p.x, p.y) for p in msg.points]
+        positions = [(point.x, point.y) for point in msg.points]
         self.feature_positions.append(positions)
 
-        # Real-time feedback every 10 frames
         if self.frame_count % 10 == 0:
             recent_avg = np.mean(self.feature_counts[-10:])
             self.get_logger().info(
@@ -91,9 +86,6 @@ class FeatureQualityTest(Node):
         self.get_logger().info("FEATURE TRACKING QUALITY ANALYSIS")
         self.get_logger().info("=" * 70)
 
-        # ================================================================
-        # FEATURE COUNT STATISTICS
-        # ================================================================
         mean_features = np.mean(counts)
         std_features = np.std(counts)
         min_features = np.min(counts)
@@ -112,7 +104,6 @@ class FeatureQualityTest(Node):
         self.get_logger().info(f"Min:      {min_features}")
         self.get_logger().info(f"Max:      {max_features}")
 
-        # Assess feature count
         if mean_features < 100:
             status = "❌ CRITICAL"
             message = "Too few features! Increase max_cnt or lower detect_threshold"
@@ -128,21 +119,17 @@ class FeatureQualityTest(Node):
 
         self.get_logger().info(f"\n{status}: {message}")
 
-        # ================================================================
-        # STABILITY ANALYSIS
-        # ================================================================
         self.get_logger().info("\n" + "-" * 70)
         self.get_logger().info("TRACKING STABILITY")
         self.get_logger().info("-" * 70)
 
-        # Coefficient of variation (CV) = std/mean
-        cv = std_features / mean_features if mean_features > 0 else 0
+        coefficient_of_variation = std_features / mean_features if mean_features > 0 else 0
 
-        self.get_logger().info(f"Coefficient of Variation: {cv:.2%}")
+        self.get_logger().info(f"Coefficient of Variation: {coefficient_of_variation:.2%}")
 
-        if cv < 0.15:
+        if coefficient_of_variation < 0.15:
             self.get_logger().info("✅ STABLE: Consistent feature tracking")
-        elif cv < 0.30:
+        elif coefficient_of_variation < 0.30:
             self.get_logger().info("⚠️  MODERATE: Some tracking variability")
         else:
             self.get_logger().info("❌ UNSTABLE: High tracking variability")
@@ -150,7 +137,6 @@ class FeatureQualityTest(Node):
             self.get_logger().info("   - Verify camera exposure settings")
             self.get_logger().info("   - May need to adjust min_dist or detect_threshold")
 
-        # Count frames with very low features
         low_feature_frames = np.sum(counts < 100)
         low_feature_ratio = low_feature_frames / len(counts)
 
@@ -163,14 +149,10 @@ class FeatureQualityTest(Node):
             self.get_logger().warn("   - Poor lighting or texture")
             self.get_logger().warn("   - Motion blur (reduce shutter speed)")
 
-        # ================================================================
-        # SPATIAL DISTRIBUTION ANALYSIS
-        # ================================================================
         self.get_logger().info("\n" + "-" * 70)
         self.get_logger().info("FEATURE DISTRIBUTION ANALYSIS")
         self.get_logger().info("-" * 70)
 
-        # Analyze spatial distribution for recent frames
         recent_frames = min(10, len(self.feature_positions))
         all_positions = []
         for positions in self.feature_positions[-recent_frames:]:
@@ -191,27 +173,22 @@ class FeatureQualityTest(Node):
 
             from configs.python import RuleOfThirdsConstants, CameraConfig
 
-            # Expected image dimensions (from config)
             img_width = CameraConfig.IMAGE_WIDTH
             img_height = CameraConfig.IMAGE_HEIGHT
 
-            # Divide into grid cells
             grid_rows = 4
             grid_cols = 6
             cell_width = img_width / grid_cols
             cell_height = img_height / grid_rows
 
-            # Count features in each cell
             grid_counts = np.zeros((grid_rows, grid_cols))
             for x, y in zip(x_coords, y_coords):
                 col = min(int(x / cell_width), grid_cols - 1)
                 row = min(int(y / cell_height), grid_rows - 1)
                 grid_counts[row, col] += 1
 
-            # Normalize by number of frames
             grid_counts /= recent_frames
 
-            # Calculate distribution metrics
             mean_per_cell = np.mean(grid_counts)
             std_per_cell = np.std(grid_counts)
             min_per_cell = np.min(grid_counts)
@@ -222,7 +199,6 @@ class FeatureQualityTest(Node):
             self.get_logger().info(f"Std dev: {std_per_cell:.1f}")
             self.get_logger().info(f"Min/Max: {min_per_cell:.0f} / {max_per_cell:.0f}")
 
-            # Check for clustering
             clustering_metric = std_per_cell / mean_per_cell if mean_per_cell > 0 else 0
 
             if clustering_metric < 0.5:
@@ -234,7 +210,6 @@ class FeatureQualityTest(Node):
                 self.get_logger().info("   - Increase min_dist parameter")
                 self.get_logger().info("   - Check for image artifacts or patterns")
 
-            # Visualize distribution (ASCII art)
             self.get_logger().info("\nFeature Distribution Heatmap:")
             self.get_logger().info("(Rows=vertical, Cols=horizontal, numbers=features/frame/cell)")
 
@@ -254,9 +229,6 @@ class FeatureQualityTest(Node):
                         row_str += " █ "
                 self.get_logger().info(f"  {row_str}")
 
-        # ================================================================
-        # RECOMMENDATIONS
-        # ================================================================
         self.get_logger().info("\n" + "=" * 70)
         self.get_logger().info("RECOMMENDATIONS")
         self.get_logger().info("=" * 70)

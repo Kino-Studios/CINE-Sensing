@@ -30,8 +30,8 @@ class YOLODetectionNode(Node):
             model_path = ModelDetectionConstants.MODEL_PATH
             self.model = YOLO(model_path)
             self.get_logger().info(f"Loaded YOLO model from {model_path}")
-        except Exception as e:
-            self.get_logger().error(f"Failed to load model: {str(e)}")
+        except Exception as exc:
+            self.get_logger().error(f"Failed to load model: {str(exc)}")
             return
 
         self.frame_count = 0
@@ -62,8 +62,8 @@ class YOLODetectionNode(Node):
                 if self.frame_count % 30 == 0:
                     self.get_logger().info(f"Frame {self.frame_count}: No objects detected")
 
-        except Exception as e:
-            self.get_logger().error(f"Error processing image: {str(e)}")
+        except Exception as exc:
+            self.get_logger().error(f"Error processing image: {str(exc)}")
 
 
 def main(args=None):
