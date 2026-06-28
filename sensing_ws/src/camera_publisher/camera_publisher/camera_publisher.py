@@ -71,7 +71,6 @@ class CameraPublisher(Node):
 
         self.image_publisher = self.create_publisher(Image, self.camera_topic, qos_profile)
 
-        # start publishing
         if self.camera_method == "opencv":
             self._start_opencv_capture()
         elif self.camera_method == "libcamera":
@@ -215,8 +214,8 @@ class CameraPublisher(Node):
             if self.save_latest_frame:
                 cv2.imwrite("latest_frame.png", frame)
 
-        except Exception as e:
-            self.get_logger().error(f"Failed to publish frame: {e}")
+        except Exception as exc:
+            self.get_logger().error(f"Failed to publish frame: {exc}")
 
     def destroy_node(self):
         self.shutdown_event.set()

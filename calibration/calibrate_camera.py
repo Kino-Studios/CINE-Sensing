@@ -70,7 +70,6 @@ def calibrate(shows_pics=True):
         _log.error("No chessboards detected. Check image quality and chessboard dimensions.")
         return None, None
 
-    # calibrate
     (
         rep_error,
         camera_matrix,
@@ -79,7 +78,6 @@ def calibrate(shows_pics=True):
         translation_vecs,
     ) = cv.calibrateCamera(world_points_list, image_points_list, image_shape, None, None)
 
-    # save params
     calib_data_dir = os.path.join(script_dir, "calib_data")
     os.makedirs(calib_data_dir, exist_ok=True)
     param_path = os.path.join(calib_data_dir, "calibration.npz")

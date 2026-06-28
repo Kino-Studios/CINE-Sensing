@@ -21,7 +21,6 @@ class GyroscopePublisher(Node):
         self.vector_publisher = self.create_publisher(Vector3Stamped, "gyroscope/data", sensor_qos)
         self.twist_publisher = self.create_publisher(TwistStamped, "gyroscope/twist", sensor_qos)
 
-    # called by subscriber to publish gyroscope data for VINS
     def imu_callback(self, msg: Imu):
         gyro_msg = Vector3Stamped()
         gyro_msg.header = msg.header

@@ -15,7 +15,6 @@ class SetpointPublisher(Node):
             depth=10,
         )
 
-        # translational
         self.mavros_position_pub = self.create_publisher(
             PoseStamped, "/mavros/setpoint_position/local", mavros_qos
         )
@@ -28,7 +27,6 @@ class SetpointPublisher(Node):
             Vector3Stamped, "/mavros/setpoint_accel/accel", mavros_qos
         )
 
-        # attitude
         self.mavros_attitude_pub = self.create_publisher(
             PoseStamped, "/mavros/setpoint_attitude/attitude", mavros_qos
         )

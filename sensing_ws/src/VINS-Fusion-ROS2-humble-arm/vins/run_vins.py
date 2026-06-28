@@ -37,6 +37,7 @@ def _vins_src_root() -> pathlib.Path:
             / "src"
             / "VINS-Fusion-ROS2-humble-arm"
         )
+
     return pathlib.Path(__file__).resolve().parents[1]
 
 
@@ -50,6 +51,7 @@ def _output_dir() -> pathlib.Path:
     root_env = os.environ.get("CINE_SENSING_ROOT", "")
     if root_env:
         return pathlib.Path(root_env) / "vins_output"
+
     return pathlib.Path.home() / ".ros" / "vins_output"
 
 
@@ -96,6 +98,7 @@ class VINSRunner(Node):
         self.loop_process: subprocess.Popen | None = None
         self.imu_bridge_process: subprocess.Popen | None = None
         self.mavros_process: subprocess.Popen | None = None
+
         self._start_vins()
 
     def _start_vins(self) -> None:

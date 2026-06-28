@@ -241,7 +241,6 @@ class IMUNoiseAnalyzer(Node):
         self.collection_duration = 300.0
         self.warmup_time = 10.0
 
-        # Create timer to check for completion
         self.completion_timer = self.create_timer(1.0, self.check_completion)
 
         self.get_logger().info("=" * 70)
@@ -290,7 +289,6 @@ class IMUNoiseAnalyzer(Node):
 
     def analyze_data(self):
         """Perform comprehensive noise analysis and log the report."""
-
         if len(self.accel_data) < 100:
             self.get_logger().error("❌ Not enough data collected!")
             return
@@ -326,12 +324,11 @@ def main():
             timestamps = data[:, 0].tolist()
             accel = data[:, 1:4]
             gyro = data[:, 4:7]
-            # Normalize timestamps to elapsed seconds
-            t0 = timestamps[0]
-            timestamps = (np.array(timestamps) - t0).tolist()
+            first_timestamp = timestamps[0]
+            timestamps = (np.array(timestamps) - first_timestamp).tolist()
             run_analysis_from_arrays(accel, gyro, timestamps, warmup_time=args.warmup, collection_duration=args.duration)
-        except Exception as e:
-            print(f"❌ Failed to load CSV: {e}")
+        except Exception as exc:
+            print(f"❌ Failed to load CSV: {exc}")
         return
 
     # Live ROS2 mode

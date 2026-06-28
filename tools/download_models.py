@@ -33,19 +33,18 @@ def download(filename, dest_dir):
 
     print(f"downloading {filename}...")
     try:
-
         def progress(count, block_size, total_size):
             if total_size > 0:
-                pct = min(count * block_size * 100 // total_size, 100)
-                sys.stdout.write(f"\r  {pct}%")
+                percent = min(count * block_size * 100 // total_size, 100)
+                sys.stdout.write(f"\r  {percent}%")
                 sys.stdout.flush()
 
         urllib.request.urlretrieve(url, dest, reporthook=progress)
         print(f"\r  done -> {dest}")
-    except Exception as e:
+    except Exception as exc:
         if os.path.exists(dest):
             os.remove(dest)
-        print(f"\r  failed: {e}")
+        print(f"\r  failed: {exc}")
         sys.exit(1)
 
 

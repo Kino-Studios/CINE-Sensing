@@ -93,8 +93,8 @@ class FeatureTrackingTest(Node):
             self.prev_gray = gray
             self.prev_pts = good_new.reshape(-1, 1, 2)
 
-        except Exception as e:
-            self.get_logger().error(f'Error: {e}')
+        except Exception as exc:
+            self.get_logger().error(f'Error: {exc}')
 
     def analyze_results(self):
         if len(self.tracked_counts) == 0:

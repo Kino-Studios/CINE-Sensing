@@ -77,7 +77,6 @@ def generate_launch_description() -> LaunchDescription:
 
     original_config = vins_src / "config" / "rpi_camera_v3" / "rpi_v3_mono_config.yaml"
 
-    # Resolve output directory: prefer CINE_SENSING_ROOT/vins_output, else ~/.ros/vins_output
     root_env = os.environ.get("CINE_SENSING_ROOT", "")
     if root_env:
         output_dir = pathlib.Path(root_env) / "vins_output"

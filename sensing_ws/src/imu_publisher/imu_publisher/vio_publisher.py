@@ -70,18 +70,19 @@ class VIOPublisher(Node):
         pose_msg = PoseStamped()
         pose_msg.header = vio_odom_msg.header
         pose_msg.pose = msg.pose.pose
+
         self.pose_publisher.publish(pose_msg)
 
-        t = TransformStamped()
-        t.header.stamp = msg.header.stamp
-        t.header.frame_id = "map"
-        t.child_frame_id = "base_link"
-        t.transform.translation.x = msg.pose.pose.position.x
-        t.transform.translation.y = msg.pose.pose.position.y
-        t.transform.translation.z = msg.pose.pose.position.z
-        t.transform.rotation = msg.pose.pose.orientation
+        transform = TransformStamped()
+        transform.header.stamp = msg.header.stamp
+        transform.header.frame_id = "map"
+        transform.child_frame_id = "base_link"
+        transform.transform.translation.x = msg.pose.pose.position.x
+        transform.transform.translation.y = msg.pose.pose.position.y
+        transform.transform.translation.z = msg.pose.pose.position.z
+        transform.transform.rotation = msg.pose.pose.orientation
 
-        self.tf_broadcaster.sendTransform(t)
+        self.tf_broadcaster.sendTransform(transform)
 
 
 def main(args=None):

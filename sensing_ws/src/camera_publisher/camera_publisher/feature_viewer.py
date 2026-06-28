@@ -35,8 +35,8 @@ class FeatureViewer(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
             with self.image_lock:
                 self.latest_image = cv_image
-        except Exception as e:
-            self.get_logger().error(f"Failed to convert image: {e}")
+        except Exception as exc:
+            self.get_logger().error(f"Failed to convert image: {exc}")
 
     def _display_loop(self):
         window_name = "VINS Feature Tracking"

@@ -96,16 +96,16 @@ class VIOPublisher(Node):
 
         self.pose_publisher.publish(pose_msg)
 
-        t = TransformStamped()
-        t.header.stamp = timestamp
-        t.header.frame_id = "map"
-        t.child_frame_id = "base_link"
-        t.transform.translation.x = pose.position.x
-        t.transform.translation.y = pose.position.y
-        t.transform.translation.z = pose.position.z
-        t.transform.rotation = pose.orientation
+        transform = TransformStamped()
+        transform.header.stamp = timestamp
+        transform.header.frame_id = "map"
+        transform.child_frame_id = "base_link"
+        transform.transform.translation.x = pose.position.x
+        transform.transform.translation.y = pose.position.y
+        transform.transform.translation.z = pose.position.z
+        transform.transform.rotation = pose.orientation
 
-        self.tf_broadcaster.sendTransform(t)
+        self.tf_broadcaster.sendTransform(transform)
 
     def publish_vio_odometry(self, pose, twist, timestamp):
         odom_msg = Odometry()
