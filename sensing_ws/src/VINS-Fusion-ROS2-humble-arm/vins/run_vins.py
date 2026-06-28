@@ -31,12 +31,7 @@ def _vins_src_root() -> pathlib.Path:
     """
     root_env = os.environ.get("CINE_SENSING_ROOT", "")
     if root_env:
-        return (
-            pathlib.Path(root_env)
-            / "sensing_ws"
-            / "src"
-            / "VINS-Fusion-ROS2-humble-arm"
-        )
+        return pathlib.Path(root_env) / "sensing_ws" / "src" / "VINS-Fusion-ROS2-humble-arm"
 
     return pathlib.Path(__file__).resolve().parents[1]
 
@@ -78,6 +73,7 @@ def _generate_config(original_config: pathlib.Path, output_dir: pathlib.Path) ->
             rf'^(?P<indent>\s*{re.escape(key)}\s*:\s*)"[^"]*"(?P<rest>.*)$',
             re.MULTILINE,
         )
+
         return pattern.sub(lambda m: f'{m.group("indent")}"{value}"{m.group("rest")}', text)
 
     patched = _sub(raw, "output_path", vins_out)
@@ -88,6 +84,7 @@ def _generate_config(original_config: pathlib.Path, output_dir: pathlib.Path) ->
 
     generated = original_config.with_name(_GENERATED_CONFIG_NAME)
     generated.write_text(patched)
+
     return str(generated)
 
 
@@ -105,9 +102,7 @@ class VINSRunner(Node):
         vins_src = _vins_src_root()
         out_dir = _output_dir()
 
-        original_config = (
-            vins_src / "config" / "rpi_camera_v3" / "rpi_v3_mono_config.yaml"
-        )
+        original_config = vins_src / "config" / "rpi_camera_v3" / "rpi_v3_mono_config.yaml"
         config_path = _generate_config(original_config, out_dir)
         self.get_logger().info(f"Using generated VINS config: {config_path}")
         self.get_logger().info(f"VINS output dir: {out_dir}")

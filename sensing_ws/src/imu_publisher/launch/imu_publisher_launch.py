@@ -32,6 +32,7 @@ def _default_config_path() -> str:
     this_file = pathlib.Path(__file__).resolve()
     sensing_ws_dir = this_file.parents[3]
     # configs/ lives at the repo root, i.e. one level above sensing_ws/.
+
     return str(sensing_ws_dir.parent / "configs" / "gyroscope" / "comms.yaml")
 
 

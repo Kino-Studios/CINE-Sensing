@@ -32,6 +32,7 @@ def _sensing_ws_root() -> pathlib.Path:
 
     # .../sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/launch_complete_vio.py
     # parents: [0]=vins  [1]=VINS-Fusion...  [2]=src  [3]=sensing_ws
+
     return pathlib.Path(__file__).resolve().parents[3]
 
 
@@ -58,6 +59,7 @@ def _generate_config(original_config: pathlib.Path, output_dir: pathlib.Path) ->
             rf'^(?P<indent>\s*{re.escape(key)}\s*:\s*)"[^"]*"(?P<rest>.*)$',
             re.MULTILINE,
         )
+
         return pattern.sub(lambda m: f'{m.group("indent")}"{value}"{m.group("rest")}', text)
 
     patched = _sub(raw, "output_path", vins_out)
@@ -68,6 +70,7 @@ def _generate_config(original_config: pathlib.Path, output_dir: pathlib.Path) ->
 
     generated = original_config.with_name(_GENERATED_CONFIG_NAME)
     generated.write_text(patched)
+
     return str(generated)
 
 
@@ -93,39 +96,37 @@ def generate_launch_description() -> LaunchDescription:
     imu_src = sensing_ws / "src" / "imu_publisher" / "launch"
     camera_src = sensing_ws / "src" / "camera_publisher" / "camera_publisher"
 
-    return LaunchDescription([
-        ExecuteProcess(
-            cmd=["bash", str(imu_src / "start_mavros.sh")],
-            output="screen",
-        ),
-
-        ExecuteProcess(
-            cmd=["python3", str(imu_src / "imu_bridge.py")],
-            output="screen",
-        ),
-
-        ExecuteProcess(
-            cmd=["python3", str(camera_src / "camera_publisher.py")],
-            output="screen",
-        ),
-
-        TimerAction(
-            period=5.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=[vins_install, config_path],
-                    output="screen",
-                ),
-            ],
-        ),
-
-        TimerAction(
-            period=5.0,
-            actions=[
-                ExecuteProcess(
-                    cmd=[loop_install, config_path],
-                    output="screen",
-                ),
-            ],
-        ),
-    ])
+    return LaunchDescription(
+        [
+            ExecuteProcess(
+                cmd=["bash", str(imu_src / "start_mavros.sh")],
+                output="screen",
+            ),
+            ExecuteProcess(
+                cmd=["python3", str(imu_src / "imu_bridge.py")],
+                output="screen",
+            ),
+            ExecuteProcess(
+                cmd=["python3", str(camera_src / "camera_publisher.py")],
+                output="screen",
+            ),
+            TimerAction(
+                period=5.0,
+                actions=[
+                    ExecuteProcess(
+                        cmd=[vins_install, config_path],
+                        output="screen",
+                    ),
+                ],
+            ),
+            TimerAction(
+                period=5.0,
+                actions=[
+                    ExecuteProcess(
+                        cmd=[loop_install, config_path],
+                        output="screen",
+                    ),
+                ],
+            ),
+        ]
+    )

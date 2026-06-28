@@ -1,14 +1,18 @@
 import os
 import sys
 
+
 def find_project_root(start_path):
     current_path = os.path.abspath(start_path)
     while current_path != os.path.dirname(current_path):
-        if os.path.isdir(os.path.join(current_path, 'configs')) and os.path.isdir(os.path.join(current_path, 'sensing_ws')):
+        if os.path.isdir(os.path.join(current_path, "configs")) and os.path.isdir(
+            os.path.join(current_path, "sensing_ws")
+        ):
             return current_path
         current_path = os.path.dirname(current_path)
 
     return None
+
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = find_project_root(script_dir)
@@ -25,18 +29,30 @@ except ImportError:
     print(f"Error: Could not import configs.python. Ensure {project_root} is in PYTHONPATH.")
     sys.exit(1)
 
+
 def resolve_cam0_calib_path(cam0_calib, project_root):
     if os.path.isabs(cam0_calib):
         return cam0_calib
 
     candidate_dirs = []
     if project_root:
-        candidate_dirs.extend([
-            os.path.join(project_root, "sensing_ws", "src", "VINS-Fusion-ROS2-humble-arm", "config", "rpi_camera_v3"),
-            os.path.join(project_root, "sensing_ws", "src", "VINS-Fusion-ROS2-humble-arm", "config"),
-            os.path.join(project_root, "configs"),
-            project_root,
-        ])
+        candidate_dirs.extend(
+            [
+                os.path.join(
+                    project_root,
+                    "sensing_ws",
+                    "src",
+                    "VINS-Fusion-ROS2-humble-arm",
+                    "config",
+                    "rpi_camera_v3",
+                ),
+                os.path.join(
+                    project_root, "sensing_ws", "src", "VINS-Fusion-ROS2-humble-arm", "config"
+                ),
+                os.path.join(project_root, "configs"),
+                project_root,
+            ]
+        )
 
     for base_dir in candidate_dirs:
         candidate = os.path.join(base_dir, cam0_calib)
@@ -45,8 +61,9 @@ def resolve_cam0_calib_path(cam0_calib, project_root):
 
     return cam0_calib
 
+
 def generate_config(output_path):
-    print(f"Generating VINS configuration using centralized parameters...")
+    print("Generating VINS configuration using centralized parameters...")
     cam0_calib_full_path = resolve_cam0_calib_path(VinsConfig.CAM0_CALIB, project_root)
 
     try:
@@ -61,23 +78,18 @@ def generate_config(output_path):
         "imu_topic": VinsConfig.IMU_TOPIC,
         "image0_topic": VinsConfig.IMAGE0_TOPIC,
         "output_path": os.path.join(os.path.expanduser("~"), VinsConfig.OUTPUT_PATH),
-
         "cam0_intrinsics": [
             CameraConfig.CAMERA_MATRIX[0],
             CameraConfig.CAMERA_MATRIX[4],
             CameraConfig.CAMERA_MATRIX[2],
-            CameraConfig.CAMERA_MATRIX[5]
+            CameraConfig.CAMERA_MATRIX[5],
         ],
-
         "cam0_distortion_coeffs": CameraConfig.DISTORTION_COEFFICIENTS,
         "cam0_calib": cam0_calib_path,
-
         "image_width": CameraConfig.IMAGE_WIDTH,
         "image_height": CameraConfig.IMAGE_HEIGHT,
-
         "estimate_extrinsic": VinsConfig.ESTIMATE_EXTRINSIC,
         "body_T_cam0": VinsConfig.BODY_T_CAM0,
-
         "multiple_thread": VinsConfig.MULTIPLE_THREAD,
         "feature_tracker": VinsConfig.FEATURE_TRACKER,
         "min_parallax": VinsConfig.MIN_PARALLAX,
@@ -92,40 +104,43 @@ def generate_config(output_path):
         "clahe_clip": VinsConfig.CLAHE_CLIP,
         "pyramid_levels": VinsConfig.PYRAMID_LEVELS,
         "win_size": VinsConfig.WIN_SIZE,
-
         "keyframe_parallax": VinsConfig.KEYFRAME_PARALLAX,
-
         "acc_n": VinsConfig.ACC_N,
         "gyr_n": VinsConfig.GYR_N,
         "acc_w": VinsConfig.ACC_W,
         "gyr_w": VinsConfig.GYR_W,
         "g_norm": VinsConfig.G_NORM,
-
         "gravity_aligned": VinsConfig.GRAVITY_ALIGNED,
-
         "estimate_td": VinsConfig.ESTIMATE_TD,
         "td": VinsConfig.TD,
         "tr": VinsConfig.TR,
-
         "loop_closure": VinsConfig.LOOP_CLOSURE,
         "load_previous_pose_graph": VinsConfig.LOAD_PREVIOUS_POSE_GRAPH,
-        "pose_graph_save_path": os.path.join(os.path.expanduser("~"), VinsConfig.POSE_GRAPH_SAVE_PATH),
+        "pose_graph_save_path": os.path.join(
+            os.path.expanduser("~"), VinsConfig.POSE_GRAPH_SAVE_PATH
+        ),
         "save_image": VinsConfig.SAVE_IMAGE,
         "use_depth": VinsConfig.USE_DEPTH,
-        "depth_topic": VinsConfig.DEPTH_TOPIC
+        "depth_topic": VinsConfig.DEPTH_TOPIC,
     }
 
     try:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        with open(output_path, 'w') as file_handle:
+        with open(output_path, "w") as file_handle:
             file_handle.write("%YAML:1.0\n")
             file_handle.write("---\n\n")
-            file_handle.write("# ===================================================================\n")
+            file_handle.write(
+                "# ===================================================================\n"
+            )
             file_handle.write("# GENERATED FILE - DO NOT EDIT BY HAND.\n")
             file_handle.write("# Source of truth: configs/json/vins.json\n")
             file_handle.write("# Regenerated by generate_vins_config.py on every VIO launch.\n")
-            file_handle.write("# Edits here are silently overwritten and produce invalid metrics.\n")
-            file_handle.write("# ===================================================================\n\n")
+            file_handle.write(
+                "# Edits here are silently overwritten and produce invalid metrics.\n"
+            )
+            file_handle.write(
+                "# ===================================================================\n\n"
+            )
             for key, value in config.items():
                 if isinstance(value, dict) and "rows" in value:
                     file_handle.write(f"{key}:\n")
@@ -145,6 +160,7 @@ def generate_config(output_path):
     except Exception as exc:
         print(f"Error writing config: {exc}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

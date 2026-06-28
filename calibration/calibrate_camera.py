@@ -23,6 +23,7 @@ def calibrate(shows_pics=True):
 
     if not images:
         _log.error("No images found in calibration/images directory")
+
         return None, None
 
     n_rows = 9  # 10 boxes
@@ -68,6 +69,7 @@ def calibrate(shows_pics=True):
 
     if successful_images == 0:
         _log.error("No chessboards detected. Check image quality and chessboard dimensions.")
+
         return None, None
 
     (
