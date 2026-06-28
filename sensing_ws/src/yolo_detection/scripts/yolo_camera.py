@@ -32,6 +32,7 @@ class YOLODetectionNode(Node):
             self.get_logger().info(f"Loaded YOLO model from {model_path}")
         except Exception as exc:
             self.get_logger().error(f"Failed to load model: {str(exc)}")
+
             return
 
         self.frame_count = 0

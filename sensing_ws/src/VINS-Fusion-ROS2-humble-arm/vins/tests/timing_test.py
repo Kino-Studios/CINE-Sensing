@@ -1,22 +1,23 @@
+import os
+import sys
+from collections import deque
+
+import numpy as np
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy
-from sensor_msgs.msg import Imu, Image
-from collections import deque
-import numpy as np
+from sensor_msgs.msg import Image, Imu
 
-import sys
-import os
-
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../../../.."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from configs.python import CameraConfig, VinsConfig
 
+
 class TimeSyncTest(Node):
     def __init__(self):
-        super().__init__('time_sync_test')
+        super().__init__("time_sync_test")
         self.imu_stamps = deque(maxlen=100)
         self.img_stamps = deque(maxlen=100)
 
@@ -24,7 +25,9 @@ class TimeSyncTest(Node):
         img_qos = QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)
 
         self.imu_sub = self.create_subscription(Imu, VinsConfig.IMU_TOPIC, self.imu_cb, imu_qos)
-        self.img_sub = self.create_subscription(Image, CameraConfig.CAMERA_TOPIC, self.img_cb, img_qos)
+        self.img_sub = self.create_subscription(
+            Image, CameraConfig.CAMERA_TOPIC, self.img_cb, img_qos
+        )
         self.timer = self.create_timer(2.0, self.analyze)
 
     def imu_cb(self, msg):
@@ -37,7 +40,11 @@ class TimeSyncTest(Node):
 
     def analyze(self):
         if len(self.imu_stamps) < 5 or len(self.img_stamps) < 5:
-            print(f"Collecting... IMU: {len(self.imu_stamps)}, Camera: {len(self.img_stamps)}", end='\r')
+            print(
+                f"Collecting... IMU: {len(self.imu_stamps)}, Camera: {len(self.img_stamps)}",
+                end="\r",
+            )
+
             return
 
         imu_arr = np.array(self.imu_stamps)
@@ -45,9 +52,9 @@ class TimeSyncTest(Node):
 
         time_diff = abs(imu_arr[-1] - img_arr[-1])
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("TIME SYNC TEST RESULTS")
-        print("="*60)
+        print("=" * 60)
         print(f"Latest IMU timestamp:    {imu_arr[-1]:.6f}")
         print(f"Latest Camera timestamp: {img_arr[-1]:.6f}")
         print(f"Time difference:         {time_diff:.6f} seconds")
@@ -70,7 +77,8 @@ class TimeSyncTest(Node):
 
         if imu_jitter > 10 or img_jitter > 20:
             print("⚠️  WARN: High jitter detected")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
+
 
 def main():
     rclpy.init()
@@ -88,5 +96,6 @@ def main():
         except:
             pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -15,6 +15,7 @@ def _verdict(final_drift_m):
         return "acceptable"
     if final_drift_m < 2.0:
         return "poor"
+
     return "fail"
 
 
@@ -47,11 +48,13 @@ def append_results_row(csv_path, label, metrics):
         writer = csv.writer(f)
         if new_file:
             writer.writerow(_FIELDS)
-        writer.writerow([
-            label,
-            f"{metrics['final_drift_m']:.4f}",
-            f"{metrics['drift_rate_cm_s']:.2f}",
-            f"{metrics['mean_vel_m_s']:.4f}",
-            f"{metrics['max_vel_m_s']:.4f}",
-            metrics["verdict"],
-        ])
+        writer.writerow(
+            [
+                label,
+                f"{metrics['final_drift_m']:.4f}",
+                f"{metrics['drift_rate_cm_s']:.2f}",
+                f"{metrics['mean_vel_m_s']:.4f}",
+                f"{metrics['max_vel_m_s']:.4f}",
+                metrics["verdict"],
+            ]
+        )

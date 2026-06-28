@@ -95,6 +95,7 @@ class CameraPublisher(Node):
                     if ret and frame is not None:
                         self.camera_id = cam_id
                         cap.release()
+
                         return "opencv"
                 cap.release()
             except Exception:

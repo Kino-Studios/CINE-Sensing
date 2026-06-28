@@ -15,16 +15,17 @@ Author: VINS Diagnostics
 Date: November 12, 2025
 """
 
+import time
+
+import numpy as np
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud
-from geometry_msgs.msg import Point32
-import numpy as np
-import time
+
 
 class FeatureQualityTest(Node):
     def __init__(self):
-        super().__init__('feature_quality_test')
+        super().__init__("feature_quality_test")
 
         self.frame_count = 0
         self.feature_counts = []
@@ -34,10 +35,7 @@ class FeatureQualityTest(Node):
         self.feature_positions = []
 
         self.feature_sub = self.create_subscription(
-            PointCloud,
-            '/feature_tracker/feature',
-            self.feature_callback,
-            10
+            PointCloud, "/feature_tracker/feature", self.feature_callback, 10
         )
 
         self.get_logger().info("=" * 70)
@@ -56,6 +54,7 @@ class FeatureQualityTest(Node):
         if elapsed > self.test_duration:
             self.analyze_results()
             rclpy.shutdown()
+
             return
 
         self.frame_count += 1
@@ -78,6 +77,7 @@ class FeatureQualityTest(Node):
 
         if len(self.feature_counts) < 10:
             self.get_logger().error("❌ Not enough frames collected!")
+
             return
 
         counts = np.array(self.feature_counts)
@@ -140,7 +140,9 @@ class FeatureQualityTest(Node):
         low_feature_frames = np.sum(counts < 100)
         low_feature_ratio = low_feature_frames / len(counts)
 
-        self.get_logger().info(f"\nFrames with < 100 features: {low_feature_frames} ({low_feature_ratio:.1%})")
+        self.get_logger().info(
+            f"\nFrames with < 100 features: {low_feature_frames} ({low_feature_ratio:.1%})"
+        )
 
         if low_feature_ratio > 0.10:
             self.get_logger().warn("⚠️  High ratio of low-feature frames!")
@@ -163,15 +165,17 @@ class FeatureQualityTest(Node):
             x_coords = positions_array[:, 0]
             y_coords = positions_array[:, 1]
 
-            import sys
             import os
+            import sys
 
             # Add project root to path to find configs
-            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../../..'))
+            project_root = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "../../../../../../..")
+            )
             if project_root not in sys.path:
                 sys.path.insert(0, project_root)
 
-            from configs.python import RuleOfThirdsConstants, CameraConfig
+            from configs.python import CameraConfig
 
             img_width = CameraConfig.IMAGE_WIDTH
             img_height = CameraConfig.IMAGE_HEIGHT
@@ -261,6 +265,7 @@ class FeatureQualityTest(Node):
         self.get_logger().info("TEST COMPLETE")
         self.get_logger().info("=" * 70)
 
+
 def main(args=None):
     rclpy.init(args=args)
     node = FeatureQualityTest()
@@ -278,5 +283,6 @@ def main(args=None):
         except:
             pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

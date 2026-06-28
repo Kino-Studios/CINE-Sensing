@@ -29,10 +29,12 @@ def download(filename, dest_dir):
 
     if os.path.exists(dest):
         print(f"already exists, skipping: {filename}")
+
         return
 
     print(f"downloading {filename}...")
     try:
+
         def progress(count, block_size, total_size):
             if total_size > 0:
                 percent = min(count * block_size * 100 // total_size, 100)

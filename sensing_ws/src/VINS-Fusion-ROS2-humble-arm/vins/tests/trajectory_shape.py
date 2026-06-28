@@ -11,4 +11,5 @@ def chirality(xy_points):
     p = np.asarray(xy_points, dtype=float)
     x = p[:, 0]
     y = p[:, 1]
+
     return 0.5 * float(np.sum(x * np.roll(y, -1) - np.roll(x, -1) * y))
