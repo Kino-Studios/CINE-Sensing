@@ -13,10 +13,10 @@ flowchart LR
     CAM["RPi Camera Module 3"]
     CP["camera_publisher<br/>/camera/image_raw"]
     MAVROS["MAVROS<br/>(flight controller)"]
-    IB["imu_publisher<br/>imu_bridge<br/>/imu_bridge/data_raw"]
+    IB["cine_sensing_imu<br/>imu_bridge<br/>/imu_bridge/data_raw"]
     VINS["VINS-Fusion VIO<br/>(pose estimate)"]
-    YOLO["yolo_detection<br/>bb_extractor<br/>(bounding boxes)"]
-    SP["setpoint_processor<br/>mavros_setpoints"]
+    YOLO["cine_sensing_yolo<br/>bb_extractor<br/>(bounding boxes)"]
+    SP["cine_sensing_setpoint<br/>mavros_setpoints"]
     CINE["CINE planner<br/>(sibling repo)"]
 
     CAM --> CP
@@ -51,7 +51,7 @@ source source_env.sh
 python3 tools/download_models.py
 
 # Launch camera node
-ros2 launch camera_publisher camera_launch.py
+ros2 launch cine_sensing_camera camera.launch.py
 ```
 
 ---
@@ -60,24 +60,24 @@ ros2 launch camera_publisher camera_launch.py
 
 ```bash
 # Camera
-ros2 launch camera_publisher camera_launch.py
+ros2 launch cine_sensing_camera camera.launch.py
 
 # IMU bridge (axis-transform, publishes /imu_bridge/data_raw)
-ros2 launch imu_publisher imu_bridge_launch.py
+ros2 launch cine_sensing_imu imu_bridge.launch.py
 
 # Gyroscope serial publisher + VIO relay
-ros2 launch imu_publisher imu_publisher_launch.py
+ros2 launch cine_sensing_imu imu_publisher.launch.py
 
 # YOLO bounding-box extractor
-ros2 run yolo_detection bb_extractor
+ros2 run cine_sensing_yolo bb_extractor
 
 # Full VIO stack (camera + IMU bridge + VINS)
-ros2 launch sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/launch/complete_vio.launch.py
+ros2 launch third_party/vins_fusion/vins/launch/complete_vio.launch.py
 # Or via Python runner
-python3 sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/run_vins.py
+python3 third_party/vins_fusion/vins/run_vins.py
 
 # Setpoint processor (bridges CINE setpoints to MAVROS)
-ros2 run setpoint_processor mavros_setpoints
+ros2 run cine_sensing_setpoint mavros_setpoints
 ```
 
 ---

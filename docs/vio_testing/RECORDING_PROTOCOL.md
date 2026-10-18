@@ -7,8 +7,8 @@ flight is never A/B'd — different motion each run makes metrics meaningless.
 ## Steps (on the Pi)
 
 1. Start sensors only — **do not** start `vins_node` yet:
-   - `ros2 launch camera_publisher camera_launch.py`
-   - `ros2 launch imu_publisher imu_bridge_launch.py`
+   - `ros2 launch cine_sensing_camera camera.launch.py`
+   - `ros2 launch cine_sensing_imu imu_bridge.launch.py`
    - MAVROS up and publishing `/mavros/imu/data_raw`
 2. Confirm all three topics publish:
    `ros2 topic hz /camera/image_raw /imu_bridge/data_raw /mavros/imu/data_raw`

@@ -121,7 +121,7 @@ they cannot.
 
 ## 3. Recommended validation procedure
 
-Tool: `sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py`
+Tool: `third_party/vins_fusion/vins/tests/static_drift_test.py`
 (already in repo). It subscribes to `/odometry`, requires the sensor held
 **completely still for 30 s**, and reports:
 

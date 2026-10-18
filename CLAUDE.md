@@ -24,4 +24,4 @@ The remaining convention rules are review-time judgment, not automated:
   rename public API, ROS topics, params, dict keys, or `self.` attributes.
 
 Verify every touched file still compiles (`python3 -m py_compile <file>`) and that
-`sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/unit` passes.
+`third_party/vins_fusion/vins/tests/unit` passes.

@@ -14,9 +14,7 @@ MODELS = [
 
 MODELS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "sensing_ws",
-    "src",
-    "yolo_detection",
+    "cine_sensing_yolo",
     "models",
 )
 

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>cine_sensing_yolo</name>
+  <version>1.1.0</version>
+  <description>Runs a YOLO detector on camera frames and publishes the tracked subject bounding box, size and centre.</description>
+  <maintainer email="fishnos@users.noreply.github.com">fishnos</maintainer>
+  <license>GPL-3.0-only</license>
+  <url type="repository">https://github.com/Kino-Studios/CINE-Sensing</url>
+  <url type="bugtracker">https://github.com/Kino-Studios/CINE-Sensing/issues</url>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>cv_bridge</depend>
+
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>cine_sensing_config</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

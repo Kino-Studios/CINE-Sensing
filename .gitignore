@@ -1,182 +1,19 @@
-# =============================================================================
-# DATA + OUTPUTS  (untracked large dirs — see datasets/README.md)
-# =============================================================================
-venv/
-datasets/
+build/
 install/
 log/
-data_visualization/
-runs/
-training_env_venv.zip
-kalibr_bags/
-*.mcap
-*.bag
-*.log
-MyDrone/logs/
-sensing_ws/src/camera_publisher/camera_publisher/MyDrone/logs/
-
-# =============================================================================
-# ROS / COLCON BUILD ARTIFACTS
-# =============================================================================
-build/
-sensing_ws/install/
-sensing_ws/build/
-sensing_ws/log/
-sensing_ws/log/latest*
-autocine_ws/install/
-autocine_ws/build/
-autocine_ws/log/
-log/COLCON_IGNORE
-# colcon result dirs inside any workspace
-**/install/local_setup.*
-**/install/setup.*
-**/install/_local_setup_util*
-
-# Embedded git repos (not submodules — plain clones)
-sensing_ws/opencv/
-sensing_ws/opencv_contrib/
-sensing_ws/src/vision_opencv/
-
-# =============================================================================
-# THIRD-PARTY SOURCE TREES
-# (install via rosdep/colcon — not committed)
-# =============================================================================
-sensing_ws/src/VINS-Fusion-ROS2-humble-arm/
-sensing_ws/ceres-solver-2.1.0/
-sensing_ws/ceres-solver-2.1.0.tar.gz
-sensing_ws/eigen-3.4.0.zip
-
-# Allow all files under third_party (override above rules)
-!sensing_ws/src/third_party/**
-!sensing_ws/src/third_party/**/build/
-!sensing_ws/src/third_party/**/lib/
-!sensing_ws/src/third_party/**/lib64/
-
-# =============================================================================
-# MODEL WEIGHTS + BINARY ARTIFACTS
-# (distributed separately — see training/README if present)
-# =============================================================================
-sensing_ws/src/yolo_detection/models/
-training/checkpoints/
-*.pt
-*.onnx
-*.tflite
-*.pb
-*.npy
-# *.onnx   # uncomment to track specific ONNX exports
-
-# =============================================================================
-# PYTHON
-# =============================================================================
 __pycache__/
-*.py[codz]
-*$py.class
-*.so
-*.egg
-*.egg-info/
-*.egg-link
-MANIFEST
-.installed.cfg
-.Python
-.eggs/
-develop-eggs/
-dist/
-downloads/
-eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-
-# Virtual environments
-.venv
-env/
-ENV/
-venv.bak/
-env.bak/
-__pypackages__/
-
-# Tooling caches
-.mypy_cache/
-.dmypy.json
-dmypy.json
-.pyre/
-.pytype/
+*.pyc
 .ruff_cache/
-.cache
-.hypothesis/
 .pytest_cache/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
-*.py.cover
-htmlcov/
-.tox/
-.nox/
-nosetests.xml
-cython_debug/
-
-# Notebook
-.ipynb_checkpoints
-
-# IPython / pyenv / package managers
-profile_default/
-ipython_config.py
-.pdm-python
-.pdm-build/
-.pixi
-.pypirc
-.abstra/
-marimo/_static/
-marimo/_lsp/
-__marimo__/
-
-# Build tools
-*.manifest
-*.spec
-pip-log.txt
-pip-delete-this-directory.txt
-*.sage.py
-celerybeat-schedule
-celerybeat.pid
-.pybuilder/
-target/
-instance/
-.webassets-cache
-.scrapy
-docs/_build/
-docs/
-/site
-
-# =============================================================================
-# IDE + OS
-# =============================================================================
-.DS_Store
+venv/
+.venv/
 .vscode/
-.idea/
-*.swp
-*.swo
-*~
-Thumbs.db
-
-# Allow log files in third_party (override *.log above)
-!sensing_ws/src/third_party/**/*.log
-
-# =============================================================================
-# GENERATED CONFIGS  (launcher-resolved build artifacts, overwritten each run)
-# =============================================================================
-*.generated.yaml
-
-# =============================================================================
-# MISC LOCAL ARTIFACTS
-# =============================================================================
 .env
-.envrc
-ziGzAjL1
+*.egg-info/
+datasets/
+data/
+release-assets/
+.DS_Store
 
-# VIO test bags (large binaries, keep on the Pi)
-datasets/vio_bags/
+# Release downloads written into the source tree by tools/download_assets.py
+third_party/vins_fusion/global_fusion/models/car.dae

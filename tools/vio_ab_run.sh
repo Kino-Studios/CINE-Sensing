@@ -13,8 +13,8 @@ BAG="${2:-datasets/vio_bags/canonical}"
 DUR="${3:-30}"
 RESULTS="vins_output/drift_results.csv"
 
-REPLAY_LAUNCH="sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/launch/replay_vio.launch.py"
-DRIFT_TEST="sensing_ws/src/VINS-Fusion-ROS2-humble-arm/vins/tests/static_drift_test.py"
+REPLAY_LAUNCH="third_party/vins_fusion/vins/launch/replay_vio.launch.py"
+DRIFT_TEST="third_party/vins_fusion/vins/tests/static_drift_test.py"
 
 echo "[$LABEL] launching deterministic replay against $BAG ..."
 ros2 launch "$REPLAY_LAUNCH" bag:="$BAG" &
