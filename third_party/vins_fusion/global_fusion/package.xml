@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>global_fusion</name>
+  <version>0.0.0</version>
+  <description>Global pose optimization with GPS fusion for VINS-Fusion</description>
+  <maintainer email="fishnos@users.noreply.github.com">fishnos</maintainer>
+  <license>GPL-3.0-only</license>
+
+  <author>HKUST Aerial Robotics Group</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>eigen</depend>
+  <!-- Ceres 2.1 is not a rosdep key: rosdep would install 2.2, which removed LocalParameterization. Build it with tools/install_ceres_2_1.sh. -->
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

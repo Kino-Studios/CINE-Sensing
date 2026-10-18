@@ -1,0 +1,17 @@
+%YAML:1.0
+---
+# Synthetic fisheye camera for the camera_models tests; values are typical of a
+# 752x480 global-shutter fisheye, not a real calibration.
+model_type: KANNALA_BRANDT
+camera_name: synthetic_fisheye
+image_width: 752
+image_height: 480
+projection_parameters:
+   k2: -0.0136
+   k3: 0.0026
+   k4: -0.0013
+   k5: 0.0002
+   mu: 380.8
+   mv: 380.4
+   u0: 376.5
+   v0: 240.2

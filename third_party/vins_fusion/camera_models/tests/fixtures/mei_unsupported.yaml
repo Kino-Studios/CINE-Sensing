@@ -1,0 +1,19 @@
+%YAML:1.0
+---
+# Unified (MEI) camera, which camera_models no longer supports.
+model_type: MEI
+camera_name: unsupported_mei
+image_width: 752
+image_height: 480
+mirror_parameters:
+   xi: 1.9
+distortion_parameters:
+   k1: -0.1
+   k2: 0.02
+   p1: 0.0
+   p2: 0.0
+projection_parameters:
+   gamma1: 1100.0
+   gamma2: 1100.0
+   u0: 376.0
+   v0: 240.0
