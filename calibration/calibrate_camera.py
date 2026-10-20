@@ -9,20 +9,20 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 _log = logging.getLogger(__name__)
 
 
 def calibrate(shows_pics=True):
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    calibration_path = os.path.join(script_dir, "images")
-    images = glob.glob(os.path.join(calibration_path, "*.jpg"))
+    calibration_path = os.path.join(script_dir, 'images')
+    images = glob.glob(os.path.join(calibration_path, '*.jpg'))
 
-    print(f"Calibration path: {calibration_path}")
-    print(f"Found {len(images)} images")
+    print(f'Calibration path: {calibration_path}')
+    print(f'Found {len(images)} images')
 
     if not images:
-        _log.error("No images found in calibration/images directory")
+        _log.error('No images found in calibration/images directory')
 
         return None, None
 
@@ -40,7 +40,7 @@ def calibrate(shows_pics=True):
     for fname in images:
         img = cv.imread(fname)
         if img is None:
-            _log.warning("Could not read image %s", fname)
+            _log.warning('Could not read image %s', fname)
             continue
 
         img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -58,17 +58,17 @@ def calibrate(shows_pics=True):
 
             if shows_pics:
                 cv.drawChessboardCorners(img, (n_rows, n_cols), corners_refined, corners_found)
-                cv.imshow("Chessboard", img)
+                cv.imshow('Chessboard', img)
                 cv.waitKey(500)
         else:
-            print(f"No chessboard found in {os.path.basename(fname)}")
+            print(f'No chessboard found in {os.path.basename(fname)}')
 
     cv.destroyAllWindows()
 
-    print(f"Successfully detected chessboard in {successful_images}/{len(images)} images")
+    print(f'Successfully detected chessboard in {successful_images}/{len(images)} images')
 
     if successful_images == 0:
-        _log.error("No chessboards detected. Check image quality and chessboard dimensions.")
+        _log.error('No chessboards detected. Check image quality and chessboard dimensions.')
 
         return None, None
 
@@ -80,9 +80,9 @@ def calibrate(shows_pics=True):
         translation_vecs,
     ) = cv.calibrateCamera(world_points_list, image_points_list, image_shape, None, None)
 
-    calib_data_dir = os.path.join(script_dir, "calib_data")
+    calib_data_dir = os.path.join(script_dir, 'calib_data')
     os.makedirs(calib_data_dir, exist_ok=True)
-    param_path = os.path.join(calib_data_dir, "calibration.npz")
+    param_path = os.path.join(calib_data_dir, 'calibration.npz')
     np.savez(
         param_path,
         rep_error=rep_error,
@@ -101,7 +101,7 @@ def run_calibration():
 
 def remove_distortion(camera_matrix, distort_coeff):
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    image_path = os.path.join(script_dir, "images", "*.jpg")
+    image_path = os.path.join(script_dir, 'images', '*.jpg')
     images = glob.glob(image_path)
 
     if not images:
@@ -126,5 +126,5 @@ def remove_distortion(camera_matrix, distort_coeff):
     plt.show()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     run_calibration()

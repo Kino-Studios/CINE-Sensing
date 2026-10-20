@@ -10,7 +10,7 @@ from sensor_msgs.msg import Image
 
 class FeatureViewer(Node):
     def __init__(self):
-        super().__init__("feature_viewer")
+        super().__init__('feature_viewer')
 
         self.bridge = CvBridge()
         self.latest_image = None
@@ -24,7 +24,7 @@ class FeatureViewer(Node):
         )
 
         self.image_subscription = self.create_subscription(
-            Image, "image_track", self._image_callback, qos_profile
+            Image, 'image_track', self._image_callback, qos_profile
         )
 
         self.display_thread = threading.Thread(target=self._display_loop, daemon=True)
@@ -32,14 +32,14 @@ class FeatureViewer(Node):
 
     def _image_callback(self, msg: Image):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             with self.image_lock:
                 self.latest_image = cv_image
         except Exception as exc:
-            self.get_logger().error(f"Failed to convert image: {exc}")
+            self.get_logger().error(f'Failed to convert image: {exc}')
 
     def _display_loop(self):
-        window_name = "VINS Feature Tracking"
+        window_name = 'VINS Feature Tracking'
         cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
 
         while rclpy.ok():
@@ -48,7 +48,7 @@ class FeatureViewer(Node):
                     cv2.imshow(window_name, self.latest_image)
 
             key = cv2.waitKey(5) & 0xFF
-            if key == ord("q"):
+            if key == ord('q'):
                 break
 
         cv2.destroyAllWindows()
@@ -70,5 +70,5 @@ def main():
             pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -6,7 +6,7 @@ from sensor_msgs.msg import Imu
 
 class GyroscopePublisher(Node):
     def __init__(self):
-        super().__init__("gyroscope_publish")
+        super().__init__('gyroscope_publish')
 
         sensor_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -16,10 +16,10 @@ class GyroscopePublisher(Node):
         )
 
         self.subscriber = self.create_subscription(
-            Imu, "mavros/imu/data", self.imu_callback, sensor_qos
+            Imu, 'mavros/imu/data', self.imu_callback, sensor_qos
         )
-        self.vector_publisher = self.create_publisher(Vector3Stamped, "gyroscope/data", sensor_qos)
-        self.twist_publisher = self.create_publisher(TwistStamped, "gyroscope/twist", sensor_qos)
+        self.vector_publisher = self.create_publisher(Vector3Stamped, 'gyroscope/data', sensor_qos)
+        self.twist_publisher = self.create_publisher(TwistStamped, 'gyroscope/twist', sensor_qos)
 
     def imu_callback(self, msg: Imu):
         gyro_msg = Vector3Stamped()

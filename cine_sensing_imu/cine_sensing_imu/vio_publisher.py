@@ -9,7 +9,7 @@ from tf2_ros import TransformBroadcaster
 
 class VIOPublisher(Node):
     def __init__(self):
-        super().__init__("vio_publisher")
+        super().__init__('vio_publisher')
 
         sensor_sub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
@@ -25,18 +25,18 @@ class VIOPublisher(Node):
         )
 
         self.imu_subscription = self.create_subscription(
-            Imu, "mavros/imu/data", self.imu_callback, sensor_sub_qos
+            Imu, 'mavros/imu/data', self.imu_callback, sensor_sub_qos
         )
 
         self.vins_odom_subscription = self.create_subscription(
-            Odometry, "/vins_estimator/odometry", self.vins_odom_callback, vins_pub_qos
+            Odometry, '/vins_estimator/odometry', self.vins_odom_callback, vins_pub_qos
         )
 
-        self.vins_imu_publisher = self.create_publisher(Imu, "/imu_bridge/data_raw", vins_pub_qos)
+        self.vins_imu_publisher = self.create_publisher(Imu, '/imu_bridge/data_raw', vins_pub_qos)
 
-        self.pose_publisher = self.create_publisher(PoseStamped, "/vio/pose", vins_pub_qos)
+        self.pose_publisher = self.create_publisher(PoseStamped, '/vio/pose', vins_pub_qos)
 
-        self.odometry_publisher = self.create_publisher(Odometry, "/vio/odometry", vins_pub_qos)
+        self.odometry_publisher = self.create_publisher(Odometry, '/vio/odometry', vins_pub_qos)
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -46,7 +46,7 @@ class VIOPublisher(Node):
     def imu_callback(self, msg: Imu):
         vins_imu_msg = Imu()
         vins_imu_msg.header = msg.header
-        vins_imu_msg.header.frame_id = "imu"
+        vins_imu_msg.header.frame_id = 'imu'
         vins_imu_msg.linear_acceleration = msg.linear_acceleration
         vins_imu_msg.angular_velocity = msg.angular_velocity
         vins_imu_msg.orientation = msg.orientation
@@ -60,8 +60,8 @@ class VIOPublisher(Node):
     def vins_odom_callback(self, msg: Odometry):
         vio_odom_msg = Odometry()
         vio_odom_msg.header.stamp = msg.header.stamp
-        vio_odom_msg.header.frame_id = "map"
-        vio_odom_msg.child_frame_id = "base_link"
+        vio_odom_msg.header.frame_id = 'map'
+        vio_odom_msg.child_frame_id = 'base_link'
         vio_odom_msg.pose = msg.pose
         vio_odom_msg.twist = msg.twist
 
@@ -75,8 +75,8 @@ class VIOPublisher(Node):
 
         transform = TransformStamped()
         transform.header.stamp = msg.header.stamp
-        transform.header.frame_id = "map"
-        transform.child_frame_id = "base_link"
+        transform.header.frame_id = 'map'
+        transform.child_frame_id = 'base_link'
         transform.transform.translation.x = msg.pose.pose.position.x
         transform.transform.translation.y = msg.pose.pose.position.y
         transform.transform.translation.z = msg.pose.pose.position.z
@@ -98,5 +98,5 @@ def main(args=None):
         rclpy.shutdown()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
