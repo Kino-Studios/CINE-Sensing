@@ -1,0 +1,5 @@
+{
+    "status": "uncalibrated-candidate",
+    "source": "third_party/vins_fusion/config/rpi_camera_v3/cam0_wide.yaml",
+    "notes": "The same intrinsics VINS reads by default (cam0_wide.yaml), as a profile so they can be compared with rpi_v3_fullfov. The repository records no calibration run, date or reprojection error for them. Whether these or rpi_v3_fullfov match the camera as it is actually driven at 1152x648 is untested."
+}

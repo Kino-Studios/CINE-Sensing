@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it using the metadata from this file.
+title: 'CINE-Sensing: camera, IMU, YOLO detection and visual-inertial odometry for the CINE drone'
+type: software
+authors:
+  # TODO(author): replace this placeholder with the real author list.
+  - family-names: TODO-AUTHOR
+license: GPL-3.0-only
+repository-code: https://github.com/Kino-Studios/CINE-Sensing
+version: 1.1.0

@@ -1,7 +1,7 @@
 %YAML:1.0
 ---
 # projection_parameters and distortion_parameters copied from the repository's
-# calibration/camera_calibration.yaml (2025-10-31, 1152x648), rewritten in the
+# tools/calibration/camera_calibration.yaml (2025-10-31, 1152x648), rewritten in the
 # VINS camera format because OpenCV cannot read that file without a %YAML header.
 model_type: PINHOLE
 camera_name: rpi_camera_v3_calibrated

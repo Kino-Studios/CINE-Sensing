@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import argparse
 import os
-import sys
 import time
 
 import numpy as np
@@ -9,16 +8,16 @@ import rclpy
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from drift_metrics import append_results_row, compute_drift_metrics
 
 
 class StaticDriftTest(Node):
-    def __init__(self, duration_s, label, results_csv):
+    def __init__(self, duration_s, label, results_csv, profile):
         super().__init__("static_drift_test")
         self.duration_s = duration_s
         self.label = label
         self.results_csv = results_csv
+        self.profile = profile
         self.positions = []
         self.velocities = []
         self.start_time = None
@@ -80,7 +79,7 @@ class StaticDriftTest(Node):
         print(f"Mean velocity: {metrics['mean_vel_m_s']:.4f} m/s")
         print(f"Max velocity:  {metrics['max_vel_m_s']:.4f} m/s")
         print(f"Verdict:       {metrics['verdict'].upper()}")
-        append_results_row(self.results_csv, self.label, metrics)
+        append_results_row(self.results_csv, self.label, metrics, self.profile)
         print(f"Appended row to {self.results_csv}")
         print("=" * 60 + "\n")
 
@@ -90,10 +89,16 @@ def main():
     parser.add_argument("--duration", type=float, default=30.0)
     parser.add_argument("--label", type=str, default="baseline")
     parser.add_argument("--results-csv", type=str, default="vins_output/drift_results.csv")
+    parser.add_argument(
+        "--profile",
+        type=str,
+        default=os.environ.get("CINE_SENSING_PROFILE", ""),
+        help="cine_sensing_config profile the VIO run used; recorded in the CSV",
+    )
     args, _ = parser.parse_known_args()
 
     rclpy.init()
-    node = StaticDriftTest(args.duration, args.label, args.results_csv)
+    node = StaticDriftTest(args.duration, args.label, args.results_csv, args.profile)
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:

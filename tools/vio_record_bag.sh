@@ -11,7 +11,7 @@ mkdir -p "$(dirname "$OUT")"
 
 echo "Recording to: $OUT  (Ctrl-C to stop)"
 echo "Topics: /camera/image_raw /imu_bridge/data_raw /mavros/imu/data_raw"
-echo "Protocol: hold STILL ~35s, then a slow figure-8 ~20s. See docs/vio_testing/RECORDING_PROTOCOL.md"
+echo "Protocol: hold STILL ~35s, then a slow figure-8 ~20s. See 'VIO testing' in README.md"
 
 # /mavros/imu/data_raw is recorded too so a future IMU-remap A/B can replay through
 # imu_bridge without re-recording. Baseline replay uses /imu_bridge/data_raw directly.

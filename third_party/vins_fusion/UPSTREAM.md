@@ -30,15 +30,17 @@ files below differ from the code as imported.
 | `e8e64da` | 2026-02-23 | `vins/src/utility/image_encodings.hpp`, `loop_fusion/src/image_encodings.hpp` (encoding matching rewritten with C++11 `std::regex`)                         |
 | (uncommitted) | 2026-10-15 | Port to ROS 2 Jazzy: `#include <cv_bridge/cv_bridge.h>` → `cv_bridge.hpp` in `loop_fusion/src/{parameters.h,pose_graph_node.cpp}`, `vins/src/{KITTIOdomTest.cpp,rosNodeTest.cpp,utility/visualization.h}` (Jazzy ships only the `.hpp` header); `package.xml` dependencies declared by rosdep key; `global_fusion/models/car.dae` (12.7 MB) moved to a release download and `global_fusion/CMakeLists.txt` now installs `models/` |
 | (uncommitted) | 2026-10-16 | camodocal camera library (CC-BY-SA 2.0, not GPL-3.0 compatible) replaced by OpenVINS's camera classes: deleted `camera_models/{include/camodocal/,src/{calib,camera_models,chessboard,gpl,sparse_graph}/,src/intrinsic_calib.cc,cmake/,camera_calib_example/,LICENSE.camodocal}` (including the `Calibrations` tool); added `camera_models/include/camera_models/open_vins/` (see below), `LICENSE.open_vins`, and a first-party adapter; rewrote `camera_models/{CMakeLists.txt,package.xml}`; callers switched to `camera_models::loadCameraFromYaml` in `vins/src/featureTracker/feature_tracker.{cpp,h}` and `loop_fusion/src/{keyframe.h,parameters.h,pose_graph_node.cpp}`; `loop_fusion/package.xml` now declares `boost` itself (its DBoW2 copy includes `boost/dynamic_bitset.hpp`; the old `camera_models` had pulled Boost in); calibration and acknowledgement text in `README.md` |
+| (uncommitted) | 2026-10-18 | `vins/CMakeLists.txt` installs `config/rpi_camera_v3/cam0_wide.yaml`; `vins/package.xml` adds `exec_depend` on `cine_sensing_config`; `vins/launch/{complete_vio,replay_vio}.launch.py` take `config_path` and `profile` arguments and regenerate the config at launch; `generate_vins_config.py` rewritten to read `cine_sensing_config` profiles and stop writing `cam0_intrinsics`; removed `vins/run_vins.py`, `vins/launch_complete_vio.py`, `config/rpi_camera_v3/rpi_v3_mono_config.yaml` |
+| (uncommitted) | 2026-10-19 | `vins/launch/complete_vio.launch.py`: starts the estimator and loop fusion after a `vins_start_delay` (default 5 s), passes a `use_transform` argument (default false) to `imu_bridge`, and looks for the depth node in `cine_depth` instead of the retired `depth_publisher` package |
 
 Run `git log -p <commit> -- third_party/vins_fusion` (or the pre-move path
 `sensing_ws/src/VINS-Fusion-ROS2-humble-arm`) to see each change in full.
 
 Kino-Studios also added first-party files inside this tree: the launch files and
-`generate_vins_config.py` under `vins/launch/`, `vins/run_vins.py`,
-`vins/launch_complete_vio.py`, the diagnostic and unit tests under `vins/tests/`, the
+`generate_vins_config.py` under `vins/launch/`, the diagnostic and unit tests under
+`vins/tests/` (including `tests/unit/test_generate_vins_config.py`), the
 Raspberry Pi Camera v3 configuration under `config/rpi_camera_v3/`, and the camera adapter
-in `camera_models/` (`include/camera_models/camera.h`, `src/camera.cpp`, `tests/`, `README.md`).
+in `camera_models/` (`include/camera_models/camera.h`, `src/camera.cpp`, `tests/`).
 
 ## Ceres Solver version requirement
 

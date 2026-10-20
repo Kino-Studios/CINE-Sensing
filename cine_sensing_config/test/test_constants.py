@@ -76,3 +76,14 @@ def test_absolute_path_is_returned_unchanged():
     resolved_path = resolve_package_relative_path('/models/detector.pt', {}.__getitem__)
 
     assert resolved_path == '/models/detector.pt'
+
+
+def test_bare_model_name_is_returned_without_a_package_lookup():
+    from cine_sensing_config.constants import resolve_package_relative_path
+
+    def lookup_rejecting_the_name(package_name):
+        raise ValueError(f'{package_name!r} is not a valid package name')
+
+    resolved_path = resolve_package_relative_path('yolo11n.pt', lookup_rejecting_the_name)
+
+    assert resolved_path == 'yolo11n.pt'

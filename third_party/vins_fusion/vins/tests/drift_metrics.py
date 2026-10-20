@@ -3,7 +3,15 @@ import os
 
 import numpy as np
 
-_FIELDS = ["label", "final_drift_m", "drift_rate_cm_s", "mean_vel_m_s", "max_vel_m_s", "verdict"]
+_FIELDS = [
+    "label",
+    "final_drift_m",
+    "drift_rate_cm_s",
+    "mean_vel_m_s",
+    "max_vel_m_s",
+    "verdict",
+    "profile",
+]
 
 
 def _verdict(final_drift_m):
@@ -40,7 +48,7 @@ def compute_drift_metrics(positions, velocities, duration_s):
     }
 
 
-def append_results_row(csv_path, label, metrics):
+def append_results_row(csv_path, label, metrics, profile=""):
     new_file = not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0
     os.makedirs(os.path.dirname(csv_path) or ".", exist_ok=True)
 
@@ -56,5 +64,6 @@ def append_results_row(csv_path, label, metrics):
                 f"{metrics['mean_vel_m_s']:.4f}",
                 f"{metrics['max_vel_m_s']:.4f}",
                 metrics["verdict"],
+                profile,
             ]
         )

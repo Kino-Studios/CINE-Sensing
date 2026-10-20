@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: pre-commit/action@v3.0.1
+
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: pip install pytest numpy pyyaml
+      # Pure-Python tests: config loader and profiles, VINS config generator, drift
+      # metrics, and the tools. No ROS needed.
+      - run: pytest
+
+  build:
+    runs-on: ubuntu-24.04
+    container: ubuntu:noble
+    env:
+      # pip inside the noble container refuses system-wide installs without this.
+      PIP_BREAK_SYSTEM_PACKAGES: '1'
+    steps:
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: jazzy
+      - uses: actions/checkout@v7
+      - name: Build Ceres Solver 2.1 (VINS-Fusion needs ceres::LocalParameterization)
+        run: tools/install_ceres_2_1.sh
+      - uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          target-ros2-distro: jazzy
+          # Builds every package below; tests only the first-party packages and
+          # camera_models, whose gtest checks the OpenVINS camera replacement.
+          colcon-defaults: |
+            {
+              "test": {
+                "packages-select": [
+                  "cine_sensing_config",
+                  "cine_sensing_camera",
+                  "cine_sensing_imu",
+                  "cine_sensing_yolo",
+                  "cine_sensing_setpoint",
+                  "camera_models"
+                ]
+              }
+            }
+          package-name: >-
+            cine_sensing_config
+            cine_sensing_camera
+            cine_sensing_imu
+            cine_sensing_yolo
+            cine_sensing_setpoint
+            camera_models
+            vins
+            loop_fusion
+            global_fusion

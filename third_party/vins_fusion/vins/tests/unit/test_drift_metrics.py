@@ -1,9 +1,4 @@
-import sys
-from pathlib import Path
-
 import numpy as np
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # .../vins/tests
 from drift_metrics import append_results_row, compute_drift_metrics
 
 
@@ -36,3 +31,12 @@ def test_append_writes_header_then_row(tmp_path):
     assert lines[1].startswith("baseline,")
     assert lines[2].startswith("A2_remap,")
     assert len(lines) == 3  # header + 2 rows
+
+
+def test_append_records_the_config_profile_of_the_run(tmp_path):
+    csv = tmp_path / "results.csv"
+    m = compute_drift_metrics(np.zeros((2, 3)), np.zeros((2, 3)), 30.0)
+    append_results_row(str(csv), "tuned", m, profile="rpi_v3_tune_maxcnt250")
+    header, row = csv.read_text().strip().splitlines()
+    assert header.endswith(",verdict,profile")
+    assert row.endswith(",excellent,rpi_v3_tune_maxcnt250")

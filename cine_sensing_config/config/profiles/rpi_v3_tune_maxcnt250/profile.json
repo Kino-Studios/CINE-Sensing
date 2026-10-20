@@ -1,0 +1,5 @@
+{
+    "status": "uncalibrated-candidate",
+    "source": "third_party/vins_fusion/config/rpi_camera_v3/rpi_v3_mono_config.yaml (removed; see git history)",
+    "notes": "Hand-tuned feature-tracker and time-offset values from the retired hand-written VINS config: max_cnt 250, min_dist 15, equalize 1, F_threshold 1.5, min_parallax 8, estimate_td 0 and its fixed td. Every other value is the base vins.json. That file also set depth_topic to /camera/depth/image_rect_raw; use_depth is 0 in both, so the base value is kept. Never validated against the base tuning on a recorded bag."
+}

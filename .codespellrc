@@ -1,0 +1,3 @@
+[codespell]
+# "ThirdParty" is a VINS-Fusion folder name; "retuned" means tuned again.
+ignore-words-list = thirdparty,retuned

@@ -1,8 +1,17 @@
 from glob import glob
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
 package_name = 'cine_sensing_config'
+
+profile_data_files = [
+    (
+        f'share/{package_name}/config/profiles/{Path(profile_directory).name}',
+        glob(f'{profile_directory}/*.json'),
+    )
+    for profile_directory in sorted(glob('config/profiles/*'))
+]
 
 setup(
     name=package_name,
@@ -12,7 +21,7 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/config', glob('config/*.json')),
-        ('share/' + package_name + '/config/gyroscope', glob('config/gyroscope/*.yaml')),
+        *profile_data_files,
     ],
     install_requires=['setuptools'],
     zip_safe=True,

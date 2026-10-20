@@ -9,32 +9,6 @@
             "jpeg_quality": 95,
             "camera_topic": "/camera/image_raw",
             "camera_info_topic": "/camera/camera_info",
-            "camera_matrix": {
-                "rows": 3,
-                "cols": 3,
-                "data": [
-                    1000.0,
-                    0.0,
-                    960.0,
-                    0.0,
-                    1000.0,
-                    540.0,
-                    0.0,
-                    0.0,
-                    1.0
-                ]
-            },
-            "distortion_coefficients": {
-                "rows": 1,
-                "cols": 5,
-                "data": [
-                    0.1,
-                    -0.2,
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
             "camera_frame_id": "camera_optical_frame",
             "auto_exposure": true,
             "exposure_time_us": 10000,

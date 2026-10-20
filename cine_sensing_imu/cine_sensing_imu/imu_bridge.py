@@ -49,7 +49,7 @@ SHUTDOWN_EXCEPTIONS = tuple(_SHUTDOWN_EXC) if _SHUTDOWN_EXC else (RuntimeError,)
 # to both the linear acceleration and angular velocity vectors.
 #
 # IMPORTANT: whether THIS mapping is the physically correct one is an open
-# hardware question (see docs/2026-06-13-vio-drift-decision.md). This refactor
+# hardware question (see "Open issue: VIO drift" in README.md). This refactor
 # intentionally preserves the existing mapping unchanged; do not "fix" signs or
 # axis order here without on-drone validation.
 #

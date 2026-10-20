@@ -36,13 +36,17 @@ def resolve_package_relative_path(
     """Resolve `<package>/<relative path>` against that package's share directory.
 
     The JSON stores paths such as `cine_sensing_yolo/models/<weights>.pt`, whose first
-    segment is a package name. An empty or absolute path, or one whose first segment
-    is not an installed package, is returned unchanged.
+    segment is a package name. An empty or absolute path, a bare file name such as the
+    stock `yolo11n.pt`, or a path whose first segment is not an installed package is
+    returned unchanged.
     """
     if not path_text or Path(path_text).is_absolute():
         return path_text
 
     package_name, *remaining_segments = PurePosixPath(path_text).parts
+    if not remaining_segments:
+        return path_text
+
     try:
         share_directory = share_directory_lookup(package_name)
     except LookupError:
@@ -78,7 +82,7 @@ class ModelDetectionConstants:
 class UserRequestedParameters:
     _data = _user_params.get('UserRequestedParameters', {})
 
-    USER_OBJECT_ID = _data.get('USER_OBJECT_ID', 2)
+    USER_OBJECT_ID = _data.get('USER_OBJECT_ID', 56)
 
 
 class RuleOfThirdsConstants:
@@ -106,8 +110,6 @@ class CameraConfig:
     JPEG_QUALITY = _data.get('jpeg_quality', 95)
     CAMERA_TOPIC = _data.get('camera_topic', '/camera/image_raw')
     CAMERA_INFO_TOPIC = _data.get('camera_info_topic', '/camera/camera_info')
-    CAMERA_MATRIX = _data.get('camera_matrix', {}).get('data', [])
-    DISTORTION_COEFFICIENTS = _data.get('distortion_coefficients', {}).get('data', [])
     CAMERA_FRAME_ID = _data.get('camera_frame_id', 'camera_optical_frame')
     AUTO_EXPOSURE = _data.get('auto_exposure', True)
     EXPOSURE_TIME_US = _data.get('exposure_time_us', 10000)
@@ -135,7 +137,7 @@ class VinsConfig:
     NUM_OF_CAM = _data.get('num_of_cam', 1)
     IMU_TOPIC = _data.get('imu_topic', '/imu_bridge/data_raw')
     IMAGE0_TOPIC = _data.get('image0_topic', '/camera/image_raw')
-    OUTPUT_PATH = _data.get('output_path', 'CINE-Sensing/vins_output/')
+    OUTPUT_PATH = _data.get('output_path', '.ros/vins_output/')
     CAM0_CALIB = _data.get('cam0_calib', 'cam0_wide.yaml')
     ESTIMATE_EXTRINSIC = _data.get('estimate_extrinsic', 0)
     BODY_T_CAM0 = _data.get('body_T_cam0', {})
@@ -165,7 +167,7 @@ class VinsConfig:
     TR = _data.get('tr', 0.0)
     LOOP_CLOSURE = _data.get('loop_closure', 1)
     LOAD_PREVIOUS_POSE_GRAPH = _data.get('load_previous_pose_graph', 0)
-    POSE_GRAPH_SAVE_PATH = _data.get('pose_graph_save_path', 'CINE-Sensing/vins_output/pose_graph/')
+    POSE_GRAPH_SAVE_PATH = _data.get('pose_graph_save_path', '.ros/vins_output/pose_graph/')
     SAVE_IMAGE = _data.get('save_image', 0)
     USE_DEPTH = _data.get('use_depth', 0)
     DEPTH_TOPIC = _data.get('depth_topic', '/depth_publisher/depth')

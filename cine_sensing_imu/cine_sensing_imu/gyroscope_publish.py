@@ -1,3 +1,4 @@
+import rclpy
 from geometry_msgs.msg import TwistStamped, Vector3Stamped
 from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSHistoryPolicy, QoSProfile, QoSReliabilityPolicy
@@ -39,3 +40,20 @@ class GyroscopePublisher(Node):
 
         self.vector_publisher.publish(gyro_msg)
         self.twist_publisher.publish(twist_msg)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = GyroscopePublisher()
+
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

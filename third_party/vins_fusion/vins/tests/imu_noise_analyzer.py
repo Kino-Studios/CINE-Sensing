@@ -198,7 +198,7 @@ def format_analysis_report(stats_result: dict, current_config: dict) -> list:
     lines.append(f"   gyr_n (white noise):  {measured['gyr_n']:.6f} rad/s")
     lines.append(f"   gyr_w (bias drift):   {measured['gyr_w']:.8f} rad/s²/√Hz")
 
-    lines.append("\n# IMU noise parameters (add to rpi_v3_mono_config.yaml)")
+    lines.append("\n# IMU noise parameters (set in cine_sensing_config/config/vins.json)")
     lines.append(f"acc_n: {recommended['acc_n']:.4f}          # accelerometer measurement noise")
     lines.append(f"gyr_n: {recommended['gyr_n']:.6f}        # gyroscope measurement noise")
     lines.append(f"acc_w: {recommended['acc_w']:.8f}      # accelerometer bias random walk")
@@ -224,7 +224,7 @@ def format_analysis_report(stats_result: dict, current_config: dict) -> list:
     lines.append("ANALYSIS COMPLETE")
     lines.append("=" * 70)
     lines.append("\n📋 NEXT STEPS:")
-    lines.append("1. Copy recommended parameters to rpi_v3_mono_config.yaml")
+    lines.append("1. Copy recommended parameters to cine_sensing_config/config/vins.json")
     lines.append("2. If error factors > 2x, update config IMMEDIATELY")
     lines.append("3. Run static_drift_test.py to validate improvements")
 

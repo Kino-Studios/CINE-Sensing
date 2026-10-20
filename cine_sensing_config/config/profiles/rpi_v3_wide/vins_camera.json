@@ -1,0 +1,18 @@
+{
+    "model_type": "PINHOLE",
+    "camera_name": "rpi_camera_v3_calibrated",
+    "image_width": 1152,
+    "image_height": 648,
+    "distortion_parameters": {
+        "k1": -0.04369182,
+        "k2": 0.04562136,
+        "p1": 4.56e-06,
+        "p2": 0.0003494
+    },
+    "projection_parameters": {
+        "fx": 750.99681791,
+        "fy": 748.9227188,
+        "cx": 578.86898934,
+        "cy": 326.60855341
+    }
+}

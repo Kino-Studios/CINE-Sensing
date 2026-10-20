@@ -17,3 +17,9 @@ release-assets/
 
 # Release downloads written into the source tree by tools/download_assets.py
 third_party/vins_fusion/global_fusion/models/car.dae
+third_party/vins_fusion/global_fusion/models/hummingbird.mesh
+third_party/vins_fusion/loop_fusion/support_files/brief_k10L6.bin
+cine_sensing_yolo/models/
+tools/calibration/images/
+tools/calibration/calib_data/
+*.part

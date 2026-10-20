@@ -1,0 +1,6 @@
+{
+    "status": "calibrated",
+    "source": "tools/calibration/camera_calibration.yaml",
+    "reprojection_error_px": 0.45665814178603836,
+    "notes": "From the checkerboard calibration of 2025-10-31 (tools/calibration/calibrate_camera.py). It was solved at the full sensor resolution, 4608x2592 (fx 1990.39423), and the projection parameters were scaled by 1/4 to 1152x648; the distortion parameters are unscaled. The reprojection error is the one the calibration reported at full resolution. Valid only if the camera delivers the full field of view binned down to 1152x648; whether it does, and so whether these or rpi_v3_wide are correct, is untested."
+}

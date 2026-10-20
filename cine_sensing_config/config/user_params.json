@@ -1,7 +1,7 @@
 {
-  "_note": "MODEL_PATH is relative to repo root. Runtime code resolves it via CINE_SENSING_ROOT env var, or two directory levels up from configs/python/__init__.py. Do not hardcode absolute paths here.",
+  "_note": "MODEL_PATH is either a stock Ultralytics model name such as yolo11n.pt, which Ultralytics downloads on first use, or <package>/<path>, whose first segment names an installed ROS package and whose rest is resolved under that package's share directory (cine_sensing_config.constants.resolve_package_relative_path); weights placed in cine_sensing_yolo/models/ are installed there. USER_OBJECT_ID is the class index the detector keeps; 56 is chair in the COCO classes of the stock model. Do not hardcode absolute paths here.",
   "ModelDetectionConstants": {
-    "MODEL_PATH": "cine_sensing_yolo/models/homeobjects_yolo11n_trained.pt",
+    "MODEL_PATH": "yolo11n.pt",
     "CAMERA_IMAGE_TOPIC": "/camera/image_raw",
     "BOUNDING_BOX_TOPIC": "/object_detection/bounding_box",
     "IMAGE_ENCODING": "bgr8",
@@ -16,7 +16,7 @@
     "IOU_THRESHOLD": 0.4
   },
   "UserRequestedParameters": {
-    "USER_OBJECT_ID": 2
+    "USER_OBJECT_ID": 56
   },
   "RuleOfThirdsConstants": {
     "FRAME_WIDTH": 1152,

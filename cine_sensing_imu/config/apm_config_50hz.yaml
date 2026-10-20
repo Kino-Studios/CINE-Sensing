@@ -2,13 +2,13 @@
   ros__parameters:
     conn:
       system_time_rate: 1.0
-    
+
     setpoint_velocity:
       mav_frame: "BODY_NED"
-    
+
     plugin_allowlist: []
     plugin_denylist: []
-    
+
 stream_rate:
   all: 50
   extra1: 50

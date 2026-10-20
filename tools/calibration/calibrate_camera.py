@@ -22,7 +22,7 @@ def calibrate(shows_pics=True):
     print(f'Found {len(images)} images')
 
     if not images:
-        _log.error('No images found in calibration/images directory')
+        _log.error('No images found in tools/calibration/images directory')
 
         return None, None
 

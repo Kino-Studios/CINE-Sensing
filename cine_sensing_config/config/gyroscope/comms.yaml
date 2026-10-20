@@ -1,3 +1,0 @@
-# Gyroscope communication configuration
-serial_port: /dev/ttyAMA0
-baud_rate: 921600

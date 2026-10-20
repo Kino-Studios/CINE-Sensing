@@ -1,0 +1,13 @@
+# pytest configuration only; the ROS packages are built by colcon, not from here.
+[tool.pytest.ini_options]
+testpaths = [
+    "cine_sensing_config/test",
+    "tools",
+    "third_party/vins_fusion/vins/tests/unit",
+]
+pythonpath = [
+    "cine_sensing_config",
+    "tools",
+    "third_party/vins_fusion/vins/tests",
+]
+addopts = "-p no:cacheprovider"

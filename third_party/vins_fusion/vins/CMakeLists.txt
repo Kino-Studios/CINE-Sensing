@@ -77,6 +77,13 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+# The camera file launch/generate_vins_config.py points VINS at when the active
+# cine_sensing_config profile defines no camera values.
+install(
+  FILES ${PROJECT_SOURCE_DIR}/../config/rpi_camera_v3/cam0_wide.yaml
+  DESTINATION share/${PROJECT_NAME}/config/rpi_camera_v3
+)
+
 # Install nodes
 install(
   TARGETS vins_node

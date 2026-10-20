@@ -4,7 +4,7 @@
         "num_of_cam": 1,
         "imu_topic": "/imu_bridge/data_raw",
         "image0_topic": "/camera/image_raw",
-        "output_path": "CINE-Sensing/vins_output/",
+        "output_path": ".ros/vins_output/",
         "cam0_calib": "cam0_wide.yaml",
         "estimate_extrinsic": 0,
         "body_T_cam0": {
@@ -56,7 +56,7 @@
         "tr": 0.0,
         "loop_closure": 1,
         "load_previous_pose_graph": 0,
-        "pose_graph_save_path": "CINE-Sensing/vins_output/pose_graph/",
+        "pose_graph_save_path": ".ros/vins_output/pose_graph/",
         "save_image": 0,
         "use_depth": 0,
         "depth_topic": "/depth_publisher/depth"

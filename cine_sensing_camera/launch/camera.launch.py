@@ -1,8 +1,7 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, LogInfo
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 
 from cine_sensing_config import CameraConfig
 
@@ -12,14 +11,6 @@ def generate_launch_description():
         'camera_id',
         default_value=str(CameraConfig.CAMERA_ID),
         description='Camera device ID (usually 0 for RPi camera)',
-    )
-
-    config_file_arg = DeclareLaunchArgument(
-        'config_file',
-        default_value=PathJoinSubstitution(
-            [FindPackageShare('cine_sensing_camera'), 'config', 'camera_params.yaml']
-        ),
-        description='Path to camera configuration file',
     )
 
     image_topic_arg = DeclareLaunchArgument(
@@ -52,12 +43,11 @@ def generate_launch_description():
         name='camera_publisher',
         output='screen',
         parameters=[
-            LaunchConfiguration('config_file'),
             {
                 'camera_id': LaunchConfiguration('camera_id'),
                 'camera_topic': LaunchConfiguration('image_topic'),
                 'camera_info_topic': LaunchConfiguration('camera_info_topic'),
-                'camera_frame_id': LaunchConfiguration('frame_id'),
+                'frame_id': LaunchConfiguration('frame_id'),
                 'save_latest_frame': LaunchConfiguration('save_latest_frame'),
             },
         ],
@@ -121,7 +111,6 @@ def generate_launch_description():
     return LaunchDescription(
         [
             camera_id_arg,
-            config_file_arg,
             image_topic_arg,
             camera_info_topic_arg,
             frame_id_arg,
