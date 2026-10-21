@@ -9,7 +9,9 @@
 set -euo pipefail
 
 CERES_VERSION="2.1.0"
-CERES_SHA256="f7d74eecde0aed75bfc51ec48c91d01fe16a6bf16bce1987a7073286701e2fc6"
+# Checksum of GitHub's archive of the 2.1.0 tag, which differs from the ceres-solver.org
+# tarball's. GitHub is the source because ceres-solver.org went unreachable during CI.
+CERES_SHA256="ccbd716a93f65d4cb017e3090ae78809e02f5426dce16d0ee2b4f8a4ba2411a8"
 CERES_PREFIX="${CERES_PREFIX:-/usr/local}"
 BUILD_JOBS="${BUILD_JOBS:-$(nproc)}"
 
@@ -28,7 +30,7 @@ WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 
 ARCHIVE="$WORK_DIR/ceres-solver-${CERES_VERSION}.tar.gz"
-wget -q "http://ceres-solver.org/ceres-solver-${CERES_VERSION}.tar.gz" -O "$ARCHIVE"
+wget -q "https://github.com/ceres-solver/ceres-solver/archive/refs/tags/${CERES_VERSION}.tar.gz" -O "$ARCHIVE"
 echo "${CERES_SHA256}  ${ARCHIVE}" | sha256sum -c -
 
 tar xzf "$ARCHIVE" -C "$WORK_DIR"
