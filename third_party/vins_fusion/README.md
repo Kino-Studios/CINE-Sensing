@@ -1,5 +1,15 @@
 # VINS-Fusion
 
+> **This copy, in CINE-Sensing.** This directory is a modified VINS-Fusion that builds on
+> ROS 2 Jazzy (Ubuntu 24.04) against Ceres Solver 2.1. Build and run it as the top-level
+> [`README.md`](../../README.md) describes; every change from the imported code is listed
+> in [`UPSTREAM.md`](UPSTREAM.md). The text below is the upstream README, kept for
+> reference: its Humble and Ubuntu 20.04 instructions, `install_external_deps.sh`, the
+> Docker section and the EuRoC and KITTI configurations it mentions do not apply to this
+> copy, and some of those files are not included. Kino-Studios edited the camera
+> calibration section (6.2) and the acknowledgements (8) after replacing the camera
+> library.
+
 ## ROS2 Humble version of VINS-Fusion, suitable for running on ARM devices
 
 ### Notices
