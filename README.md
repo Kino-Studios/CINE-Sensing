@@ -4,9 +4,9 @@
 [![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)](LICENSE)
 [![ROS 2 Jazzy](https://img.shields.io/badge/ROS%202-Jazzy-22314E.svg)](https://docs.ros.org/en/jazzy/)
 
-A Raspberry Pi 5 bolted to a drone, running a camera and IMU, doing real-time visual-inertial odometry, YOLO subject detection, and flight-controller bridging on commodity ARM hardware. This is the sensing half of the Cinematic Intelligent Navigation Engine. The [CINE trajectory planner](https://github.com/Kino-Studios/CINE) is blind without it.
+A Raspberry Pi 5 bolted to a drone, running a camera and IMU, doing visual-inertial odometry, YOLO subject detection, and flight-controller bridging on commodity ARM hardware. This is the sensing half of the Cinematic Intelligent Navigation Engine. The [CINE trajectory planner](https://github.com/Kino-Studios/CINE) is blind without it.
 
-Four ROS 2 nodes handle the full perception loop: camera frames in, IMU axes reconciled with what VINS-Fusion expects, YOLO bounding boxes out, MAVROS setpoints in. Nothing exotic; no dedicated compute. The Pi is the point.
+A handful of ROS 2 nodes handle the full perception loop: camera frames in, IMU data handed to VINS-Fusion, YOLO bounding boxes out, MAVROS setpoints in. Nothing exotic; no dedicated compute. The Pi is the point.
 
 ---
 
@@ -59,8 +59,12 @@ git clone https://github.com/Kino-Studios/CINE-Sensing.git
 CINE-Sensing/tools/install_ceres_2_1.sh
 source /opt/ros/jazzy/setup.bash
 rosdep install --from-paths . -yi --rosdistro jazzy
-sudo ros2 run mavros install_geographiclib_datasets.sh   # data MAVROS needs; rosdep cannot fetch it
-pip install -r CINE-Sensing/requirements.txt
+# Data MAVROS needs; rosdep cannot fetch it. sudo drops /opt/ros from PATH, hence the full path.
+sudo "$(ros2 pkg prefix mavros)/lib/mavros/install_geographiclib_datasets.sh"
+# Ubuntu 24.04 refuses pip installs into the system Python, and so the pip-only packages
+# go in a venv that can still see the ROS Python packages. source_env.sh activates it.
+python3 -m venv --system-site-packages CINE-Sensing/venv
+CINE-Sensing/venv/bin/pip install -r CINE-Sensing/requirements.txt
 python3 CINE-Sensing/tools/download_assets.py
 cd ~/cine_ws && colcon build --symlink-install
 source ~/cine_ws/src/CINE-Sensing/source_env.sh
@@ -76,8 +80,9 @@ downloads on first run, and keeps class 56 (chair). To use your own weights, put
 `cine_sensing_yolo/models/` before building and set `MODEL_PATH` and `USER_OBJECT_ID` in
 `cine_sensing_config/config/user_params.json`.
 
-`source_env.sh` sources ROS 2 Jazzy and `~/cine_ws/install/setup.bash` (the workspace two
-levels above the repository, or `$CINE_SENSING_WS`) and defaults `ROS_DOMAIN_ID` to 0.
+`source_env.sh` activates `CINE-Sensing/venv` when present, sources ROS 2 Jazzy and
+`~/cine_ws/install/setup.bash` (the workspace two levels above the repository, or
+`$CINE_SENSING_WS`) and defaults `ROS_DOMAIN_ID` to 0.
 
 ---
 
@@ -87,10 +92,11 @@ levels above the repository, or `$CINE_SENSING_WS`) and defaults `ROS_DOMAIN_ID`
 # Camera
 ros2 launch cine_sensing_camera camera.launch.py
 
-# IMU bridge (axis-transform, publishes /imu_bridge/data_raw)
+# IMU bridge: republishes /mavros/imu/data_raw on /imu_bridge/data_raw for VINS
+# (axis remap only with use_transform:=true, off by default and unvalidated)
 ros2 launch cine_sensing_imu imu_bridge.launch.py
 
-# Gyroscope serial publisher + VIO relay
+# Gyroscope rates from MAVROS + VIO relay (VINS /odometry to /vio/pose, /vio/odometry, TF)
 ros2 launch cine_sensing_imu imu_publisher.launch.py
 
 # YOLO bounding-box extractor

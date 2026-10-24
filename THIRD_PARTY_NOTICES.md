@@ -20,7 +20,7 @@ entry names the licence and where its full text lives.
 | Ceres Solver 2.1.0 | BSD-3-Clause | Built from the upstream tarball by `tools/install_ceres_2_1.sh`. |
 | Ultralytics YOLO | AGPL-3.0 | Installed from PyPI (`requirements.txt`). |
 | YOLO11n detector weights (`yolo11n.pt`) | AGPL-3.0 (Ultralytics) | Downloaded by Ultralytics itself on first use; not redistributed here. |
-| HomeObjects-3K dataset (Ultralytics) | AGPL-3.0 | Not shipped or downloaded; used only to train the weights above. |
+| HomeObjects-3K dataset (Ultralytics) | AGPL-3.0 | Not shipped or downloaded; used only to train the project's own detector weights, which are not distributed. |
 | VINS-Fusion data files (`brief_k10L6.bin`, `car.dae`, `hummingbird.mesh`) | GPL-3.0, as part of VINS-Fusion | Downloaded by `tools/download_assets.py` from this project's GitHub Release. |
 
 Citations for these works are in `references.bib`.
