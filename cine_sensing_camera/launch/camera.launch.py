@@ -64,11 +64,11 @@ def generate_launch_description():
         arguments=[
             '0',
             '0',
-            '0.1',  # x, y, z translation
+            '0.1',  # x, y, z translation in metres
             '0',
             '0',
             '0',
-            '1',  # x, y, z, w quaternion rotation
+            '1',  # quaternion x, y, z, w: no rotation
             'base_link',
             'camera_link',
         ],
@@ -85,7 +85,7 @@ def generate_launch_description():
             '-0.5',
             '0.5',
             '-0.5',
-            '0.5',  # 90-degree rotation around x-axis
+            '0.5',  # quaternion x, y, z, w: optical z forward, x right, y down (REP 103)
             'camera_link',
             LaunchConfiguration('frame_id'),
         ],

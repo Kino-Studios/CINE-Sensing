@@ -25,6 +25,7 @@ class CameraPublisher(Node):
                 ('image_height', CameraConfig.IMAGE_HEIGHT),
                 ('fps', CameraConfig.FPS),
                 ('camera_topic', CameraConfig.CAMERA_TOPIC),
+                ('color_topic', CameraConfig.COLOR_TOPIC),
                 ('frame_id', CameraConfig.CAMERA_FRAME_ID),
                 ('save_latest_frame', False),
                 (
@@ -40,6 +41,7 @@ class CameraPublisher(Node):
         self.image_height = self.get_parameter('image_height').get_parameter_value().integer_value
         self.fps = float(self.get_parameter('fps').get_parameter_value().double_value)
         self.camera_topic = self.get_parameter('camera_topic').get_parameter_value().string_value
+        self.color_topic = self.get_parameter('color_topic').get_parameter_value().string_value
         self.frame_id = self.get_parameter('frame_id').get_parameter_value().string_value
         self.save_latest_frame = (
             self.get_parameter('save_latest_frame').get_parameter_value().bool_value
@@ -64,6 +66,8 @@ class CameraPublisher(Node):
         )
 
         self.image_publisher = self.create_publisher(Image, self.camera_topic, qos_profile)
+        # VINS tracks features on the greyscale image; the detector needs colour.
+        self.color_publisher = self.create_publisher(Image, self.color_topic, qos_profile)
 
         if self.camera_method == 'opencv':
             self._start_opencv_capture()
@@ -205,6 +209,13 @@ class CameraPublisher(Node):
             msg.header.frame_id = self.frame_id
 
             self.image_publisher.publish(msg)
+
+            # Converting a full colour frame costs the Pi time, and so it is skipped
+            # while nothing listens.
+            if self.color_publisher.get_subscription_count() > 0:
+                color_msg = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
+                color_msg.header = msg.header
+                self.color_publisher.publish(color_msg)
 
             if self.save_latest_frame:
                 cv2.imwrite('latest_frame.png', frame)

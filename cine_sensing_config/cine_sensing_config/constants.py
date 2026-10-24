@@ -65,7 +65,7 @@ class ModelDetectionConstants:
     _data = _user_params.get('ModelDetectionConstants', {})
 
     MODEL_PATH = resolve_package_relative_path(_data.get('MODEL_PATH', ''))
-    CAMERA_IMAGE_TOPIC = _data.get('CAMERA_IMAGE_TOPIC', '/camera/image_raw')
+    CAMERA_IMAGE_TOPIC = _data.get('CAMERA_IMAGE_TOPIC', '/camera/image_color')
     BOUNDING_BOX_TOPIC = _data.get('BOUNDING_BOX_TOPIC', '/object_detection/bounding_box')
     IMAGE_ENCODING = _data.get('IMAGE_ENCODING', 'bgr8')
     IMAGE_DIR = _data.get('IMAGE_DIR', '~/object_detection_images')
@@ -109,6 +109,7 @@ class CameraConfig:
     IMAGE_FORMAT = _data.get('image_format', 'BGR8')
     JPEG_QUALITY = _data.get('jpeg_quality', 95)
     CAMERA_TOPIC = _data.get('camera_topic', '/camera/image_raw')
+    COLOR_TOPIC = _data.get('color_topic', '/camera/image_color')
     CAMERA_INFO_TOPIC = _data.get('camera_info_topic', '/camera/camera_info')
     CAMERA_FRAME_ID = _data.get('camera_frame_id', 'camera_optical_frame')
     AUTO_EXPOSURE = _data.get('auto_exposure', True)

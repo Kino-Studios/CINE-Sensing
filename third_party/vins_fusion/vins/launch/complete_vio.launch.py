@@ -6,8 +6,9 @@ exported as CINE_SENSING_PROFILE before the generator runs, so the generator and
 every node started here read the same profile.
 
 The estimator and loop fusion start `vins_start_delay` seconds after the sensors, so
-MAVROS and the camera are already publishing when VINS initialises. `cine_depth` (from
-the CINE repository) is started too when it is installed in the same workspace.
+MAVROS and the camera are already publishing when VINS initialises. `use_depth:=true`
+also starts `cine_depth` (from the CINE repository) on this machine; it is off by default
+because the depth model normally runs on a separate GPU machine on the same ROS network.
 """
 
 import os
@@ -76,8 +77,13 @@ def _generate_config_and_start_nodes(context):
         TimerAction(period=vins_start_delay, actions=[vins_estimator_node, loop_fusion_node]),
     ]
 
-    try:
-        get_package_share_directory('cine_depth')
+    if LaunchConfiguration('use_depth').perform(context).lower() == 'true':
+        try:
+            get_package_share_directory('cine_depth')
+        except PackageNotFoundError as error:
+            raise RuntimeError(
+                'use_depth:=true, but cine_depth is not installed in this workspace'
+            ) from error
         depth_publisher_node = Node(
             package='cine_depth',
             executable='depth_publisher_node',
@@ -85,9 +91,6 @@ def _generate_config_and_start_nodes(context):
             output='screen',
         )
         nodes_to_launch.append(depth_publisher_node)
-        print('[complete_vio.launch.py] cine_depth found - will launch depth node')
-    except PackageNotFoundError:
-        print('[complete_vio.launch.py] cine_depth not installed - skipping depth node')
 
     return nodes_to_launch
 
@@ -117,12 +120,19 @@ def generate_launch_description():
         description='Remap IMU axes in imu_bridge (unvalidated on hardware; see README)',
     )
 
+    use_depth_arg = DeclareLaunchArgument(
+        'use_depth',
+        default_value='false',
+        description='Also start cine_depth here; normally it runs on a separate GPU machine',
+    )
+
     return LaunchDescription(
         [
             config_path_arg,
             profile_arg,
             vins_start_delay_arg,
             use_transform_arg,
+            use_depth_arg,
             OpaqueFunction(function=_generate_config_and_start_nodes),
         ]
     )

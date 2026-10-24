@@ -8,6 +8,7 @@
             "image_format": "BGR8",
             "jpeg_quality": 95,
             "camera_topic": "/camera/image_raw",
+            "color_topic": "/camera/image_color",
             "camera_info_topic": "/camera/camera_info",
             "camera_frame_id": "camera_optical_frame",
             "auto_exposure": true,

@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 if ! command -v ros2 >/dev/null 2>&1; then
   echo 'ros2 not found: source /opt/ros/jazzy/setup.bash and your workspace install/setup.bash first.' >&2
   exit 1

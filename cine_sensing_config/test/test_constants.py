@@ -45,6 +45,15 @@ def test_shipped_config_files_all_load(monkeypatch):
     assert constants.ModelDetectionConstants.BOUNDING_BOX_TOPIC == '/object_detection/bounding_box'
 
 
+def test_shipped_detector_reads_the_colour_camera_topic(monkeypatch):
+    monkeypatch.setenv('CINE_SENSING_CONFIG_DIR', str(SHIPPED_CONFIG_DIRECTORY))
+
+    constants = _fresh_constants_module()
+
+    assert constants.ModelDetectionConstants.CAMERA_IMAGE_TOPIC == '/camera/image_color'
+    assert constants.CameraConfig.COLOR_TOPIC == '/camera/image_color'
+
+
 def test_package_relative_path_resolves_under_that_package_share_directory():
     from cine_sensing_config.constants import resolve_package_relative_path
 

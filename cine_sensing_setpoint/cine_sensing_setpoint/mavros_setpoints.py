@@ -35,9 +35,8 @@ class SetpointPublisher(Node):
             TwistStamped, '/mavros/setpoint_attitude/cmd_vel', mavros_qos
         )
 
-        self.mavros_attitude_acceleration_pub = self.create_publisher(
-            Vector3Stamped, '/mavros/setpoint_attitude/accel', mavros_qos
-        )
+        # MAVROS's setpoint_attitude plugin takes only attitude, cmd_vel and thrust; it has
+        # no acceleration input, and so there is no attitude acceleration relay here.
 
         self.setpoint_translational_position_subscriber = self.create_subscription(
             PoseStamped,
@@ -74,13 +73,6 @@ class SetpointPublisher(Node):
             mavros_qos,
         )
 
-        self.setpoint_attitude_acceleration_subscriber = self.create_subscription(
-            Vector3Stamped,
-            '/cinematography/attitude_acceleration_setpoints',
-            self.attitude_acceleration_callback,
-            mavros_qos,
-        )
-
     def translational_position_callback(self, msg: PoseStamped):
         self.mavros_position_pub.publish(msg)
 
@@ -95,9 +87,6 @@ class SetpointPublisher(Node):
 
     def attitude_velocity_callback(self, msg: TwistStamped):
         self.mavros_attitude_velocity_pub.publish(msg)
-
-    def attitude_acceleration_callback(self, msg: Vector3Stamped):
-        self.mavros_attitude_acceleration_pub.publish(msg)
 
 
 def main():

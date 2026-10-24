@@ -29,14 +29,12 @@ class GyroscopePublisher(Node):
         gyro_msg.vector.y = msg.angular_velocity.y
         gyro_msg.vector.z = msg.angular_velocity.z
 
+        # The IMU measures acceleration, not velocity, and so twist.linear stays zero.
         twist_msg = TwistStamped()
         twist_msg.header = msg.header
         twist_msg.twist.angular.x = msg.angular_velocity.x
         twist_msg.twist.angular.y = msg.angular_velocity.y
         twist_msg.twist.angular.z = msg.angular_velocity.z
-        twist_msg.twist.linear.x = msg.linear_acceleration.x
-        twist_msg.twist.linear.y = msg.linear_acceleration.y
-        twist_msg.twist.linear.z = msg.linear_acceleration.z
 
         self.vector_publisher.publish(gyro_msg)
         self.twist_publisher.publish(twist_msg)

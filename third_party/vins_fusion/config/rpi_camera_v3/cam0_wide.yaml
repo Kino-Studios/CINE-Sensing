@@ -1,7 +1,7 @@
 %YAML:1.0
 ---
 model_type: PINHOLE
-camera_name: rpi_camera_v3_calibrated
+camera_name: rpi_camera_v3_wide
 image_width: 1152
 image_height: 648
 

@@ -58,7 +58,10 @@ class BoundingBoxPublisher(Node):
             )
 
             inference_results = self.detection_model(
-                cv_image, classes=[UserRequestedParameters.USER_OBJECT_ID]
+                cv_image,
+                classes=[UserRequestedParameters.USER_OBJECT_ID],
+                conf=ModelDetectionConstants.CONFIDENCE_THRESHOLD,
+                iou=ModelDetectionConstants.IOU_THRESHOLD,
             )
 
             if (
