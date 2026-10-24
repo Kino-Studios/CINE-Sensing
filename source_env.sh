@@ -15,6 +15,14 @@ if [ -f "$CINE_SENSING_REPO/venv/bin/activate" ]; then
     source "$CINE_SENSING_REPO/venv/bin/activate"
 fi
 
+# ROS starts Python nodes with /usr/bin/python3, which ignores an activated venv, and so the
+# venv's packages are put on PYTHONPATH for the nodes to import.
+if [ -n "${VIRTUAL_ENV:-}" ]; then
+    CINE_VENV_SITE="$("$VIRTUAL_ENV/bin/python" -c 'import sysconfig; print(sysconfig.get_path("purelib"))')"
+    export PYTHONPATH="$CINE_VENV_SITE${PYTHONPATH:+:$PYTHONPATH}"
+    unset CINE_VENV_SITE
+fi
+
 if [ -f /opt/ros/jazzy/setup.bash ]; then
     source /opt/ros/jazzy/setup.bash
 else
