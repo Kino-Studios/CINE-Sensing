@@ -33,8 +33,8 @@ files below differ from the code as imported.
 | `a014059` | 2026-10-18 | `vins/CMakeLists.txt` installs `config/rpi_camera_v3/cam0_wide.yaml`; `vins/package.xml` adds `exec_depend` on `cine_sensing_config`; `vins/launch/{complete_vio,replay_vio}.launch.py` take `config_path` and `profile` arguments and regenerate the config at launch; `generate_vins_config.py` rewritten to read `cine_sensing_config` profiles and stop writing `cam0_intrinsics`; removed `vins/run_vins.py`, `vins/launch_complete_vio.py`, `config/rpi_camera_v3/rpi_v3_mono_config.yaml` |
 | `a014059` | 2026-10-19 | `vins/launch/complete_vio.launch.py`: starts the estimator and loop fusion after a `vins_start_delay` (default 5 s), passes a `use_transform` argument (default false) to `imu_bridge`, and looks for the depth node in `cine_depth` instead of the retired `depth_publisher` package |
 | `1fb2079` | 2026-10-22 | `README.md`: a note at the top on how this copy differs from the upstream text below it |
-| — | 2026-10-24 | `vins/launch/complete_vio.launch.py`: starts `cine_depth` only with `use_depth:=true` (default false), since depth normally runs on a separate GPU machine, and fails the launch if it is asked for but not installed |
-| — | 2026-10-24 | `config/rpi_camera_v3/cam0_wide.yaml`: `camera_name` changed from `rpi_camera_v3_calibrated` to `rpi_camera_v3_wide`, since no calibration run is recorded for these intrinsics; the name is a label only |
+| `1aba6e7` | 2026-10-24 | `vins/launch/complete_vio.launch.py`: starts `cine_depth` only with `use_depth:=true` (default false), since depth normally runs on a separate GPU machine, and fails the launch if it is asked for but not installed |
+| `1aba6e7` | 2026-10-24 | `config/rpi_camera_v3/cam0_wide.yaml`: `camera_name` changed from `rpi_camera_v3_calibrated` to `rpi_camera_v3_wide`, since no calibration run is recorded for these intrinsics; the name is a label only |
 
 The date is when the work was done; rows that share a commit are separate pieces of work
 that landed in that one commit after the history was rewritten.
