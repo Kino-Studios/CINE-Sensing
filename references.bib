@@ -8,28 +8,31 @@
     year = {2025}
 }
 
-@article{qin2017vins,
+@article{qin2018vins,
     title = {VINS-Mono: A Robust and Versatile Monocular Visual-Inertial State Estimator},
     author = {Qin, Tong and Li, Peiliang and Shen, Shaojie},
     journal = {IEEE Transactions on Robotics},
     year = {2018},
     volume = {34},
     number = {4},
-    pages = {1004-1020}
+    pages = {1004--1020},
+    doi = {10.1109/TRO.2018.2853729}
 }
 
 @misc{qin2019a,
     author = {Tong Qin and Jie Pan and Shaozu Cao and Shaojie Shen},
     title = {A General Optimization-based Framework for Local Odometry Estimation with Multiple Sensors},
     year = {2019},
-    eprint = {arXiv:1901.03638}
+    eprint = {1901.03638},
+    archivePrefix = {arXiv}
 }
 
 @misc{qin2019b,
     author = {Tong Qin and Shaozu Cao and Jie Pan and Shaojie Shen},
     title = {A General Optimization-based Framework for Global Pose Estimation with Multiple Sensors},
     year = {2019},
-    eprint = {arXiv:1901.03642}
+    eprint = {1901.03642},
+    archivePrefix = {arXiv}
 }
 
 @inproceedings{qin2018online,
@@ -38,26 +41,28 @@
     booktitle = {2018 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
     pages = {3662--3669},
     year = {2018},
-    organization = {IEEE}
+    organization = {IEEE},
+    doi = {10.1109/IROS.2018.8593603}
 }
 
-@software{Agarwal_Ceres_Solver,
+@software{Agarwal_Ceres_Solver_2022,
     author = {Agarwal, Sameer and Mierle, Keir and {The Ceres Solver Team}},
-    title = {Ceres Solver},
-    url = {http://ceres-solver.org},
+    title = {{Ceres Solver}},
+    url = {https://github.com/ceres-solver/ceres-solver},
     license = {BSD-3-Clause},
-    version = {2.3},
-    year = {2023},
+    version = {2.1},
+    year = {2022},
+    month = {3},
     note = {CINE-Sensing builds against version 2.1.0}
 }
 
-@software{Jocher_Ultralytics_YOLO,
-    author = {Jocher, Glenn and Qiu, Jing and Chaurasia, Ayush},
-    title = {Ultralytics YOLO},
+@software{yolo11_ultralytics,
+    author = {Jocher, Glenn and Qiu, Jing},
+    title = {Ultralytics YOLO11},
     url = {https://github.com/ultralytics/ultralytics},
     license = {AGPL-3.0},
-    version = {8.0.0},
-    year = {2023}
+    version = {11.0.0},
+    year = {2024}
 }
 
 @article{GalvezTRO12,
@@ -71,4 +76,27 @@
     pages = {1188--1197},
     doi = {10.1109/TRO.2012.2197158},
     issn = {1552-3098}
+}
+
+@inproceedings{geneva2020openvins,
+    title = {{OpenVINS}: A Research Platform for Visual-Inertial Estimation},
+    author = {Geneva, Patrick and Eckenhoff, Kevin and Lee, Woosik and Yang, Yulin and Huang, Guoquan},
+    booktitle = {2020 IEEE International Conference on Robotics and Automation (ICRA)},
+    pages = {4666--4672},
+    year = {2020},
+    organization = {IEEE},
+    doi = {10.1109/ICRA40945.2020.9196524},
+    note = {Camera model classes vendored in third\_party/vins\_fusion/camera\_models/}
+}
+
+@article{karney2013geodesics,
+    title = {Algorithms for geodesics},
+    author = {Karney, Charles F. F.},
+    journal = {Journal of Geodesy},
+    volume = {87},
+    number = {1},
+    pages = {43--55},
+    year = {2013},
+    doi = {10.1007/s00190-012-0578-z},
+    note = {GeographicLib, vendored by VINS-Fusion's global fusion}
 }
