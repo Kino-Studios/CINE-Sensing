@@ -3,7 +3,8 @@
 # and the message packages come from the ROS install; do not pip-install them.
 # numpy stays below 2: Jazzy's cv_bridge is built against Ubuntu's numpy 1.26, and pip
 # cannot replace a Debian-installed numpy anyway.
-ultralytics>=8.2.0,<9
+# YOLO11 (the stock yolo11n.pt) needs ultralytics 8.3.0 or later.
+ultralytics>=8.3.0,<9
 numpy>=1.23.0,<2
 matplotlib>=3.7.0,<4
 # ultralytics pulls in torch, which needs setuptools>=77.0.3, and colcon-core needs
