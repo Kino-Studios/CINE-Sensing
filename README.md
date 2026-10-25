@@ -22,7 +22,7 @@ the frame. The planning half of this study, along with the results and the paper
 | Camera driver, motion-sensor bridge, flight-controller link | **Works on the drone.** |
 | Subject detection (YOLO) | **Works on the drone.** Trained model measured on its validation set; see Results. |
 | Depth from the camera | **Works**, on a separate GPU computer that talks to the Pi over ROS 2. |
-| Position estimate (visual-inertial odometry) | **Runs on the drone but drifts.** The cause is not settled; see [Open issue: VIO drift](#open-issue-vio-drift). This is what stops autonomous flight today. |
+| Position estimate (visual-inertial odometry) | **Runs on the drone but drifts.** The cause is not settled; see [Open issue: VIO drift](#open-issue-vio-drift). Until it is fixed, the drone cannot fly autonomously. |
 | Camera calibration | **Two candidate calibrations disagree**, and which one is correct has not been evaluated on hardware; see [Profiles](#profiles). |
 
 ## Components
@@ -36,16 +36,16 @@ in its [`UPSTREAM.md`](third_party/vins_fusion/UPSTREAM.md). Its camera models a
 flight controller. [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) lists all bundled
 code. This repository adds:
 
-- the **ROS 2 nodes** in the `cine_sensing_*` packages: the camera publisher, the bridge
+- the ROS 2 nodes in the `cine_sensing_*` packages: the camera publisher, the bridge
   that hands the flight controller's motion data to VINS, the YOLO detector node, and the
   relay that passes CINE's position targets to the flight controller;
-- a **detector setup** for YOLO11n fine-tuned on the HomeObjects-3K dataset (12 kinds of
+- a detector setup for YOLO11n fine-tuned on the HomeObjects-3K dataset (12 kinds of
   household object); the trained weights are not published;
-- **camera calibration** scripts in `tools/calibration/`;
-- a **VIO test harness**: record one flight's sensor data once, replay it through every
+- camera calibration scripts in `tools/calibration/`;
+- a VIO test harness: record one flight's sensor data once, replay it through every
   configuration, and compare drift on identical input (`tools/vio_ab_run.sh`,
   `third_party/vins_fusion/vins/tests/`);
-- the **configuration system** in `cine_sensing_config/`, including profiles that swap in
+- the configuration system in `cine_sensing_config/`, including profiles that swap in
   one set of camera or tuning values without editing the base files.
 
 ## Hardware
@@ -88,19 +88,18 @@ code. This repository adds:
 
 ### Design notes
 
-- **Depth runs off the Pi.** A large depth model takes seconds per frame on the Pi's CPU,
-  so depth runs on a separate computer with a GTX 1660 Ti, which receives the Pi's images
-  over ROS 2 and sends depth back. The VIO launch file initiates depth on the Pi only when
-  asked (`use_depth:=true`).
-- **camodocal replaced by OpenVINS.** VINS-Fusion's camera library (camodocal) is licensed
-  CC-BY-SA 2.0, which cannot be combined with GPL-3.0 code. It was replaced with OpenVINS's
-  camera classes, and `third_party/vins_fusion/camera_models/tests/` checks the new code
-  against values camodocal produced before it was removed.
-- **Ceres 2.1.** VINS-Fusion uses part of the Ceres solver that was removed in Ceres 2.2,
-  the version Ubuntu 24.04 ships, so `tools/install_ceres_2_1.sh` builds 2.1 from source.
-- **Drift is compared on replayed data.** No two test flights move the same way, andd so the
-  harness records the sensor data once and replays the same recording through every
-  configuration.
+- A large depth model takes seconds per frame on the Pi's CPU, so depth runs on a
+  separate computer with a GTX 1660 Ti, which receives the Pi's images over ROS 2 and
+  sends depth back. The VIO launch file initiates depth on the Pi only when asked
+  (`use_depth:=true`).
+- VINS-Fusion's camera library (camodocal) is licensed CC-BY-SA 2.0, which cannot be
+  combined with GPL-3.0 code. It was replaced with OpenVINS's camera classes, and
+  `third_party/vins_fusion/camera_models/tests/` checks the new code against values
+  camodocal produced before it was removed.
+- VINS-Fusion uses part of the Ceres solver that was removed in Ceres 2.2, the version
+  Ubuntu 24.04 ships, so `tools/install_ceres_2_1.sh` builds 2.1 from source.
+- No two test flights move the same way, and so the harness records the sensor data once
+  and replays the same recording through every configuration.
 
 <p align="center">
   <img src="docs/media/calibration.jpg" width="280" alt="Camera calibration target taped to a wall">
@@ -112,7 +111,9 @@ code. This repository adds:
 
 ## Results
 
-**Subject detection.** YOLO11n fine-tuned on HomeObjects-3K (12 classes; 2,285 training
+### Subject detection
+
+YOLO11n fine-tuned on HomeObjects-3K (12 classes; 2,285 training
 and 404 validation images), measured on the validation set:
 
 | Precision | Recall | mAP50 | mAP50-95 |
@@ -130,12 +131,12 @@ overlap threshold. The mean recall across the 12 classes is 67.7%.
   lowest; the bottom row shows objects the model missed entirely.</em>
 </p>
 
-**Framing on the real camera.** On this hardware, with the drone on the ground and moved
+### Framing on the real camera
+
+On this hardware, with the drone on the ground and moved
 by hand, CINE cut the subject's average distance from its rule-of-thirds target from
 127.6 px to 32.5 px. The flight results are in
 [CINE](https://github.com/Kino-Studios/CINE#results); they come from simulation.
-
----
 
 ## Pipeline
 
@@ -164,8 +165,6 @@ flowchart LR
     SP -->|pose setpoints| MAVROS
 ```
 
----
-
 ## Supported platform
 
 | | |
@@ -175,8 +174,6 @@ flowchart LR
 | Camera | Raspberry Pi Camera Module 3, published at 1152x648 |
 | Flight controller | ArduPilot over MAVROS (`apm.launch`, serial `/dev/ttyAMA0` at 921600 baud; see `cine_sensing_imu/launch/start_mavros.sh`) |
 | Depth (optional) | Any machine on the same ROS 2 network with the CINE repository's `cine_depth`; a CUDA GPU is recommended |
-
----
 
 ## Install
 
@@ -216,8 +213,6 @@ before building and set `MODEL_PATH` and `USER_OBJECT_ID` in
 `~/cine_ws/install/setup.bash` (the workspace two levels above the repository, or
 `$CINE_SENSING_WS`) and defaults `ROS_DOMAIN_ID` to 0.
 
----
-
 ## Run
 
 ```bash
@@ -249,8 +244,6 @@ Depth normally runs on the GPU computer rather than the Pi: with both machines o
 `ROS_DOMAIN_ID`, start `ros2 launch cine_depth depth_publisher.launch.py` there (see the
 [CINE README](https://github.com/Kino-Studios/CINE#mlp-correction-and-depth-anything-3)).
 
----
-
 ## Configuration
 
 `cine_sensing_config/config/` holds the shared parameters (`camera.json`, `gyroscope.json`,
@@ -275,7 +268,7 @@ environment variable. With no profile, VINS reads the camera intrinsics in
 | `rpi_v3_fullfov` | `vins_camera.json`: the 2025-10-31 checkerboard calibration in `tools/calibration/camera_calibration.yaml`, scaled from the full sensor resolution to 1152x648 (fx 497.6) | calibrated |
 | `rpi_v3_tune_maxcnt250` | `vins.json`: hand-tuned feature tracking (max_cnt 250, min_dist 15, equalize 1, F_threshold 1.5, min_parallax 8) and a fixed time offset (estimate_td 0) | uncalibrated-candidate |
 
-**Which camera intrinsics are correct is untested.** The two camera profiles disagree by
+Which camera intrinsics are correct is untested. The two camera profiles disagree by
 about 1.5x in focal length; which one matches the camera as it is actually driven at
 1152x648 has not been checked on hardware. None of the profiles has been compared with
 the base configuration on a recorded bag either; use `tools/vio_ab_run.sh` (below) for
@@ -289,15 +282,13 @@ in `vins_camera.json`, using the keys of the VINS camera YAML (`model_type`,
 `projection_parameters`); the generator writes them beside the generated config and
 points VINS at them. Rebuild so the new files are installed.
 
----
-
 ## VIO testing
 
 Drift is compared by recording one rosbag and replaying it for every configuration under
 test. Live flights are never compared with each other, because different motion on each
 run makes the numbers incomparable.
 
-**Record the bag once, on the Pi:**
+### Recording the bag once, on the Pi
 
 1. Start the camera, the IMU bridge, and MAVROS, but not VINS. Check that all three topics
    publish: `ros2 topic hz /camera/image_raw /imu_bridge/data_raw /mavros/imu/data_raw`.
@@ -308,7 +299,9 @@ run makes the numbers incomparable.
 4. `ros2 bag info datasets/vio_bags/canonical` should list all three topics over about 55 s.
    `datasets/` is ignored by git; keep the bag outside the repository.
 
-**Compare a configuration:** set the values in `vins.json` (or pick a profile), run
+### Comparing a configuration
+
+Set the values in `vins.json` (or pick a profile), run
 `bash tools/vio_ab_run.sh <label> [bag] [duration_s] [profile]` from the repository root
 with the workspace sourced, and read the new row in `vins_output/drift_results.csv`; the
 row records the profile.
@@ -326,25 +319,18 @@ The scripts in `third_party/vins_fusion/vins/tests/` are the diagnostics behind 
 | `timing_test.py` | Camera and IMU time synchronisation |
 | `position_monitor.py` | Position over time |
 
----
-
 ## Open issue: VIO drift
 
 VINS drifts on this hardware, and the cause is not settled. Three candidate fixes exist:
 a different IMU axis mapping in `imu_bridge.py`, a different MAVROS IMU topic, and retuned
-noise values. None has been validated on hardware, and so none is adopted.
-
-> **Do not adopt any drift fix without hardware validation.** Use the bag comparison above.
-
----
+noise values. None has been validated on hardware, and so none is adopted. Any fix should
+first pass the bag comparison in [VIO testing](#vio-testing).
 
 ## Troubleshooting
 
 **Missing vocabulary or meshes:** run `python3 tools/download_assets.py`, then rebuild so the files are installed. Check `VERSION` matches a published release.
 
 **IMU/VIO drift:** see the open-issue section above.
-
----
 
 ## Packages
 
@@ -359,8 +345,6 @@ noise values. None has been validated on hardware, and so none is adopted.
 
 `tools/` holds the asset downloader, the Ceres install script, the formatter, the VIO
 A/B and bag-recording scripts, and the camera calibration scripts (`tools/calibration/`).
-
----
 
 ## Contributing
 
@@ -378,23 +362,17 @@ adds the repository's whitespace convention. Code under `third_party/` keeps its
 style and is excluded from the hooks; record any change to it in
 `third_party/vins_fusion/UPSTREAM.md`.
 
----
-
 ## Citation
 
 If you use CINE-Sensing in research, cite it with the metadata in
 [`CITATION.cff`](CITATION.cff). [`references.bib`](references.bib) lists the work it builds
 on.
 
----
-
 ## Licence
 
 GPL-3.0-only; see [`LICENSE`](LICENSE). Third-party code and data, their licences, and
 what is downloaded rather than shipped are listed in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-
----
 
 ## Acknowledgements
 
@@ -403,8 +381,6 @@ Robotics Group) and its ROS 2 port, [OpenVINS](https://github.com/rpng/open_vins
 camera model classes, [DBoW2](https://github.com/dorian3d/DBoW2) for loop-closure place
 recognition, [Ceres Solver](http://ceres-solver.org/), and
 [Ultralytics YOLO](https://github.com/ultralytics/ultralytics).
-
----
 
 ## Related
 
