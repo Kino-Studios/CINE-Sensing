@@ -9,7 +9,7 @@ entry names the licence and where its full text lives.
 | Component | Licence | Location | Notes |
 | --- | --- | --- | --- |
 | VINS-Fusion (HKUST Aerial Robotics Group) | GPL-3.0 | `third_party/vins_fusion/`, licence in `third_party/vins_fusion/LICENCE` | Modified; every change is listed in `third_party/vins_fusion/UPSTREAM.md`. |
-| DBoW2 (Dorian Galvez-Lopez) | BSD-style with a notification clause | `third_party/vins_fusion/loop_fusion/src/ThirdParty/`, licence in `LICENSE.DBoW2` there | Bundled by VINS-Fusion for loop closure. See the open item below. |
+| DBoW2 (Dorian Galvez-Lopez) | BSD-style with a notification clause | `third_party/vins_fusion/loop_fusion/src/ThirdParty/`, licence in `LICENSE.DBoW2` there | Bundled by VINS-Fusion for loop closure. Its author has been notified of this redistribution, as clause 3 of its licence requires. |
 | OpenVINS camera classes (Robot Perception and Navigation Group) | GPL-3.0-or-later | `third_party/vins_fusion/camera_models/include/camera_models/open_vins/`, licence in `third_party/vins_fusion/camera_models/LICENSE.open_vins` | Replaced the camodocal camera library (CC-BY-SA 2.0) on 2026-10-16. |
 | GeographicLib (Charles Karney) | MIT | `third_party/vins_fusion/global_fusion/ThirdParty/GeographicLib/`, licence in `LICENSE.txt` there | Bundled by VINS-Fusion for global fusion. |
 
@@ -24,10 +24,3 @@ entry names the licence and where its full text lives.
 | VINS-Fusion data files (`brief_k10L6.bin`, `car.dae`, `hummingbird.mesh`) | GPL-3.0, as part of VINS-Fusion | Downloaded by `tools/download_assets.py` from this project's GitHub Release. |
 
 Citations for these works are in `references.bib`.
-
-## Open items
-
-- **DBoW2 notification.** Clause 3 of `LICENSE.DBoW2` reads: "The original author of
-  the work must be notified of any redistribution of source code or in binary form."
-  Dorian Galvez-Lopez has not yet been notified of this repository's redistribution.
-  This must be done before a public release.
