@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cine-sensing-cli"
+version = "0.1.0"
+description = "Command-line front end for the CINE-Sensing scripts and launch files"
+requires-python = ">=3.12"
+dependencies = ["typer>=0.29.1,<0.30"]
+
+[project.scripts]
+cine-sensing = "cine_sensing_cli.main:app"
+
+[tool.setuptools]
+packages = ["cine_sensing_cli"]

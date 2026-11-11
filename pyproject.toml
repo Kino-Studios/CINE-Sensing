@@ -2,11 +2,13 @@
 [tool.pytest.ini_options]
 testpaths = [
     "cine_sensing_config/test",
+    "cine_sensing_cli/test",
     "tools",
     "third_party/vins_fusion/vins/tests/unit",
 ]
 pythonpath = [
     "cine_sensing_config",
+    "cine_sensing_cli",
     "tools",
     "third_party/vins_fusion/vins/tests",
 ]

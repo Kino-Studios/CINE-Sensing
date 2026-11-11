@@ -50,3 +50,4 @@ never edit the import path themselves.
 - Data files kept out of git: `python3 tools/download_assets.py`.
 - Ceres 2.1 (VINS-Fusion needs it; Ubuntu 24.04 ships 2.2): `tools/install_ceres_2_1.sh`.
 - Changes under `third_party/vins_fusion/` are recorded in its `UPSTREAM.md`.
+- Prefer `cine-sensing ... --json` over calling the underlying scripts directly: it prints one JSON object on stdout and uses distinct exit codes (exit `3` means the environment is not ready).

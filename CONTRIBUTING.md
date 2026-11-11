@@ -16,6 +16,23 @@ pytest                                          # pure-Python tests, no ROS need
 cd ~/cine_ws && colcon build && colcon test && colcon test-result --verbose
 ```
 
+## Command-line tool
+
+The `cine-sensing` command (package `cine_sensing_cli`) runs the launch, VIO, config,
+contract, assets and doctor steps on the drone's Raspberry Pi. Install it from the
+repository root with pipx, not plain `pip`, because Ubuntu 24.04 refuses `pip` into the
+system Python (`sudo apt install pipx` if pipx is missing):
+
+```bash
+pipx install --editable ./cine_sensing_cli
+pipx inject cine-sensing-cli ../CINE-Interfaces/cine_interfaces   # needed by `contract check`
+cine-sensing --help                                               # lists every command
+```
+
+The editable install means `git pull` updates the tool without reinstalling it. The
+`inject` line adds the CINE-Interfaces package to the same environment, so `contract check`
+can import it.
+
 ## Topics shared with CINE
 
 Topics that cross the Wi-Fi link to the ground PC are listed in the contract in

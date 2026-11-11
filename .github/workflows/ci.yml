@@ -28,7 +28,7 @@ jobs:
           # Must match version in interfaces.repos, so CI checks the pinned contract.
           ref: 9bd133ce7bed4b9d7ff50f1476eccd25ae8bb5d2
           path: .deps/CINE-Interfaces
-      - run: pip install pytest numpy pyyaml ./.deps/CINE-Interfaces/cine_interfaces
+      - run: pip install pytest numpy pyyaml ./cine_sensing_cli ./.deps/CINE-Interfaces/cine_interfaces
       # Pure-Python tests: config loader and profiles, VINS config generator, drift
       # metrics, and the tools. No ROS needed.
       - run: pytest
