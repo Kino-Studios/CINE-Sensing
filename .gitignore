@@ -23,3 +23,6 @@ cine_sensing_yolo/models/
 tools/calibration/images/
 tools/calibration/calib_data/
 *.part
+
+# CINE-Interfaces checkout made by CI
+.deps/

@@ -16,6 +16,22 @@ pytest                                          # pure-Python tests, no ROS need
 cd ~/cine_ws && colcon build && colcon test && colcon test-result --verbose
 ```
 
+## Topics shared with CINE
+
+Topics that cross the Wi-Fi link to the ground PC are listed in the contract in
+[CINE-Interfaces](https://github.com/Kino-Studios/CINE-Interfaces), and
+`tools/test_interface_contract.py` fails when this repository drifts from it. Install
+the checker next to this checkout before running `pytest`:
+
+```bash
+git clone https://github.com/Kino-Studios/CINE-Interfaces ../CINE-Interfaces
+pip install -e ../CINE-Interfaces/cine_interfaces
+```
+
+To rename or retype one of those topics, edit `contract.json` in CINE-Interfaces first,
+then change the code here and in CINE, and move the commit pinned in `interfaces.repos`
+and `.github/workflows/ci.yml` forward.
+
 ## Style
 
 Python style is ruff (line length 100, single quotes) plus `python3 tools/format.py`, which
