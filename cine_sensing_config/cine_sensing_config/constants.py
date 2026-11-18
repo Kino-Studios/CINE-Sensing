@@ -15,6 +15,7 @@ def package_share_directory(package_name: str) -> str:
 
     Raises LookupError when the package is not installed or ROS is not on the path.
     """
+
     try:
         from ament_index_python.packages import (
             PackageNotFoundError,
@@ -40,6 +41,7 @@ def resolve_package_relative_path(
     stock `yolo11n.pt`, or a path whose first segment is not an installed package is
     returned unchanged.
     """
+
     if not path_text or Path(path_text).is_absolute():
         return path_text
 

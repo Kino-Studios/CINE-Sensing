@@ -12,25 +12,25 @@ export PYTHONUNBUFFERED=1
 
 # Optional virtual environment for the pip-only Python packages (requirements.txt).
 if [ -f "$CINE_SENSING_REPO/venv/bin/activate" ]; then
-    source "$CINE_SENSING_REPO/venv/bin/activate"
+  source "$CINE_SENSING_REPO/venv/bin/activate"
 fi
 
 # ROS starts Python nodes with /usr/bin/python3, which ignores an activated venv, and so the
 # venv's packages are put on PYTHONPATH for the nodes to import.
 if [ -n "${VIRTUAL_ENV:-}" ]; then
-    CINE_VENV_SITE="$("$VIRTUAL_ENV/bin/python" -c 'import sysconfig; print(sysconfig.get_path("purelib"))')"
-    export PYTHONPATH="$CINE_VENV_SITE${PYTHONPATH:+:$PYTHONPATH}"
-    unset CINE_VENV_SITE
+  CINE_VENV_SITE="$("$VIRTUAL_ENV/bin/python" -c 'import sysconfig; print(sysconfig.get_path("purelib"))')"
+  export PYTHONPATH="$CINE_VENV_SITE${PYTHONPATH:+:$PYTHONPATH}"
+  unset CINE_VENV_SITE
 fi
 
 if [ -f /opt/ros/jazzy/setup.bash ]; then
-    source /opt/ros/jazzy/setup.bash
+  source /opt/ros/jazzy/setup.bash
 else
-    echo "source_env.sh: /opt/ros/jazzy/setup.bash not found; install ROS 2 Jazzy first." >&2
+  echo "source_env.sh: /opt/ros/jazzy/setup.bash not found; install ROS 2 Jazzy first." >&2
 fi
 
 if [ -f "$CINE_SENSING_WS/install/setup.bash" ]; then
-    source "$CINE_SENSING_WS/install/setup.bash"
+  source "$CINE_SENSING_WS/install/setup.bash"
 else
-    echo "source_env.sh: $CINE_SENSING_WS/install/setup.bash not found; run colcon build in $CINE_SENSING_WS." >&2
+  echo "source_env.sh: $CINE_SENSING_WS/install/setup.bash not found; run colcon build in $CINE_SENSING_WS." >&2
 fi

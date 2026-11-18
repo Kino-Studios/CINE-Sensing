@@ -19,7 +19,7 @@ def test_config_profiles_lists_every_profile_directory(invoke):
     result = invoke('config', 'profiles', '--json')
 
     assert json.loads(result.stdout) == {
-        'profiles': ['gazebo', 'rpi_v3_fullfov', 'rpi_v3_tune_maxcnt250', 'rpi_v3_wide']
+        'profiles': ['gazebo', 'rpi_v3_fullfov', 'rpi_v3_tune_maxcnt250', 'rpi_v3_wide'],
     }
 
 
@@ -65,12 +65,16 @@ def test_config_show_works_without_ros2(invoke, environment):
 
 
 def test_config_show_defaults_the_profile_to_the_environment_variable(
-    invoke, environment, tmp_path
+    invoke,
+    environment,
+    tmp_path,
 ):
     config_directory = build_tree(tmp_path)
     write_json(config_directory / 'profiles' / 'p' / 'vins.json', {'a': 2})
     isolated = replace(
-        environment, repository_root=tmp_path, variables={'CINE_SENSING_PROFILE': 'p'}
+        environment,
+        repository_root=tmp_path,
+        variables={'CINE_SENSING_PROFILE': 'p'},
     )
 
     result = invoke('config', 'show', '--json', environment=isolated)

@@ -13,6 +13,6 @@ def generate_launch_description():
                 name='imu_bridge',
                 output='screen',
                 parameters=[],
-            )
-        ]
+            ),
+        ],
     )

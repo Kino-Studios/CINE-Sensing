@@ -24,7 +24,10 @@ class FeatureViewer(Node):
         )
 
         self.image_subscription = self.create_subscription(
-            Image, 'image_track', self._image_callback, qos_profile
+            Image,
+            'image_track',
+            self._image_callback,
+            qos_profile,
         )
 
         self.display_thread = threading.Thread(target=self._display_loop, daemon=True)
@@ -33,6 +36,7 @@ class FeatureViewer(Node):
     def _image_callback(self, msg: Image):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+
             with self.image_lock:
                 self.latest_image = cv_image
         except Exception as exc:
@@ -64,6 +68,7 @@ def main():
         pass
     finally:
         node.destroy_node()
+
         try:
             rclpy.shutdown()
         except Exception:

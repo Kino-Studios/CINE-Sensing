@@ -40,21 +40,28 @@ class BoundingBoxPublisher(Node):
         )
 
         self.bounding_box_publisher = self.create_publisher(
-            PolygonStamped, ModelDetectionConstants.BOUNDING_BOX_TOPIC, qos_profile
+            PolygonStamped,
+            ModelDetectionConstants.BOUNDING_BOX_TOPIC,
+            qos_profile,
         )
 
         self.dimensions_publisher = self.create_publisher(
-            PolygonStamped, '/object_detection/dimensions', qos_profile
+            PolygonStamped,
+            '/object_detection/dimensions',
+            qos_profile,
         )
 
         self.center_point_publisher = self.create_publisher(
-            PolygonStamped, '/object_detection/center_point', qos_profile
+            PolygonStamped,
+            '/object_detection/center_point',
+            qos_profile,
         )
 
     def _bounding_box_capture_callback(self, image_message):
         try:
             cv_image = self.bridge.imgmsg_to_cv2(
-                image_message, desired_encoding=ModelDetectionConstants.IMAGE_ENCODING
+                image_message,
+                desired_encoding=ModelDetectionConstants.IMAGE_ENCODING,
             )
 
             inference_results = self.detection_model(
@@ -63,7 +70,6 @@ class BoundingBoxPublisher(Node):
                 conf=ModelDetectionConstants.CONFIDENCE_THRESHOLD,
                 iou=ModelDetectionConstants.IOU_THRESHOLD,
             )
-
             if (
                 len(inference_results) == 0
                 or inference_results[0].boxes is None
@@ -73,7 +79,6 @@ class BoundingBoxPublisher(Node):
 
             bounding_boxes = inference_results[0].boxes
             xyxy_tensors = bounding_boxes.xyxy[0]
-
             if hasattr(xyxy_tensors, 'cpu'):
                 xyxy_numpy = xyxy_tensors.cpu().numpy()
             else:

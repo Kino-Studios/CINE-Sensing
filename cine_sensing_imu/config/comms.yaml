@@ -4,8 +4,8 @@
 mavros:
   ros__parameters:
     # Serial connection to flight controller
-    fcu_url: "/dev/ttyAMA0:921600"
-    gcs_url: ""
+    fcu_url: '/dev/ttyAMA0:921600'
+    gcs_url: ''
     target_system_id: 1
     target_component_id: 1
 

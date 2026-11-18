@@ -1,11 +1,8 @@
 """Shared CINE-Sensing configuration, read from the JSON files this package installs.
 
-`load(name)` returns one JSON file as a dict. A profile, named by the
-`CINE_SENSING_PROFILE` environment variable, is a directory under `profiles/` whose
-files replace the base files of the same name, whole file, with no key merging. The
-typed constant classes
-(`CameraConfig`, `VinsConfig`, ...) live in `cine_sensing_config.constants` and are
-re-exported here lazily, so importing this package never reads a file by itself.
+A profile (`CINE_SENSING_PROFILE`) is a directory under `profiles/` whose files replace
+same-named base files whole. The typed constant classes in `cine_sensing_config.constants`
+are re-exported here lazily, so importing this package reads no file.
 """
 
 import importlib
@@ -28,11 +25,8 @@ _CONSTANT_CLASS_NAMES = (
 
 
 def config_directory() -> Path:
-    """Return the directory holding the config files.
+    """Return `CINE_SENSING_CONFIG_DIR` when set, else this package's installed config."""
 
-    `CINE_SENSING_CONFIG_DIR` wins when set; otherwise the installed share
-    directory of this package is used, so lookup works from any working directory.
-    """
     override_directory = os.environ.get(CONFIG_DIRECTORY_ENVIRONMENT_VARIABLE)
     if override_directory:
         return Path(override_directory)
@@ -49,10 +43,8 @@ def active_profile() -> str:
 
 
 def profile_directory(profile: str) -> Path:
-    """Return the directory of `profile`.
+    """Return the directory of `profile`; raise ValueError when it does not exist."""
 
-    Raises ValueError naming the profile when no such directory exists.
-    """
     directory = config_directory() / PROFILES_DIRECTORY_NAME / profile
     if not directory.is_dir():
         raise ValueError(f'Unknown config profile {profile!r}: {directory} does not exist')
@@ -62,6 +54,7 @@ def profile_directory(profile: str) -> Path:
 
 def config_file_path(name: str) -> Path:
     """Return the file `load(name)` reads: the active profile's copy, else the base file."""
+
     profile = active_profile()
     if profile:
         profile_file = profile_directory(profile) / f'{name}.json'
@@ -72,12 +65,12 @@ def config_file_path(name: str) -> Path:
 
 
 def load(name: str) -> dict:
-    """Return the `<name>.json` config file as a dict.
+    """Return `<name>.json` as a dict, the active profile's copy first.
 
-    The active profile's copy wins over the base file. Raises FileNotFoundError when
-    neither exists, ValueError when the file is not valid JSON or the profile is
-    unknown; the messages carry the full path.
+    Raises FileNotFoundError when neither exists, ValueError for malformed JSON or an
+    unknown profile.
     """
+
     config_path = config_file_path(name)
     if not config_path.is_file():
         raise FileNotFoundError(f'Config file not found: {config_path}')

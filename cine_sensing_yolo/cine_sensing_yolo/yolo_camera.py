@@ -16,7 +16,10 @@ class YOLODetectionNode(Node):
         self.bridge = CvBridge()
 
         self.image_subscription = self.create_subscription(
-            Image, ModelDetectionConstants.CAMERA_IMAGE_TOPIC, self.image_callback, 10
+            Image,
+            ModelDetectionConstants.CAMERA_IMAGE_TOPIC,
+            self.image_callback,
+            10,
         )
 
         try:
@@ -44,7 +47,7 @@ class YOLODetectionNode(Node):
             detections = results[0].boxes
             if detections is not None and len(detections) > 0:
                 self.get_logger().info(
-                    f'Frame {self.frame_count}: Detected {len(detections)} objects'
+                    f'Frame {self.frame_count}: Detected {len(detections)} objects',
                 )
 
                 for i, detection in enumerate(detections):
@@ -55,7 +58,6 @@ class YOLODetectionNode(Node):
             else:
                 if self.frame_count % 30 == 0:
                     self.get_logger().info(f'Frame {self.frame_count}: No objects detected')
-
         except Exception as exc:
             self.get_logger().error(f'Error processing image: {str(exc)}')
 

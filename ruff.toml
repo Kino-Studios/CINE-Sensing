@@ -11,7 +11,7 @@ extend-exclude = [
 ]
 
 [lint]
-select = ["E", "F", "W", "I", "B", "UP"]
+select = ["E", "F", "W", "I", "B", "UP", "COM812"]
 ignore = [
     "E501",   # line length handled by formatter
     "F841",   # local variable assigned but never used: plot handles kept for API symmetry

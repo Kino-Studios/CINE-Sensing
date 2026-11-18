@@ -50,7 +50,7 @@ class CameraPublisher(Node):
             self.get_parameter('libcamera_shutter').get_parameter_value().integer_value
         )
         self.libcamera_gain = float(
-            self.get_parameter('libcamera_gain').get_parameter_value().double_value
+            self.get_parameter('libcamera_gain').get_parameter_value().double_value,
         )
 
         self.bridge = CvBridge()
@@ -77,7 +77,10 @@ class CameraPublisher(Node):
     def _detect_camera_method(self):
         try:
             result = subprocess.run(
-                ['rpicam-hello', '--list-cameras'], capture_output=True, text=True, timeout=5
+                ['rpicam-hello', '--list-cameras'],
+                capture_output=True,
+                text=True,
+                timeout=5,
             )
             if result.returncode == 0 and 'Available cameras' in result.stdout:
                 return 'libcamera'
@@ -95,6 +98,7 @@ class CameraPublisher(Node):
                         cap.release()
 
                         return 'opencv'
+
                 cap.release()
             except Exception:
                 pass
@@ -129,7 +133,6 @@ class CameraPublisher(Node):
             next_frame_time += frame_period
             current_time = time.time()
             sleep_time = next_frame_time - current_time
-
             if sleep_time > 0:
                 time.sleep(sleep_time)
             else:
@@ -170,10 +173,12 @@ class CameraPublisher(Node):
             self.get_logger().info('libcamera capture at ' + str(self.fps) + ' Hz')
 
             buffer = b''
+
             while not self.shutdown_event.is_set() and rclpy.ok():
                 chunk = process.stdout.read(4096)
                 if not chunk:
                     break
+
                 buffer += chunk
 
                 while True:
@@ -191,10 +196,10 @@ class CameraPublisher(Node):
                             self._publish_frame(frame, capture_time)
                     else:
                         break
-
         finally:
             if 'process' in locals():
                 process.terminate()
+
                 try:
                     process.wait(timeout=2)
                 except subprocess.TimeoutExpired:
@@ -219,7 +224,6 @@ class CameraPublisher(Node):
 
             if self.save_latest_frame:
                 cv2.imwrite('latest_frame.png', frame)
-
         except Exception as exc:
             self.get_logger().error(f'Failed to publish frame: {exc}')
 
@@ -245,6 +249,7 @@ def main():
         pass
     finally:
         node.destroy_node()
+
         try:
             rclpy.shutdown()
         except Exception:

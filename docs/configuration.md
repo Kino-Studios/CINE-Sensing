@@ -16,11 +16,11 @@ of `complete_vio.launch.py` and `replay_vio.launch.py`, or the `CINE_SENSING_PRO
 environment variable. With no profile, VINS reads the camera intrinsics in
 `third_party/vins_fusion/config/rpi_camera_v3/cam0_wide.yaml`, as before profiles existed.
 
-| Profile | Overrides | Status |
-| --- | --- | --- |
-| `rpi_v3_wide` | `vins_camera.json`: the `cam0_wide.yaml` intrinsics (fx 751) | uncalibrated-candidate |
-| `rpi_v3_fullfov` | `vins_camera.json`: the 2025-10-31 checkerboard calibration in `tools/calibration/camera_calibration.yaml`, scaled from the full sensor resolution to 1152x648 (fx 497.6) | calibrated |
-| `rpi_v3_tune_maxcnt250` | `vins.json`: hand-tuned feature tracking (max_cnt 250, min_dist 15, equalize 1, F_threshold 1.5, min_parallax 8) and a fixed time offset (estimate_td 0) | uncalibrated-candidate |
+| Profile                 | Overrides                                                                                                                                                                 | Status                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `rpi_v3_wide`           | `vins_camera.json`: the `cam0_wide.yaml` intrinsics (fx 751)                                                                                                              | uncalibrated-candidate |
+| `rpi_v3_fullfov`        | `vins_camera.json`: the 2025-10-31 checkerboard calibration in `tools/calibration/camera_calibration.yaml`, scaled from the full sensor resolution to 1152x648 (fx 497.6) | calibrated             |
+| `rpi_v3_tune_maxcnt250` | `vins.json`: hand-tuned feature tracking (max_cnt 250, min_dist 15, equalize 1, F_threshold 1.5, min_parallax 8) and a fixed time offset (estimate_td 0)                  | uncalibrated-candidate |
 
 Which camera intrinsics are correct is untested. The two camera profiles disagree by about
 1.5x in focal length; which one matches the camera as it is actually driven at 1152x648

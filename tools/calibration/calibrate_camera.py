@@ -45,14 +45,18 @@ def calibrate(shows_pics=True):
 
         img_gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         corners_found, corners_org = cv.findChessboardCorners(img_gray, (n_rows, n_cols), None)
-
         if corners_found:
             successful_images += 1
             world_points_list.append(world_points.copy())
             corners_refined = cv.cornerSubPix(
-                img_gray, corners_org, (11, 11), (-1, -1), term_criteria
+                img_gray,
+                corners_org,
+                (11, 11),
+                (-1, -1),
+                term_criteria,
             )
             image_points_list.append(corners_refined)
+
             if image_shape is None:
                 image_shape = img_gray.shape[::-1]
 
@@ -103,7 +107,6 @@ def remove_distortion(camera_matrix, distort_coeff):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     image_path = os.path.join(script_dir, 'images', '*.jpg')
     images = glob.glob(image_path)
-
     if not images:
         return
 
@@ -111,7 +114,11 @@ def remove_distortion(camera_matrix, distort_coeff):
 
     height, width = image.shape[:2]
     new_camera_matrix = cv.getOptimalNewCameraMatrix(
-        camera_matrix, distort_coeff, (width, height), 1, (width, height)
+        camera_matrix,
+        distort_coeff,
+        (width, height),
+        1,
+        (width, height),
     )
     img_undistorted = cv.undistort(image, camera_matrix, distort_coeff, None, new_camera_matrix)
 

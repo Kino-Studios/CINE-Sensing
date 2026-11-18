@@ -22,7 +22,10 @@ class VIOPublisher(Node):
         # VINS-Fusion's estimator node has no namespace, and so its relative "odometry"
         # topic is /odometry. VINS reads its IMU from the IMU bridge, not from this node.
         self.vins_odom_subscription = self.create_subscription(
-            Odometry, '/odometry', self.vins_odom_callback, vins_pub_qos
+            Odometry,
+            '/odometry',
+            self.vins_odom_callback,
+            vins_pub_qos,
         )
 
         self.pose_publisher = self.create_publisher(PoseStamped, '/vio/pose', vins_pub_qos)
@@ -30,9 +33,12 @@ class VIOPublisher(Node):
         self.odometry_publisher = self.create_publisher(Odometry, '/vio/odometry', vins_pub_qos)
 
         self.autopilot_pose_publisher = None
+
         if self.get_parameter('forward_to_autopilot').value:
             self.autopilot_pose_publisher = self.create_publisher(
-                PoseStamped, '/mavros/vision_pose/pose', 10
+                PoseStamped,
+                '/mavros/vision_pose/pose',
+                10,
             )
 
         self.tf_broadcaster = TransformBroadcaster(self)

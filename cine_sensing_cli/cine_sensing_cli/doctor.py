@@ -47,10 +47,12 @@ def _format_check(check: Check) -> str:
 
 def doctor(context: typer.Context, as_json: JsonFlag = False) -> None:
     """Check that the ROS 2 data paths the VIO pipeline needs are alive."""
+
     environment = get_environment(context)
     ros2_path = environment.which('ros2')
     working_directory = Path.cwd()
     checks: list[Check] = []
+
     if ros2_path is None:
         checks.append(Check('ros2', False, ROS2_MISSING_MESSAGE))
         exit_code = ExitCode.ENVIRONMENT
@@ -65,8 +67,9 @@ def doctor(context: typer.Context, as_json: JsonFlag = False) -> None:
         )
         connected = 'true' in state.stdout.lower()
         checks.append(
-            Check('MAVROS connected', connected, 'connected' if connected else 'not connected')
+            Check('MAVROS connected', connected, 'connected' if connected else 'not connected'),
         )
+
         for topic in RATE_TOPICS:
             captured = environment.runner.capture(
                 ['ros2', 'topic', 'hz', topic, '--window', '10'],
@@ -76,7 +79,9 @@ def doctor(context: typer.Context, as_json: JsonFlag = False) -> None:
             rate = parse_average_rate(captured.stdout)
             detail = 'no messages' if rate is None else f'{rate:.2f} Hz'
             checks.append(Check(f'{topic} rate', rate is not None, detail))
+
         exit_code = ExitCode.OK if all(check.passed for check in checks) else ExitCode.FAILED
+
     if as_json:
         typer.echo(json.dumps({'checks': [asdict(check) for check in checks]}))
     else:

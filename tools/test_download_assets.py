@@ -39,7 +39,7 @@ def test_asset_is_fetched_from_the_release_named_by_the_tag(tmp_path):
     download_assets.fetch_asset(TEST_ASSET, tmp_path, 'v1.1.0', recording_download)
 
     assert requested_urls == [
-        'https://github.com/Kino-Studios/CINE-Sensing/releases/download/v1.1.0/vocabulary.bin'
+        'https://github.com/Kino-Studios/CINE-Sensing/releases/download/v1.1.0/vocabulary.bin',
     ]
 
 
@@ -67,7 +67,10 @@ def test_present_asset_with_wrong_checksum_is_refused_and_left_alone(tmp_path):
 def test_downloaded_asset_with_wrong_checksum_is_deleted(tmp_path):
     with pytest.raises(download_assets.ChecksumMismatchError, match='vocabulary.bin'):
         download_assets.fetch_asset(
-            TEST_ASSET, tmp_path, 'v1.1.0', _download_writing(b'other bytes')
+            TEST_ASSET,
+            tmp_path,
+            'v1.1.0',
+            _download_writing(b'other bytes'),
         )
 
     assert list((tmp_path / 'third_party/support_files').iterdir()) == []

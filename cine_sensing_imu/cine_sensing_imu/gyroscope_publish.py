@@ -17,7 +17,10 @@ class GyroscopePublisher(Node):
         )
 
         self.subscriber = self.create_subscription(
-            Imu, 'mavros/imu/data', self.imu_callback, sensor_qos
+            Imu,
+            'mavros/imu/data',
+            self.imu_callback,
+            sensor_qos,
         )
         self.vector_publisher = self.create_publisher(Vector3Stamped, 'gyroscope/data', sensor_qos)
         self.twist_publisher = self.create_publisher(TwistStamped, 'gyroscope/twist', sensor_qos)

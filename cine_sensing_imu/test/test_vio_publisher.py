@@ -26,23 +26,29 @@ def start_vio_node():
 
     for node in nodes:
         node.destroy_node()
+
     rclpy.shutdown()
 
 
 def publish_one_odometry_and_collect_autopilot_poses(vio_node, probe_node):
     received_poses = []
     probe_node.create_subscription(
-        PoseStamped, '/mavros/vision_pose/pose', received_poses.append, 10
+        PoseStamped,
+        '/mavros/vision_pose/pose',
+        received_poses.append,
+        10,
     )
     odometry_publisher = probe_node.create_publisher(Odometry, '/odometry', 10)
     odometry = Odometry()
     odometry.pose.pose.position.x = 1.5
     odometry.pose.pose.position.y = -2.0
     odometry.pose.pose.position.z = 0.25
+
     for _ in range(MAXIMUM_SPINS):
         odometry_publisher.publish(odometry)
         rclpy.spin_once(vio_node, timeout_sec=0.05)
         rclpy.spin_once(probe_node, timeout_sec=0.05)
+
         if received_poses:
             break
 

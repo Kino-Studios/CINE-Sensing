@@ -11,11 +11,17 @@ class IMUChecker(Node):
         super().__init__('imu_checker')
 
         self.mavros_sub = self.create_subscription(
-            Imu, '/mavros/imu/data_raw', self.mavros_callback, 10
+            Imu,
+            '/mavros/imu/data_raw',
+            self.mavros_callback,
+            10,
         )
 
         self.bridge_sub = self.create_subscription(
-            Imu, '/imu_bridge/data_raw', self.bridge_callback, 10
+            Imu,
+            '/imu_bridge/data_raw',
+            self.bridge_callback,
+            10,
         )
 
         self.get_logger().info('IMU Checker started - monitoring both MAVROS and bridge topics')
@@ -27,7 +33,7 @@ class IMUChecker(Node):
 
         self.get_logger().info(
             f'MAVROS: acc=[{acc.x:.2f}, {acc.y:.2f}, {acc.z:.2f}] mag={acc_mag:.2f} '
-            f'gyro=[{gyro.x:.3f}, {gyro.y:.3f}, {gyro.z:.3f}]'
+            f'gyro=[{gyro.x:.3f}, {gyro.y:.3f}, {gyro.z:.3f}]',
         )
 
     def bridge_callback(self, msg):
@@ -37,7 +43,7 @@ class IMUChecker(Node):
 
         self.get_logger().info(
             f'BRIDGE: acc=[{acc.x:.2f}, {acc.y:.2f}, {acc.z:.2f}] mag={acc_mag:.2f} '
-            f'gyro=[{gyro.x:.3f}, {gyro.y:.3f}, {gyro.z:.3f}]'
+            f'gyro=[{gyro.x:.3f}, {gyro.y:.3f}, {gyro.z:.3f}]',
         )
 
 

@@ -26,14 +26,14 @@ velocity while static should stay under 0.1 m/s.
 
 The scripts in `third_party/vins_fusion/vins/tests/` are the diagnostics behind these runs:
 
-| Script | Checks |
-| --- | --- |
-| `static_drift_test.py` | Drift while the rig is static; writes the CSV row |
-| `imu_noise_analyzer.py` | Measured IMU noise against the noise values in the VINS config |
-| `feature_quality_test.py`, `feature_tracking_visual_test.py` | Feature counts and tracking quality |
-| `solver_convergence_monitor.py` | Solver failures, iteration counts, and timing |
-| `timing_test.py` | Camera and IMU time synchronisation |
-| `position_monitor.py` | Position over time |
+| Script                                                       | Checks                                                         |
+| ------------------------------------------------------------ | -------------------------------------------------------------- |
+| `static_drift_test.py`                                       | Drift while the rig is static; writes the CSV row              |
+| `imu_noise_analyzer.py`                                      | Measured IMU noise against the noise values in the VINS config |
+| `feature_quality_test.py`, `feature_tracking_visual_test.py` | Feature counts and tracking quality                            |
+| `solver_convergence_monitor.py`                              | Solver failures, iteration counts, and timing                  |
+| `timing_test.py`                                             | Camera and IMU time synchronisation                            |
+| `position_monitor.py`                                        | Position over time                                             |
 
 ## Open issue: VIO drift
 

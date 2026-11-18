@@ -21,7 +21,7 @@ def test_launch_camera_runs_from_the_repository_root(invoke, runner, repository_
     invoke('launch', 'camera')
 
     assert runner.commands == [
-        (['ros2', 'launch', 'cine_sensing_camera', 'camera.launch.py'], repository_root)
+        (['ros2', 'launch', 'cine_sensing_camera', 'camera.launch.py'], repository_root),
     ]
 
 

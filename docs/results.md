@@ -5,9 +5,9 @@
 YOLO11n fine-tuned on HomeObjects-3K (12 classes; 2,285 training
 and 404 validation images), measured on the validation set:
 
-| Precision | Recall | mAP50 | mAP50-95 |
-| --- | --- | --- | --- |
-| about 0.71 | 0.60 | 0.65 | 0.44 |
+| Precision  | Recall | mAP50 | mAP50-95 |
+| ---------- | ------ | ----- | -------- |
+| about 0.71 | 0.60   | 0.65  | 0.44     |
 
 Precision is the share of detections that were right, recall the share of real objects
 found; mAP50 and mAP50-95 are the standard detection scores at a loose and a strict

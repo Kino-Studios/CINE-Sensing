@@ -57,8 +57,11 @@ class SubprocessRunner:
         interrupt_is_normal_stop: bool = False,
     ) -> int:
         process = subprocess.Popen(
-            command, cwd=cwd, stdout=sys.stderr if stdout_to_stderr else None
+            command,
+            cwd=cwd,
+            stdout=sys.stderr if stdout_to_stderr else None,
         )
+
         try:
             return process.wait()
         except KeyboardInterrupt:
@@ -105,6 +108,7 @@ def default_environment() -> Environment:
 
     variables = dict(os.environ)
     repository_root = None
+
     if 'CINE_SENSING_ROOT' in variables:
         repository_root = Path(variables['CINE_SENSING_ROOT'])
     else:
@@ -141,6 +145,7 @@ def require_ros2(environment: Environment) -> None:
 def validate_profile(root: Path, profile: str) -> str:
     if not profile:
         return profile
+
     profiles_directory = root / 'cine_sensing_config' / 'config' / 'profiles'
     names = sorted(path.name for path in profiles_directory.iterdir() if path.is_dir())
     if profile not in names:
@@ -157,6 +162,7 @@ def execute(
     interrupt_is_normal_stop: bool = False,
 ) -> None:
     root = require_root(environment)
+
     if dry_run:
         if as_json:
             typer.echo(json.dumps({'command': command, 'cwd': str(root)}))
@@ -164,23 +170,28 @@ def execute(
             typer.echo(shlex.join(command))
 
         return
+
     exit_code = environment.runner.run(
         command,
         root,
         stdout_to_stderr=as_json,
         interrupt_is_normal_stop=interrupt_is_normal_stop,
     )
+
     if as_json:
         typer.echo(json.dumps({'command': command, 'exit_code': exit_code}))
+
     if exit_code != 0:
         raise typer.Exit(exit_code)
 
 
 JsonFlag = Annotated[
-    bool, typer.Option('--json', help='Print one JSON object on stdout instead of text.')
+    bool,
+    typer.Option('--json', help='Print one JSON object on stdout instead of text.'),
 ]
 DryRunFlag = Annotated[
-    bool, typer.Option('--dry-run', '-n', help='Print the command and start nothing.')
+    bool,
+    typer.Option('--dry-run', '-n', help='Print the command and start nothing.'),
 ]
 
 

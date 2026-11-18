@@ -23,5 +23,5 @@ def generate_launch_description() -> LaunchDescription:
                 name='vio_publisher',
                 output='screen',
             ),
-        ]
+        ],
     )

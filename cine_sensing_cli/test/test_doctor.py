@@ -16,8 +16,9 @@ RATE_TOPICS = [
 
 def healthy_captures() -> dict[tuple[str, ...], CapturedOutput]:
     captures = {
-        ('ros2', 'topic', 'echo', '/mavros/state'): CapturedOutput(returncode=0, stdout='True\n')
+        ('ros2', 'topic', 'echo', '/mavros/state'): CapturedOutput(returncode=0, stdout='True\n'),
     }
+
     for topic in RATE_TOPICS:
         captures[('ros2', 'topic', 'hz', topic)] = HEALTHY_RATE
 
@@ -48,7 +49,8 @@ def test_doctor_all_healthy_exits_0(invoke, runner):
 def test_doctor_silent_camera_fails_only_that_check(invoke, runner):
     runner.captures.update(healthy_captures())
     runner.captures[('ros2', 'topic', 'hz', '/camera/image_raw')] = CapturedOutput(
-        returncode=124, stdout=''
+        returncode=124,
+        stdout='',
     )
 
     result = invoke('doctor', '--json')
@@ -89,7 +91,8 @@ def test_doctor_without_ros2_exits_3_and_reports_one_check(invoke, environment):
 def test_doctor_accepts_lowercase_true_from_mavros(invoke, runner):
     runner.captures.update(healthy_captures())
     runner.captures[('ros2', 'topic', 'echo', '/mavros/state')] = CapturedOutput(
-        returncode=0, stdout='true\n'
+        returncode=0,
+        stdout='true\n',
     )
 
     result = invoke('doctor', '--json')
@@ -101,7 +104,8 @@ def test_doctor_accepts_lowercase_true_from_mavros(invoke, runner):
 def test_doctor_fails_mavros_when_the_state_is_false(invoke, runner):
     runner.captures.update(healthy_captures())
     runner.captures[('ros2', 'topic', 'echo', '/mavros/state')] = CapturedOutput(
-        returncode=0, stdout='false\n'
+        returncode=0,
+        stdout='false\n',
     )
 
     result = invoke('doctor', '--json')

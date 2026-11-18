@@ -38,7 +38,7 @@ def test_vio_compare_passes_label_bag_duration_and_profile(invoke, runner, repos
                 'rpi_v3_tune_maxcnt250',
             ],
             repository_root,
-        )
+        ),
     ]
 
 

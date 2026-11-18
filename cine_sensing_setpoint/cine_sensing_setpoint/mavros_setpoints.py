@@ -16,23 +16,33 @@ class SetpointPublisher(Node):
         )
 
         self.mavros_position_pub = self.create_publisher(
-            PoseStamped, '/mavros/setpoint_position/local', mavros_qos
+            PoseStamped,
+            '/mavros/setpoint_position/local',
+            mavros_qos,
         )
 
         self.mavros_velocity_pub = self.create_publisher(
-            TwistStamped, '/mavros/setpoint_velocity/cmd_vel', mavros_qos
+            TwistStamped,
+            '/mavros/setpoint_velocity/cmd_vel',
+            mavros_qos,
         )
 
         self.mavros_acceleration_pub = self.create_publisher(
-            Vector3Stamped, '/mavros/setpoint_accel/accel', mavros_qos
+            Vector3Stamped,
+            '/mavros/setpoint_accel/accel',
+            mavros_qos,
         )
 
         self.mavros_attitude_pub = self.create_publisher(
-            PoseStamped, '/mavros/setpoint_attitude/attitude', mavros_qos
+            PoseStamped,
+            '/mavros/setpoint_attitude/attitude',
+            mavros_qos,
         )
 
         self.mavros_attitude_velocity_pub = self.create_publisher(
-            TwistStamped, '/mavros/setpoint_attitude/cmd_vel', mavros_qos
+            TwistStamped,
+            '/mavros/setpoint_attitude/cmd_vel',
+            mavros_qos,
         )
 
         # MAVROS's setpoint_attitude plugin takes only attitude, cmd_vel and thrust; it has

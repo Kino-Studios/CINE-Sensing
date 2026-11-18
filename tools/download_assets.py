@@ -114,6 +114,7 @@ def release_tag(version_file=VERSION_FILE):
 
 def file_sha256(path):
     digest = hashlib.sha256()
+
     with open(path, 'rb') as file_handle:
         for chunk in iter(lambda: file_handle.read(1 << 20), b''):
             digest.update(chunk)
@@ -131,12 +132,13 @@ def fetch_asset(asset, destination_root, tag, download=_download_with_urllib):
     Raises ChecksumMismatchError when a present file or a fresh download does not
     match the recorded checksum; a present file is never overwritten.
     """
+
     target_path = Path(destination_root) / asset.destination / asset.name
     if target_path.exists():
         if asset.sha256 is not None and file_sha256(target_path) != asset.sha256:
             raise ChecksumMismatchError(
                 f'{target_path} exists but its sha256 is not {asset.sha256}; '
-                'not overwriting it. Delete the file to download it again.'
+                'not overwriting it. Delete the file to download it again.',
             )
 
         print(f'present: {target_path}')
@@ -147,11 +149,13 @@ def fetch_asset(asset, destination_root, tag, download=_download_with_urllib):
     partial_path = target_path.with_name(target_path.name + '.part')
     url = f'https://github.com/{GITHUB_REPO}/releases/download/{tag}/{asset.name}'
     print(f'downloading {url}')
+
     try:
         download(url, partial_path)
+
         if asset.sha256 is not None and file_sha256(partial_path) != asset.sha256:
             raise ChecksumMismatchError(
-                f'downloaded {asset.name} does not match sha256 {asset.sha256}; discarded'
+                f'downloaded {asset.name} does not match sha256 {asset.sha256}; discarded',
             )
     except BaseException:
         partial_path.unlink(missing_ok=True)
@@ -159,8 +163,10 @@ def fetch_asset(asset, destination_root, tag, download=_download_with_urllib):
         raise
 
     partial_path.rename(target_path)
+
     if asset.sha256 is None:
         print(f'warning: no checksum recorded for {asset.name}; not verified')
+
     print(f'done: {target_path}')
 
 

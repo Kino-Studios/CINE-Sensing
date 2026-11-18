@@ -105,7 +105,7 @@ def generate_launch_description():
             '\n',
             'Frame ID: ',
             LaunchConfiguration('frame_id'),
-        ]
+        ],
     )
 
     return LaunchDescription(
@@ -119,5 +119,5 @@ def generate_launch_description():
             camera_publisher_node,
             static_transform_node,
             optical_transform_node,
-        ]
+        ],
     )

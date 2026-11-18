@@ -7,7 +7,7 @@ SHIPPED_CONFIG_DIRECTORY = Path(__file__).resolve().parents[1] / 'config'
 
 def _write_minimal_config_directory(directory, camera_parameters):
     (directory / 'camera.json').write_text(
-        json.dumps({'camera_publisher': {'ros__parameters': camera_parameters}})
+        json.dumps({'camera_publisher': {'ros__parameters': camera_parameters}}),
     )
     (directory / 'gyroscope.json').write_text('{}')
     (directory / 'user_params.json').write_text('{}')
@@ -58,11 +58,12 @@ def test_package_relative_path_resolves_under_that_package_share_directory():
     from cine_sensing_config.constants import resolve_package_relative_path
 
     share_directories = {
-        'cine_sensing_yolo': '/opt/ws/install/cine_sensing_yolo/share/cine_sensing_yolo'
+        'cine_sensing_yolo': '/opt/ws/install/cine_sensing_yolo/share/cine_sensing_yolo',
     }
 
     resolved_path = resolve_package_relative_path(
-        'cine_sensing_yolo/models/detector.pt', share_directories.__getitem__
+        'cine_sensing_yolo/models/detector.pt',
+        share_directories.__getitem__,
     )
 
     assert (

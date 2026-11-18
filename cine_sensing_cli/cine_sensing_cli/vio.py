@@ -13,7 +13,8 @@ from cine_sensing_cli.common import (
 CANONICAL_BAG = 'datasets/vio_bags/canonical'
 
 app = typer.Typer(
-    no_args_is_help=True, help='Record VIO test bags and compare VIO configs on them.'
+    no_args_is_help=True,
+    help='Record VIO test bags and compare VIO configs on them.',
 )
 
 
@@ -28,8 +29,10 @@ def _run_script(
     environment = get_environment(context)
     root = require_root(environment)
     validate_profile(root, profile)
+
     if not dry_run:
         require_ros2(environment)
+
     execute(environment, command, dry_run, as_json, interrupt_is_normal_stop)
 
 
@@ -41,6 +44,7 @@ def record(
     as_json: JsonFlag = False,
 ) -> None:
     """Record a VIO test bag with the sensor stack running."""
+
     command = ['bash', 'tools/vio_record_bag.sh', out]
     _run_script(context, command, dry_run, as_json, interrupt_is_normal_stop=True)
 
@@ -56,5 +60,6 @@ def compare(
     as_json: JsonFlag = False,
 ) -> None:
     """Replay a bag through one labeled VINS config and record its drift."""
+
     command = ['bash', 'tools/vio_ab_run.sh', label, bag, str(duration), profile]
     _run_script(context, command, dry_run, as_json, profile)

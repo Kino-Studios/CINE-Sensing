@@ -4,7 +4,7 @@
       system_time_rate: 1.0
 
     setpoint_velocity:
-      mav_frame: "BODY_NED"
+      mav_frame: 'BODY_NED'
 
     plugin_allowlist: []
     plugin_denylist: []

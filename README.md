@@ -112,9 +112,9 @@ override them. To record a bag and compare drift between two settings, follow
 YOLO11n, fine-tuned on HomeObjects-3K (12 household object classes), scored as follows on
 that dataset's 404-image validation set:
 
-| Precision | Recall | mAP50 | mAP50-95 |
-| --- | --- | --- | --- |
-| about 0.71 | 0.60 | 0.65 | 0.44 |
+| Precision  | Recall | mAP50 | mAP50-95 |
+| ---------- | ------ | ----- | -------- |
+| about 0.71 | 0.60   | 0.65  | 0.44     |
 
 On the real camera, with the drone on the ground and moved by hand, CINE cut the subject's
 average distance from its rule-of-thirds target from 127.6 px to 32.5 px. What these
@@ -123,14 +123,14 @@ scores mean, along with the confusion matrix and the remaining details, is in
 
 ## 6. Code layout
 
-| Package | What it does |
-| --- | --- |
-| `cine_sensing_camera` | Publishes Raspberry Pi Camera Module 3 frames: greyscale on `/camera/image_raw`, colour on `/camera/image_color` |
-| `cine_sensing_imu` | Republishes MAVROS IMU data for VINS, gyroscope publisher, VIO pose relay |
-| `cine_sensing_yolo` | YOLO detector on the colour image, publishing the tracked subject's bounding box |
-| `cine_sensing_setpoint` | Forwards CINE setpoints to MAVROS |
-| `cine_sensing_config` | Shared JSON configuration, profiles, and its Python loader |
-| `third_party/vins_fusion/` (`vins`, `loop_fusion`, `global_fusion`, `camera_models`) | VINS-Fusion, modified; the VIO launch files live in `vins/launch/` |
+| Package                                                                              | What it does                                                                                                     |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `cine_sensing_camera`                                                                | Publishes Raspberry Pi Camera Module 3 frames: greyscale on `/camera/image_raw`, colour on `/camera/image_color` |
+| `cine_sensing_imu`                                                                   | Republishes MAVROS IMU data for VINS, gyroscope publisher, VIO pose relay                                        |
+| `cine_sensing_yolo`                                                                  | YOLO detector on the colour image, publishing the tracked subject's bounding box                                 |
+| `cine_sensing_setpoint`                                                              | Forwards CINE setpoints to MAVROS                                                                                |
+| `cine_sensing_config`                                                                | Shared JSON configuration, profiles, and its Python loader                                                       |
+| `third_party/vins_fusion/` (`vins`, `loop_fusion`, `global_fusion`, `camera_models`) | VINS-Fusion, modified; the VIO launch files live in `vins/launch/`                                               |
 
 Alongside these packages, `tools/` holds the asset downloader, the Ceres install script,
 the formatter, the VIO A/B and bag-recording scripts, and the camera calibration scripts
