@@ -1,0 +1,5 @@
+{
+    "status": "uncalibrated-candidate",
+    "source": "CINE cine_gazebo simulated camera (gazebo_sim.launch.py)",
+    "notes": "Ideal pinhole camera of the Gazebo simulator at 1152x648, with the principal point at the image centre and the distortion of rpi_v3_fullfov applied by the simulated lens. The camera sits 0.05 m ahead of the body origin, looking along the body x axis. Select with CINE_SENSING_PROFILE=gazebo; never use on hardware."
+}

@@ -4,13 +4,13 @@ if ! command -v ros2 >/dev/null 2>&1; then
   exit 1
 fi
 
-PORT=/dev/ttyAMA0
-BAUD=921600
+FCU_URL="${FCU_URL:-serial:///dev/ttyAMA0:921600}"
+USE_SIM_TIME="${USE_SIM_TIME:-false}"
 
 ros2 launch mavros apm.launch \
-  fcu_url:=serial://$PORT:$BAUD \
+  fcu_url:="$FCU_URL" \
   gcs_url:=udp://@ \
   system_id:=255 tgt_system:=1 tgt_component:=1 \
-  use_sim_time:=false \
+  use_sim_time:="$USE_SIM_TIME" \
   plugin_allowlist:=[] \
   plugin_denylist:=[time_sync]

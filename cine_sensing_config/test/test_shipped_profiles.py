@@ -7,7 +7,9 @@ import pytest
 SHIPPED_CONFIG_DIRECTORY = Path(__file__).resolve().parents[1] / 'config'
 
 
-@pytest.mark.parametrize('profile', ['rpi_v3_wide', 'rpi_v3_fullfov', 'rpi_v3_tune_maxcnt250'])
+@pytest.mark.parametrize(
+    'profile', ['rpi_v3_wide', 'rpi_v3_fullfov', 'rpi_v3_tune_maxcnt250', 'gazebo']
+)
 def test_shipped_profile_declares_a_known_status(profile):
     metadata_path = SHIPPED_CONFIG_DIRECTORY / 'profiles' / profile / 'profile.json'
 

@@ -10,6 +10,8 @@ class VIOPublisher(Node):
     def __init__(self):
         super().__init__('vio_publisher')
 
+        self.declare_parameter('forward_to_autopilot', False)
+
         vins_pub_qos = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
             durability=QoSDurabilityPolicy.VOLATILE,
@@ -26,6 +28,12 @@ class VIOPublisher(Node):
         self.pose_publisher = self.create_publisher(PoseStamped, '/vio/pose', vins_pub_qos)
 
         self.odometry_publisher = self.create_publisher(Odometry, '/vio/odometry', vins_pub_qos)
+
+        self.autopilot_pose_publisher = None
+        if self.get_parameter('forward_to_autopilot').value:
+            self.autopilot_pose_publisher = self.create_publisher(
+                PoseStamped, '/mavros/vision_pose/pose', 10
+            )
 
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -44,6 +52,9 @@ class VIOPublisher(Node):
         pose_msg.pose = msg.pose.pose
 
         self.pose_publisher.publish(pose_msg)
+
+        if self.autopilot_pose_publisher is not None:
+            self.autopilot_pose_publisher.publish(pose_msg)
 
         transform = TransformStamped()
         transform.header.stamp = msg.header.stamp

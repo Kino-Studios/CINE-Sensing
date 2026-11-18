@@ -19,7 +19,7 @@ def test_config_profiles_lists_every_profile_directory(invoke):
     result = invoke('config', 'profiles', '--json')
 
     assert json.loads(result.stdout) == {
-        'profiles': ['rpi_v3_fullfov', 'rpi_v3_tune_maxcnt250', 'rpi_v3_wide']
+        'profiles': ['gazebo', 'rpi_v3_fullfov', 'rpi_v3_tune_maxcnt250', 'rpi_v3_wide']
     }
 
 

@@ -3,12 +3,14 @@
 testpaths = [
     "cine_sensing_config/test",
     "cine_sensing_cli/test",
+    "cine_sensing_imu/test",
     "tools",
     "third_party/vins_fusion/vins/tests/unit",
 ]
 pythonpath = [
     "cine_sensing_config",
     "cine_sensing_cli",
+    "cine_sensing_imu",
     "tools",
     "third_party/vins_fusion/vins/tests",
 ]
