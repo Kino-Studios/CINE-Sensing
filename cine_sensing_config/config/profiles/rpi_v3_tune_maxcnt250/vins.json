@@ -59,6 +59,6 @@
         "pose_graph_save_path": ".ros/vins_output/pose_graph/",
         "save_image": 0,
         "use_depth": 0,
-        "depth_topic": "/depth_publisher/depth"
+        "depth_topic": "/depth/image_raw"
     }
 }
